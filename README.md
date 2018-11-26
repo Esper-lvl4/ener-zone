@@ -1,5 +1,5 @@
 # ener-zone
-Online client for Wixoss TCG. 
+Online open-source client for Wixoss TCG. 
 
 Change list.
 
