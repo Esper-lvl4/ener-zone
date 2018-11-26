@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <title>Database interface</title>
+  <link rel="stylesheet" type="text/css" href="database/css/parse.css">
+</head>
+<body>
+	<div id="parse-block">
+		<form id="parsing-db">
+			<input id='parse' type="submit" name="parse" value="Parse">
+		</form>
+		<form id="show-db">
+			<input id='show' type="submit" name="show" value="Show db">
+		</form>
+		<form id="search-for">
+			<input id="search-what" type="text" name="query">
+			<input id="search-val" type="text" name="query">
+			<input id='show-no-ru-button' type="submit" name="show" value="Show db">
+		</form>
+		<form id="fix">
+			<input id="search-what" type="text" name="query">
+			<input id="search-val" type="text" name="query">
+			<input id='show-no-ru-button' type="submit" name="show" value="Show db">
+		</form>
+		<ol id="link-list">
+			
+		</ol>
+		<div id="output">
+			
+		</div>
+	</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/files/js/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="/database/js/socket-events.js"></script>
+</body>
+</html>

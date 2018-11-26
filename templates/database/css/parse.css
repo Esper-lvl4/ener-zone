@@ -1,0 +1,10 @@
+/* Tech styles */
+
+#parse-block {
+	display: none;
+}
+#output {
+	white-space: pre-wrap;
+}
+
+/* **** */

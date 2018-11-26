@@ -1,0 +1,58 @@
+/* Global Styles */
+
+@import url('https://fonts.googleapis.com/css?family=Raleway:400,400i,700,700i');
+
+html {
+	height: 100%;
+}
+body {
+	display: flex;
+	flex-direction: column;
+	background-color: #eeeeee;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	background: url('../img/background.jpg') 50% 50%/cover no-repeat;
+	font: 16px/20px 'Raleway', sans-serif;
+}
+body * {
+	box-sizing: border-box;
+}
+.global-wrap {
+	flex: 1 0 auto;
+}
+.global-header {
+	flex-grow: 0;
+}
+.global-main {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-around;
+	flex-grow: 1;
+}
+.global-footer {
+	flex-shrink: 0;
+}
+
+.global-size {
+	display: flex;
+	flex-direction: column;
+	width: 1300px;
+	height: 100%;
+	margin: 0 auto;
+}
+
+
+/* **** */
+
+/* Script styles */
+
+.js-none {
+	display: none!important;
+}
+.js-hide {
+	visibility: hidden!important;
+}
+.js-dissolve {
+	opacity: 0!important;
+}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wixoss Client v.0.0.1</title>
+	<link rel="stylesheet" type="text/css" href="/files/css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="/files/css/global.css">
+	<link rel="stylesheet" type="text/css" href="/deck-editor/css/deck-editor.css">
+</head>
+<body>
+	<div class="global-wrap">
+		<div class="global-size">
+			<!--<div class="global-header">
+				<h1 class="menu-title">Edit your deck here.</h1>
+			</div>-->
+			<div class="global-main">
+				<div class="deck-editor-wrap">
+		      <div class="info-block">
+				    <img src="/files/img/default-card.jpg" class="info-img" id="info-img">
+						<span id="info-name"></span>
+						<span id="info-props"></span>
+						<span id="info-class"></span>
+						<span id="info-cost"></span>
+						<span id="info-timing"></span>
+						<span id="info-power"></span>
+						<span id="info-limit-con"></span>
+						<div class="info-text" id="info-text"></div>
+			  	</div>
+		      <main>
+		      	<div class="search-block">
+		      		<form>
+							  <input class="search-field" type="text" id="name-filter">
+							</form>
+							<div class="search-result" id="search-result">
+							
+							</div>
+							<button id="more-button" class="more-button none">More</button>
+				  	</div>
+			    	<div class="deck-manage">
+			    		<button id="create-deck">New deck</button>
+						  <button id="load-deck">Load deck</button>
+						  <button id="save-deck">Save deck</button>
+						  <button id="delete-deck">Delete deck</button>
+						  <button id="search-filter">Filter</button>
+						  <a href="../" class="exit-de">menu</a>
+						  <div class="deck-list-block" id="deck-list-block">
+						  	<ul class="deck-list" id="deck-list">
+						  		<li id="deck-load-cancel">Cancel</li>
+						  	</ul>
+						  </div>
+
+						  <div class="delete-list-block" id="delete-list-block">
+						  	<ul class="delete-list" id="delete-list">
+						  		<li id="delete-load-cancel">Cancel</li>
+						  	</ul>
+						  </div>
+
+						  <div class="save-deck-block" id="save-deck-block">
+						  	<label for="save-deck-name">Enter deck name:</label>
+						  	<input type="text" name="deck-name" id="save-deck-name">
+						  	<button id="save-deck-submit">Done</button>
+						  </div>
+
+						  <div class="filter-block" id="filter-block">
+						  	<form>
+						  		<div class="filter-first">
+						  			<label for="card-kslegal">Game format: KS</label>
+							  		<input id="card-kslegal" type="checkbox" name="kslegal">
+
+							  		<label for="card-color">Color</label>
+							  		<input id="card-color" type="text" name="color">
+
+							  		<label for="card-type">Card Type</label>
+							  		<select id="card-type">
+							  			<option>Any</option>
+							  			<option>LRIG</option>
+							  			<option>ARTS</option>
+							  			<option>Key</option>
+							  			<option>SIGNI</option>
+							  			<option>Spell</option>
+							  			<option>Resona</option>
+							  		</select>
+
+							  		<label for="card-effect">Text</label>
+							  		<input id="card-effect" type="text" name="effect">
+
+							  		<label for="card-set">Booster Set</label>
+							  		<input id="card-set" type="text" name="set">
+						  		</div>
+						  		
+						  		<!-- Optional -->
+
+						  		<div class="filter-second">
+						  			<label for="card-limcon">Limiting Condition</label>
+							  		<input id="card-limcon" type="text" name="limcon">
+
+							  		<label for="card-class">Signi class</label>
+							  		<input id="card-class" type="text" name="class">
+
+							  		<label for="card-level">Level</label>
+							  		<input id="card-level" type="number" name="level">
+
+							  		<label for="card-power">Power</label>
+							  		<input id="card-power" type="number" name="power">
+
+							  		<label for="card-lrigtype">Lrig type</label>
+							  		<input id="card-lrigtype" type="text" name="lrigtype">
+
+							  		<label for="card-limit">Limit</label>
+							  		<input id="card-limit" type="number" name="limit">
+
+							  		<label for="card-timing">Use timing</label>
+							  		<input id="card-timing" type="text" name="timing">
+						  		</div>
+						  		
+						  		<div class="filter-submit">
+						  			<input id="filter-send" type="submit" name="filter-send" value="Search cards">
+						  		</div>
+						  	</form>
+						  </div>
+						</div>
+						<div class="main-deck">
+						  <div id="m-deck-check">Main Deck</div>
+						  <div class="main-card-block" id="main-deck">
+						  	
+						  </div>
+						</div>
+						<div class="lrig-deck">
+						  <div id="l-deck-check">LRIG Deck</div>
+						    <div class="lrig-card-block" id="lrig-deck">
+						    	
+						    </div>
+						</div>
+			  	</main>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="global-footer">
+		<div class="global-size">
+			<span>Open!</span>
+		</div>
+	</div>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/files/js/jquery-3.3.1.js"></script>
+	<script type="text/javascript" src="/deck-editor/js/deck-editor.js"></script>
+</body>
+</html>
