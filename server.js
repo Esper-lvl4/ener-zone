@@ -13,19 +13,6 @@ const fs = require('fs');
 const app = express();
 const server = http.Server(app);
 const io = IO(server);
-const IOauth = require('socketio-auth')(io, {
-	authenticate: function (socket, data, callback) {
-		var query = data;
-
-		UserDB.find(query, (err, user) => {
-			if (err || !user) {
-				return callback(new Error('Failed to authenticate.'))
-			};
-			return callback(null, user.password == query.password);
-		}
-
-	}
-});
 
 mongoose.connect('mongodb://127.0.0.1:27017/wixoss', {useNewUrlParser: true});
 mongoose.connection.on('open', function (err) {
@@ -81,22 +68,6 @@ const userSchema = new mongoose.Schema({
 });
 
 const UserDB = mongoose.model('users', userSchema);
-/* create user.
-const user = new UserDB({
-	userID: 1111,
-	username: 'Kassadin',
-	password: '123456',
-	avatarPath: '',
-	options: {
-		infoPosition: 'left',
-		clientColor: 'black',
-	}
-});
-
-user.save(function (err) {
-	if (err) {console.error(err)};
-	console.log(user);
-});*/
 
 // Saved decks path.
 
@@ -343,6 +314,21 @@ const mainMenu = io.of('/main-menu');
 
 mainMenu.on('connection', function(socket) {
 	console.log('User entered main menu');
+
+	socket.on('authentication', function(values) {
+		target = {
+			username: values.name,
+			password: values.password,
+		}
+		UserDB.findOne(target, (err, data) => {
+			if (err) {console.error(err)};
+			if (!data) {
+				socket.emit('failed-auth', 'failed');
+			} else {
+				socket.emit('authenticated', 'success');
+			}
+		});
+	});
 
 });
 
