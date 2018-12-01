@@ -62,20 +62,20 @@ $(function () {
 				password: $('#login-password').val(),
 				remember: $('#login-password').prop('checked'),
 			}
-			socket.emit('authentication', user);
+			socket.emit('login', user);
 		});
 
 		// Login failure.
 
-		socket.on('failed-auth', function (data) {
+		socket.on('failed-login', function (data) {
 			$('#login-form .info').text('Wrong username or password! Check is Caps lock is on.');
 		})
 
 		// Login success.
 
-		socket.on('authenticated', function (data) {
+		socket.on('success-login', function (res) {
 			$('#login-wrap').addClass(['js-none', 'js-dissolve']);
-			isAuthenticated();
+			console.log(res);
 		})
 
 		// Validate sign up form. Emit.
@@ -117,6 +117,17 @@ $(function () {
 		socket.on('success-sign-up', function (res) {
 			console.log(res);
 		})
+
+		socket.on('failed-sign-up', function (res) {
+			console.log(res);
+		})
+
+		// Logout.
+
+		socket.on('success-logout', function (res) {
+			console.log(res);
+		})
+
 
 
 		
