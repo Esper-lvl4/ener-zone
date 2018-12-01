@@ -5,7 +5,7 @@ const FileStore = require('express-file-store');
 const mongoose = require('mongoose');
 const cheerio = require('cheerio');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt.js');
+const bcrypt = require('bcryptjs');
 
 const request = require('request');
 const path = require('path');
@@ -278,7 +278,7 @@ function setDatabase (cardArray) {
 	console.log('Added another pack of cards to db.');
 }
 
-app.use('/auth', AuthController);
+//app.use('/auth', AuthController);
 app.use(express.static(path.resolve(__dirname, 'templates/')));
 
 const sessionMiddle = session({
@@ -306,6 +306,8 @@ const mainMenu = io.of('/main-menu');
 
 mainMenu.on('connection', function(socket) {
 	console.log('User entered main menu');
+
+	AuthController(socket);
 
 	socket.on('authentication', function(values) {
 		target = {
