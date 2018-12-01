@@ -4,15 +4,23 @@ const session = require('express-session');
 const FileStore = require('express-file-store');
 const mongoose = require('mongoose');
 const cheerio = require('cheerio');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt.js');
 
 const request = require('request');
 const path = require('path');
 const http = require('http');
 const fs = require('fs');
 
+const AuthController = require('./auth/AuthController');
+const UserDB = require('./users/User');
+
 const app = express();
 const server = http.Server(app);
 const io = IO(server);
+const key = {
+	'secret': 'kappadin',
+}
 
 mongoose.connect('mongodb://127.0.0.1:27017/wixoss', {useNewUrlParser: true});
 mongoose.connection.on('open', function (err) {
@@ -51,23 +59,6 @@ const cardSchema = new mongoose.Schema({
 });
 
 const CardDB = mongoose.model('cards01', cardSchema);
-
-// User database
-
-const userSchema = new mongoose.Schema({
-	userID: Number,
-	username: String,
-	password: String,
-	avatarPath: String,
-	options: {
-		infoPosition: String,
-		clientColor: String,
-	},
-}, {
-	collection: 'users',
-});
-
-const UserDB = mongoose.model('users', userSchema);
 
 // Saved decks path.
 
@@ -287,6 +278,7 @@ function setDatabase (cardArray) {
 	console.log('Added another pack of cards to db.');
 }
 
+app.use('/auth', AuthController);
 app.use(express.static(path.resolve(__dirname, 'templates/')));
 
 const sessionMiddle = session({

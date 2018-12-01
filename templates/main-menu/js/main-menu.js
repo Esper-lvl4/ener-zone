@@ -114,6 +114,10 @@ $(function () {
 			socket.emit('sign-up-user', user);
 		});
 
+		socket.on('success-sign-up', function (res) {
+			console.log(res);
+		})
+
 
 		
 		
