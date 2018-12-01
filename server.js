@@ -14,6 +14,7 @@ const fs = require('fs');
 
 const AuthController = require('./auth/AuthController');
 const UserDB = require('./users/User');
+const VerifyToken = require('./auth/VerifyToken');
 
 const app = express();
 const server = http.Server(app);
@@ -303,6 +304,8 @@ app.get('/', (req, res) => {
 })
 
 const mainMenu = io.of('/main-menu');
+
+mainMenu.use(VerifyToken);
 
 mainMenu.on('connection', function(socket) {
 	console.log('User entered main menu');

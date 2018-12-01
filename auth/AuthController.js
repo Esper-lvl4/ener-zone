@@ -54,9 +54,11 @@ function socketRouter (socket) {
 		User.findOne({username: userObj.name}, function (err, user) {
 			if (err) {
 				socket.emit('failed-login', 'Error, when tried to login.');
+				return;
 			}
 			if (!user) {
 				socket.emit('failed-login', 'Wrong username or password.');
+				return;
 			}
 			let passwordIsValid = bcrypt.compareSync(userObj.password, user.password);
 

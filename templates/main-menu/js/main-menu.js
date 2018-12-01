@@ -1,5 +1,9 @@
 $(function () {
-		var socket = io('/main-menu');
+		var socket = io('/main-menu', {
+			query: {
+				token: localStorage.getItem('EnerZoneToken'),
+			},
+		});
 
 		// Run if user if logged in.
 
@@ -75,7 +79,8 @@ $(function () {
 
 		socket.on('success-login', function (res) {
 			$('#login-wrap').addClass(['js-none', 'js-dissolve']);
-			console.log(res);
+
+			localStorage.setItem('EnerZoneToken', res.token);
 		})
 
 		// Validate sign up form. Emit.
@@ -115,7 +120,8 @@ $(function () {
 		});
 
 		socket.on('success-sign-up', function (res) {
-			console.log(res);
+			
+			localStorage.setItem('EnerZoneToken', res.token);
 		})
 
 		socket.on('failed-sign-up', function (res) {
@@ -125,7 +131,7 @@ $(function () {
 		// Logout.
 
 		socket.on('success-logout', function (res) {
-			console.log(res);
+			localStorage.removeItem('EnerZoneToken');
 		})
 
 
