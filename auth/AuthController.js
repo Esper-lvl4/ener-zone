@@ -1,56 +1,80 @@
-var express = require('express');
-var router = express.Router();
-var bodyParser = require('body-parser');
-router.use(bodyParser.urlencoded({ extended: false }));
-router.use(bodyParser.json());
-var User = require('../user/User');
+const express = require('express');
+const User = require('../users/User');
 
-var jwt = require('jsonwebtoken');
-var bcrypt = require('bcryptjs');
-var key = {
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const key = {
 	'secret': 'kappadin',
 }
 
-router.post('/register', function (req, res) {
-	var hashedPassword = bcrypt.hashSync(req.body.password, 8);
+function socketRouter (socket) {
+	socket.on('sign-up-user', async function (userObj) {
 
-	User.create({
-		name: req.body.name,
-		email: req.body.email,
-		password: hashedPassword,
-	},
-	function (err, user) {
-		if (err) return res.status(500).send('There was a problem registering the user.')
+		// check if there is user with that name already.
 
-		var token = jwt.sign({id: user._id}, key.secret, {
-			expiresIn: 86400,
+		var allowSignUp = true;
+
+		await User.findOne({username: userObj.name}, function (err, user) {
+			if (err) {
+				socket.emit('failed-sign-up', 'Something went wrong, when checked the name.');
+				allowSignUp = false;
+			}
+			if (user) {
+				socket.emit('failed-sign-up', 'Username is already taken');
+				allowSignUp = false;
+			}
 		});
-		res.status(200).send({auth: true, token: token});
+		if (allowSignUp === false) {
+			return;
+		} else {
+			let hashedPass = bcrypt.hashSync(userObj.password, 8);
+			User.create({
+				username: userObj.name,
+				password: hashedPass,
+				avatarPass: '/users/default-pic.png',
+				options: {
+					infoPosition: 'left',
+					clientColor: 'default',
+				}
+			},
+			function (err, user) {
+				if (err) {
+					socket.emit('failed-register', 'Could not register a user');
+					return;
+				}
+				let token = jwt.sign({id: user._id}, key.secret, {
+					expiresIn: 86400,
+				});
+				socket.emit('success-sign-up', {auth: true, token: token})
+			});
+		}
 	});
-});
 
-router.get('/me', function (req, res) {
-	var token = req.headers['x-access-token'];
-	if (!token) return res.status(401).send({auth: false, message: 'No token provided.'});
+	socket.on('login', function (userObj) {
+		User.findOne({username: userObj.name}, function (err, user) {
+			if (err) {
+				socket.emit('failed-login', 'Error, when tried to login.');
+				return;
+			}
+			if (!user) {
+				socket.emit('failed-login', 'Wrong username or password.');
+				return;
+			}
+			let passwordIsValid = bcrypt.compareSync(userObj.password, user.password);
 
-	jwt.verify(token, key.secret, function(err, decoded) {
-		if (err) return res.status(500).send({auth: false, message: 'Failed to authenticate token.'})
-		res.status(200).send(decoded);
-	})
-});
-
-router.post('/login', function (req, res) {
-	User.findOne({email: req.body.email}, function (err, user) {
-		if (err) {return res.status(500).send('Error on the server.')};
-		if (!user) {return res.status (404).send('No user found.')};
-		var passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
-
-		if (!passwordIsValid) {return res.status(401).send({auth: false, token: null})};
-		var token = jwt.sign({id: user._id}, key.secret, {
-			expiresIn: 86400, // expires in a day.
+			if (!passwordIsValid) {
+				socket.emit('failed-login', 'Wrong username or password.');
+			}
+			else {
+				const token = jwt.sign({id: user._id}, key.secret, {
+					expiresIn: 86400,
+				});
+				console.log(token);
+				socket.emit('success-login', {auth: true, token: token});
+			}
 		});
-		res.status(200).send({auth: true, token: token});
 	});
-});
+};
 
-module.exports = router;
+
+module.exports = socketRouter;

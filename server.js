@@ -4,15 +4,24 @@ const session = require('express-session');
 const FileStore = require('express-file-store');
 const mongoose = require('mongoose');
 const cheerio = require('cheerio');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const request = require('request');
 const path = require('path');
 const http = require('http');
 const fs = require('fs');
 
+const AuthController = require('./auth/AuthController');
+const UserDB = require('./users/User');
+const VerifyToken = require('./auth/VerifyToken');
+
 const app = express();
 const server = http.Server(app);
 const io = IO(server);
+const key = {
+	'secret': 'kappadin',
+}
 
 mongoose.connect('mongodb://127.0.0.1:27017/wixoss', {useNewUrlParser: true});
 mongoose.connection.on('open', function (err) {
@@ -51,23 +60,6 @@ const cardSchema = new mongoose.Schema({
 });
 
 const CardDB = mongoose.model('cards01', cardSchema);
-
-// User database
-
-const userSchema = new mongoose.Schema({
-	userID: Number,
-	username: String,
-	password: String,
-	avatarPath: String,
-	options: {
-		infoPosition: String,
-		clientColor: String,
-	},
-}, {
-	collection: 'users',
-});
-
-const UserDB = mongoose.model('users', userSchema);
 
 // Saved decks path.
 
@@ -289,20 +281,26 @@ function setDatabase (cardArray) {
 
 app.use(express.static(path.resolve(__dirname, 'templates/')));
 
-const sessionMiddle = session({
-	secret: 'testingSession',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
-});
+// Authentication and Authorization.
+app.get('/auth', (req, res) => {
+	res.sendFile(__dirname + '/templates/auth/auth.html');
+})
 
-app.use(sessionMiddle);
+const authPage = io.of('/auth');
 
-io.use(function (socket, next) {
-  sessionMiddle(socket.request, socket.request.res, next);
-});
+authPage.on('connection', function (socket) {
+	console.log('User is at auth page.');
+
+	if (VerifyToken(socket)) {
+		return;
+	};
+
+	AuthController(socket);
+})
 
 // Main menu.
+
+const mainMenu = io.of('/main-menu');
 
 app.get('/', (req, res) => {
 
@@ -310,26 +308,20 @@ app.get('/', (req, res) => {
 
 })
 
-const mainMenu = io.of('/main-menu');
-
 mainMenu.on('connection', function(socket) {
 	console.log('User entered main menu');
 
-	socket.on('authentication', function(values) {
-		target = {
-			username: values.name,
-			password: values.password,
-		}
-		UserDB.findOne(target, (err, data) => {
-			if (err) {console.error(err)};
-			if (!data) {
-				socket.emit('failed-auth', 'failed');
-			} else {
-				socket.emit('authenticated', 'success');
-			}
-		});
+	if (!VerifyToken(socket)) {
+		return;
+	};
+
+	socket.on('mighty-click', function(values) {
+		console.log('its working');
 	});
 
+	socket.on('logout', function (user) {
+		socket.emit('success-logout', {auth: false, token: null});
+	})
 });
 
 // Deck Editor.
@@ -342,6 +334,10 @@ const deckEditor = io.of('/deck-editor');
 
 deckEditor.on('connection', function(socket) {
 	console.log('User entered deck editor');
+
+	if (!VerifyToken(socket)) {
+		return;
+	};
 
 	CardDB.find((err, data) => {
 		deckEditor.emit('db-init', data);

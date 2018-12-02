@@ -1,5 +1,14 @@
 $(function () {
-		var socket = io('/deck-editor');
+		var socket = io('/deck-editor', {
+			query: {
+				token: localStorage.getItem('EnerZoneToken'),
+			},
+		});
+
+		socket.on('failed-auth', function (socket) {
+			window.location.href = '/auth/';
+		})
+		
 		var database = [];
 		var visibleCards = [];
 		var visibleCount = 0;
