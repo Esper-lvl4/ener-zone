@@ -69,14 +69,11 @@ function socketRouter (socket) {
 				const token = jwt.sign({id: user._id}, key.secret, {
 					expiresIn: 86400,
 				});
+				console.log(token);
 				socket.emit('success-login', {auth: true, token: token});
 			}
 		});
 	});
-
-	socket.on('logout', function (user) {
-		socket.emit('success-logout', {auth: false, token: null});
-	})
 };
 
 

@@ -4,18 +4,22 @@ var key = {
 	'secret': 'kappadin',
 }
 
-function verifyToken (socket, next) {
+function verifyToken (socket) {
 	let token = socket.handshake.query.token;
+	let access = false;
 
 	if (!token) { 
-		return next(new Error('There is no token.'));
+		socket.emit('failed-auth', 'There was no token.');
+		return access;
 	}
 	jwt.verify(token, key.secret, function (err, decoded) {
 		if (err) {
-			return next(new Error('Invlaid token.'));
+			socket.emit('failed-auth', 'Invalid token');
 		}
-		return next();
+		access = true;
+		socket.emit('success-auth', 'Access granted');
 	})
+	return access;
 };
 
 module.exports = verifyToken;

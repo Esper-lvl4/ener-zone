@@ -279,23 +279,28 @@ function setDatabase (cardArray) {
 	console.log('Added another pack of cards to db.');
 }
 
-//app.use('/auth', AuthController);
 app.use(express.static(path.resolve(__dirname, 'templates/')));
 
-const sessionMiddle = session({
-	secret: 'testingSession',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
-});
+// Authentication and Authorization.
+app.get('/auth', (req, res) => {
+	res.sendFile(__dirname + '/templates/auth/auth.html');
+})
 
-app.use(sessionMiddle);
+const authPage = io.of('/auth');
 
-io.use(function (socket, next) {
-  sessionMiddle(socket.request, socket.request.res, next);
-});
+authPage.on('connection', function (socket) {
+	console.log('User is at auth page.');
+
+	if (VerifyToken(socket)) {
+		return;
+	};
+
+	AuthController(socket);
+})
 
 // Main menu.
+
+const mainMenu = io.of('/main-menu');
 
 app.get('/', (req, res) => {
 
@@ -303,30 +308,20 @@ app.get('/', (req, res) => {
 
 })
 
-const mainMenu = io.of('/main-menu');
-
-mainMenu.use(VerifyToken);
-
 mainMenu.on('connection', function(socket) {
 	console.log('User entered main menu');
 
-	AuthController(socket);
+	if (!VerifyToken(socket)) {
+		return;
+	};
 
-	socket.on('authentication', function(values) {
-		target = {
-			username: values.name,
-			password: values.password,
-		}
-		UserDB.findOne(target, (err, data) => {
-			if (err) {console.error(err)};
-			if (!data) {
-				socket.emit('failed-auth', 'failed');
-			} else {
-				socket.emit('authenticated', 'success');
-			}
-		});
+	socket.on('mighty-click', function(values) {
+		console.log('its working');
 	});
 
+	socket.on('logout', function (user) {
+		socket.emit('success-logout', {auth: false, token: null});
+	})
 });
 
 // Deck Editor.
@@ -339,6 +334,10 @@ const deckEditor = io.of('/deck-editor');
 
 deckEditor.on('connection', function(socket) {
 	console.log('User entered deck editor');
+
+	if (!VerifyToken(socket)) {
+		return;
+	};
 
 	CardDB.find((err, data) => {
 		deckEditor.emit('db-init', data);
