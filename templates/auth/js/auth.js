@@ -116,7 +116,7 @@ $(function () {
 				name: $('#sign-up-username').val(),
 				password: $('#sign-up-password').val(),
 			}
-
+			console.log('hmm');
 			socket.emit('sign-up-user', user);
 		});
 

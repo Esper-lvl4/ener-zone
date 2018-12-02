@@ -291,9 +291,7 @@ const authPage = io.of('/auth');
 authPage.on('connection', function (socket) {
 	console.log('User is at auth page.');
 
-	if (VerifyToken(socket)) {
-		return;
-	};
+	
 
 	AuthController(socket);
 })
