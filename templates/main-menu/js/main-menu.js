@@ -9,6 +9,10 @@ $(function () {
 			window.location.href = '/auth/';
 		})
 
+		socket.on('success-logout', function (socket) {
+			window.location.href = '/auth/';
+		})
+
 		setLogout(socket);
 
 		

@@ -7,7 +7,6 @@ var key = {
 function verifyToken (socket) {
 	let token = socket.handshake.query.token;
 	let access = false;
-	console.log(token);
 
 	if (!token) { 
 		socket.emit('failed-auth', 'There was no token.');

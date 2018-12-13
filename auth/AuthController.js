@@ -13,7 +13,6 @@ function socketRouter (socket) {
 		// check if there is user with that name already.
 
 		var allowSignUp = true;
-		console.log('hmm');
 
 		await User.findOne({username: userObj.name}, function (err, user) {
 			if (err) {
@@ -71,7 +70,6 @@ function socketRouter (socket) {
 				const token = jwt.sign({id: user._id}, key.secret, {
 					expiresIn: 86400,
 				});
-				console.log(token);
 				socket.emit('success-login', {auth: true, token: token});
 			}
 		});

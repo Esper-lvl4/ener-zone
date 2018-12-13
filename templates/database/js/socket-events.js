@@ -3,17 +3,20 @@ var socket = io();
 $(function () {
 		var socket = io('/parse-db');
 
-		$('#parsing-db').submit(function() {
+		$('#parsing-db').submit(function(event) {
+			event.preventDefault();
 			socket.emit('parse', $('#parse').val());
 			return false;
 		});
 
-		$('#show-db').submit(function() {
+		$('#show-db').submit(function(event) {
+			event.preventDefault();
 			socket.emit('showDB', $('#show-db').val());
 			return false;
 		});
 
-		$('#search-for').submit(function() {
+		$('#search-for').submit(function(event) {
+			event.preventDefault();
 			let obj = {};
 			if ($('#search-val').val() === 'false') {
 				obj[$('#search-what').val()] = false;
@@ -52,6 +55,7 @@ $(function () {
 		});
 
 		socket.on('gotUntranslatedCards', function(cards) {
+			console.log(cards);
 			cards.forEach(function (card) {
 				$('#link-list').append($('<li>').text(card.link));
 			});
