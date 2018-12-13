@@ -2,6 +2,9 @@
 Online client for Wixoss TCG. 
 
 Change list.
+
+v.0.0.4
+- Changes to inner structure of the client. For better workflow =)
   
 v.0.0.3
 - Done making authentication and authorization.
