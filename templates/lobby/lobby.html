@@ -18,10 +18,10 @@
 						<div class="lobby-filter-wrap">
 							<input class="lobby-name-filter"type="text" name="name-filter" id="name-filter">
 							<div class="progress-filter-wrap">
-								<input type="checkbox" name="progress-filter" id="progress-filter">
-								<label>Show games, that started.</label>
+								<input type="checkbox" name="progress-filter" id="progress-filter" placeholder="Search for rooms by name">
+								<label for="progress-filter">Show rooms, where game has started.</label>
 							</div>
-							<button class="filters-modal-button" id="filters-modal-button">Фильтры</button>
+							<button class="filters-modal-button" id="filters-modal-button">Filters</button>
 						</div>
 						<div class="lobby-game-list">
 							<ul>
@@ -30,26 +30,26 @@
 							</ul>
 						</div>
 						<div class="lobby-buttons-wrap">
-							<button class="lobby-button">Create game</button>
-							<button class="lobby-button js-inactive" disabled>Join game</button>
-							<button class="lobby-button js-inactive" disabled>Spectate game</button>
-							<button class="lobby-button js-inactive" disabled>Friend list</button>
-							<a class="lobby-button" href="../deck-editor/">Edit decks</a>
-							<a class="lobby-button" href="../">Main menu</a>
+							<button class="lobby-button">Create</button>
+							<button class="lobby-button js-inactive" disabled>Join</button>
+							<button class="lobby-button js-inactive" disabled>Spectate</button>
+							<button class="lobby-button js-inactive" disabled>Friends</button>
+							<a class="lobby-button" href="../deck-editor/">Decks</a>
+							<a class="lobby-button" href="../">Back</a>
 						</div>
 					</div>
 					<div class="lobby-chat-block">
 						<div class="chat-buttons">
-							<button id="chat-button">Chat</button>
+							<button class="js-active-button" id="chat-button">Chat</button>
 							<button id="server-button">Server info</button>
 						</div>
-						<div class="chat-tab" id="chat-tab">
+						<div class="chat-tab tab" id="chat-tab">
 							<ul>
 								<li>Msg 1</li>
 								<li>Msg 2</li>
 							</ul>
 						</div>
-						<div class="server-tab" id="server-tab">
+						<div class="server-tab tab js-none" id="server-tab">
 							<ul>
 								<li>Server info 1</li>
 								<li>Server info 2</li>
@@ -57,6 +57,7 @@
 						</div>
 						<div class="message-field-wrap">
 							<input class="chat-message-field" type="text" name="chat-message-field" id="chat-message-field">
+							<button class="send-message" id="send-message">Send</button>
 						</div>
 					</div>
 				</div>
