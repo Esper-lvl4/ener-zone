@@ -4,23 +4,61 @@
 	<title>Wixoss Client v.0.0.4</title>
 	<link rel="stylesheet" type="text/css" href="/files/css/normalize.css">
 	<link rel="stylesheet" type="text/css" href="/files/css/global.css">
-	<link rel="stylesheet" type="text/css" href="/main-menu/css/main-menu.css">
+	<link rel="stylesheet" type="text/css" href="/lobby/css/lobby.css">
 </head>
 <body>
 	<div class="global-wrap">
 		<div class="global-size">
 			<div class="global-header">
-				<h1 class="menu-title">Wixoss Client v.0.0.4</h1>
+				<h1 class="lobby-title">Wixoss Client v.0.0.4</h1>
 			</div>
 			<div class="global-main">
-				<div class="menu-wrap">
-					<a class="menu-button" id="play" href="/lobby/">Play</a>
-					<a class="menu-button" id="deck-editor" href="/deck-editor/">Deck Editor</a>
-					<a class="menu-button" id="options" href="#">Options</a>
-					<a class="menu-button" id="profile" href="#">Profile</a>
-					<a class="menu-button" id="language" href="#">Language</a>
-					<a class="menu-button" id="parse" href="/parse-db/">Parser</a>
-					<a class="menu-button" id="logout" href="#">Logout</a>
+				<div class="lobby-wrap">
+					<div class="lobby-list-block">
+						<div class="lobby-filter-wrap">
+							<input class="lobby-name-filter"type="text" name="name-filter" id="name-filter">
+							<div class="progress-filter-wrap">
+								<input type="checkbox" name="progress-filter" id="progress-filter">
+								<label>Show games, that started.</label>
+							</div>
+							<button class="filters-modal-button" id="filters-modal-button">Фильтры</button>
+						</div>
+						<div class="lobby-game-list">
+							<ul>
+								<li>Game 1</li>
+								<li>Game 2</li>
+							</ul>
+						</div>
+						<div class="lobby-buttons-wrap">
+							<button class="lobby-button">Create game</button>
+							<button class="lobby-button js-inactive" disabled>Join game</button>
+							<button class="lobby-button js-inactive" disabled>Spectate game</button>
+							<button class="lobby-button js-inactive" disabled>Friend list</button>
+							<a class="lobby-button" href="../deck-editor/">Edit decks</a>
+							<a class="lobby-button" href="../">Main menu</a>
+						</div>
+					</div>
+					<div class="lobby-chat-block">
+						<div class="chat-buttons">
+							<button id="chat-button">Chat</button>
+							<button id="server-button">Server info</button>
+						</div>
+						<div class="chat-tab" id="chat-tab">
+							<ul>
+								<li>Msg 1</li>
+								<li>Msg 2</li>
+							</ul>
+						</div>
+						<div class="server-tab" id="server-tab">
+							<ul>
+								<li>Server info 1</li>
+								<li>Server info 2</li>
+							</ul>
+						</div>
+						<div class="message-field-wrap">
+							<input class="chat-message-field" type="text" name="chat-message-field" id="chat-message-field">
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -31,39 +69,34 @@
 		</div>
 	</div>
 
-	<!-- Login popup -->
+	<!-- Filter modal -->
 
-	<div class="login-wrap js-none js-dissolve" id="login-wrap">
-		<form class="login-form" id="login-form">
-			<div class="info"></div>
-			<label>Username</label>
-			<input type="text" name="username" id="login-username">
-			<label>Password</label>
-			<input type="text" name="password" id="login-password">
-			<label>Remember me</label>
-			<input type="checkbox" name="remember" id="login-remember">
-			<button id="login-submit">Log in</button>
-		</form>
-	</div>
+	<form class="filter-modal-wrap js-none">
+		<input type="number" name="people-count">
+		<input type="text" name="spectators-allowed">
+		<input type="text" name="username">
+		<input type="checkbox" name="hide-password-protected">
+	</form>
 
-	<!-- Sign Up popup -->
 
-	<div class="sign-up-wrap js-none js-dissolve" id="sign-up-wrap">
-		<form class="sign-up-form" id="sign-up-form">
-			<div class="info"></div>
-			<label>Username</label>
-			<input type="text" name="username" id="sign-up-username">
-			<label>Password</label>
-			<input type="text" name="password" id="sign-up-password">
-			<button id="sign-up-submit">Sign Up</button>
-		</form>
-	</div>
+	<!-- Game is protected by password modal -->
 
+	<form class="game-password-modal js-none">
+		<span>Enter password to join this room.</span>
+		<input type="text" name="enter-game-password">
+		<button>Join</button>
+	</form>
+
+	<!-- Friend list modal -->
+
+	<form class="friend-list-modal js-none">
+		<!-- Still thinking -->
+	</form>
 
 
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="/files/js/jquery-3.3.1.js"></script>
 	<script src="/files/js/global.js"></script>
-	<script type="text/javascript" src="/main-menu/js/main-menu.js"></script>
+	<script type="text/javascript" src="/lobby/js/lobby.js"></script>
 </body>
 </html>
