@@ -1,6 +1,5 @@
 button, a, .search-submit {
 	text-decoration: none;
-	color: white;
 }
 button:hover, a:hover, .search-submit {
 	cursor: pointer;
@@ -13,7 +12,6 @@ button:hover, a:hover, .search-submit {
 	margin: 10px auto 0;
 	display: flex;
 	flex-flow: row nowrap;
-	color: #ffffff;
 }
 
 .info-block {
@@ -45,34 +43,32 @@ main img {
 }
 .deck-manage {
 	position: relative;
-	width: 100%;
-	height: 30px;
 	display: flex;
 	flex-flow: row nowrap;
 	align-content: center;
+	width: 100%;
+	height: 30px;
 	margin: 0 0 10px;
+	background: linear-gradient(135deg, #666666, #333333);
 }
 
 .deck-manage > button, .deck-manage > a, .search-submit, .more-button {
 	display: block;
 	width: 16%;
 	flex-grow: 2;
-	background-color: #999999;
 	border: none;
 	outline: none;
 	text-align: center;
 	text-transform: capitalize;
+	color: #f1f1f1;
+	background-color: transparent;
+	transition: all 0.5s linear;
 }
 .deck-manage a {
 	padding: 5px 0 0;
 }
-.deck-manage button:hover, .deck-manage a:hover, .search-submit:hover {
-	color: #000000;
-	background-color: #99ccff;
-}
 .main-deck {
 	width: 100%;
-	/*height: 65%;*/
 	flex-grow: 2;
 
 }
@@ -119,10 +115,18 @@ main img {
 	box-sizing: content-box;
 	display: flex;
 	flex-flow: column nowrap;
+	background: linear-gradient(135deg, #666666, #333333);
+}
+.search-block-form {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+	width: 100%;
 }
 .search-result {
 	display: flex;
 	flex-flow: column wrap;
+	justify-content: center;
 	overflow-x: scroll;
 }
 .search-block img {
@@ -135,18 +139,16 @@ main img {
 	filter: contrast(125%);
 }
 .more-button {
-	width: 100%;
+	width: 20%;
+	margin: 5px 5px 5px 0;
 	padding: 5px 0 0;
-	color: #ffffff;
 }
-.more-button:hover {
-	color: #000000;
-	background-color: #99ccff;
-}
-.search-field, .search-submit{
+.search-field {
+	flex-grow: 2;
 	display: block;
-	width: 95%;
-	margin: 0 auto 5px;
+	width: 70%;
+	margin: 5px 15px 5px 5px;
+	background-color: #aaaaaa;
 }
 
 /* Save deck block styles */
@@ -162,16 +164,12 @@ main img {
 	width: 50%;
 	height: 0;
 	overflow: hidden;
-	background: rgba(255, 255, 255, 1);
-	color: #000000;
+	background-color: #2098D1;
 	transition: all 0.3s linear 0s;
 }
 .save-deck-block input {
 	width: 90%;
 	margin: 15px 0;
-}
-.save-deck-block button {
-	color: #000000;
 }
 .save-active {
 	height: 110px;
@@ -190,8 +188,7 @@ main img {
 	width: 300px;
 	height: 0;
 	overflow-y: auto;
-	background: rgba(255, 255, 255, 1);
-	color: #000000;
+	background-color: #2098D1;
 	transition: all 0.3s linear 0s;
 }
 .delete-list-block {
@@ -208,11 +205,7 @@ main img {
 .deck-list li:hover, .delete-list li:hover {
 	cursor: pointer;
 	background-color: #000000;
-	color: #ffffff;
 }
-
-
-
 
 /* Filter styles */
 
@@ -224,8 +217,8 @@ main img {
 	width: 100%;
 	height: 0;
 	overflow: hidden;
-	background: rgba(255, 255, 255, 1);
-	color: #000000;
+	background-color: #2098D1;
+	color: #ffffff;
 	transition: all 0.3s linear 0s;
 }
 .filter-block form {
@@ -233,18 +226,52 @@ main img {
 	flex-flow: row wrap;
 	width: 100%;
 }
+.filter-block label {
+	margin: 0 0 5px 10px;
+}
+.filter-block input, .filter-block select {
+	margin-bottom: 5px;
+	background-color: #4fafff;
+	color: #ffffff;
+}
+.filter-block select, .filter-block input[type="number"] {
+	border: none;
+	border-radius: 15px;
+	padding: 5px 15px;
+}
 .filter-first, .filter-second {
 	display: flex;
 	flex-flow: column wrap;
 	width: 50%;
 	padding: 20px;
 }
+.filter-small-inputs {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+}
+.filter-small-inputs div {
+	flex-grow: 2;
+	width: 30%;
+}
+.filter-small-inputs div:not(:last-of-type) {
+	margin-right: 10px;
+}
+.filter-small-inputs input {
+	max-width: 100%;
+}
 .filter-submit {
 	width: 100%;
 	padding: 20px;
 	text-align: center;
 }
+.filter-submit button {
+	background: #ffffff;
+}
+.filter-submit button:hover {
+	color: #333333;
+}
 
 .filter-visible {
-	height: 460px;
+	height: 400px;
 }
