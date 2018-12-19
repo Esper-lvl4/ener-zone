@@ -38,7 +38,7 @@ body * {
 .global-size {
 	display: flex;
 	flex-direction: column;
-	width: 1300px;
+	width: 1366px;
 	height: 100%;
 	margin: 0 auto;
 }

@@ -16,10 +16,11 @@
 	flex-grow: 2;
 	width: 50%;
 	height: 100%;
-	margin-right: 15px;
 	padding: 5px;
-	border: 4px solid #ffffff;
-	border-radius: 10px;
+	border: 4px solid #333333;
+	border-right: none;
+	border-top-left-radius: 10px;
+	border-bottom-left-radius: 10px;
 }
 .lobby-chat-block {
 	display: flex;
@@ -27,8 +28,10 @@
 	width: 40%;
 	height: 100%;
 	padding: 5px;
-	border: 4px solid #ffffff;
-	border-radius: 10px;
+	border: 4px solid #333333;
+	border-left: none;
+	border-top-right-radius: 10px;
+	border-bottom-right-radius: 10px;
 }
 
 /* Filter block */
@@ -40,10 +43,12 @@
 	align-items: center;
 }
 .lobby-name-filter {
-	width: 45%;
+	width: 40%;
 	padding: 10px 15px;
+	margin-right: 15px;
 	border: none;
 	border-radius: 25px;
+	background-color: #999999;
 }
 .progress-filter-wrap {
 	position: relative;
@@ -51,7 +56,7 @@
 	flex-flow: row wrap;
 	align-items: center;
 	padding-left: 25px;
-	color: #ffffff;
+	color: #333333;
 }
 .progress-filter-wrap input {
 	display: none;
@@ -67,23 +72,12 @@
 	display: block;
 	width: 15px;
 	height: 15px;
-	border: 2px solid #ffffff;
+	border: 2px solid #333333;
 	border-radius: 50%;
 	cursor: pointer;
 }
 .progress-filter-wrap input:checked ~ label::before {
-	background-color: #ffffff;
-}
-.filters-modal-button {
-	display: block;
-	padding: 10px 15px;
-	border: none;
-	outline: none;
-	box-shadow: none;
-	border-radius: 25px;
-	background-color: #ffffff;
-	color: #333333;
-	cursor: pointer;
+	background: linear-gradient(45deg, #666666, #333333);
 }
 
 /*****/
@@ -92,7 +86,7 @@
 
 .lobby-game-list {
 	flex-grow: 2;
-	color: #ffffff;
+	color: #333333;
 }
 .lobby-game-list ul {
 	list-style: none;
@@ -118,11 +112,12 @@
 	padding: 10px 15px;
 	border: none;
 	border-radius: 25px;
-	background-color: #ffffff;
-	color: #333333;
+	background: linear-gradient(45deg, #666666, #333333);
+	color: #ffffff;
 	text-align: center;
 	text-decoration: none;
 	cursor: pointer;
+	overflow: hidden;
 }
 .lobby-button:not(:last-child) {
 	margin-right: 15px;
@@ -164,8 +159,8 @@
 	flex-grow: 2;
 	width: 100%;
 	margin-bottom: 10px;
-	border: 1px solid #ffffff;
-	color: #ffffff;
+	border: 1px solid #333333;
+	color: #333333;
 }
 .tab ul {
 	list-style: none;
@@ -191,19 +186,6 @@
   padding: 10px 15px;
   border: none;
   border-radius: 25px;
-}
-.send-message {
-	display: block;
-	flex-grow: 2;
-	width: 10%;
-	padding: 10px 15px;
-	border: none;
-	border-radius: 25px;
-	background-color: #ffffff;
-	color: #333333;
-	text-align: center;
-	text-decoration: none;
-	cursor: pointer;
 }
 
 /*****/
