@@ -1,5 +1,5 @@
 $(function () {
-		var socket = io('/main-menu', {
+		var socket = io('/lobby', {
 			query: {
 				token: localStorage.getItem('EnerZoneToken'),
 			},
