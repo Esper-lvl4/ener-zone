@@ -1,25 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const User = require('../users/User');
+const Users = require('../users/Users');
 
 function LobbyRoom (socket) {
 	console.log(`User entered lobby:`);
-	var nick = socket.handshake.query.nickname;
-	if (nick === 'null' || !nick) {
-		let token = socket.handshake.query.token;
-		let decoded = jwt.decode(token, {complete: true});
-		User.findOne({_id: decoded.payload.id}, function (err, user) {
-			if (err) {
-				socket.emit('something-wrong', 'Error, when tried to find a user.');
-				return;
-			}
-			if (!user) {
-				socket.emit('success-logout', 'User without a document in DB got token.');
-				return;
-			}
-			socket.emit('set-nickname', user.nickname);
-		});																												
-	}
+	Users.setNickname(socket);
 
 	socket.emit('get-room-list', '');
 

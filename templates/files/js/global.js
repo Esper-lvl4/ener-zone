@@ -50,5 +50,6 @@ function setLogout (socket) {
 
 	socket.on('success-logout', function (res) {
 		localStorage.removeItem('EnerZoneToken');
+		localStorage.removeItem('EnerZoneNickname');
 	})
 }
