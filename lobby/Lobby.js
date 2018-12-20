@@ -5,9 +5,7 @@ const User = require('../users/User');
 function LobbyRoom (socket) {
 	console.log(`User entered lobby:`);
 	var nick = socket.handshake.query.nickname;
-	console.log(nick);
-	if (!nick) {
-		console.log(socket.handshake.query);
+	if (nick === 'null' || !nick) {
 		let token = socket.handshake.query.token;
 		let decoded = jwt.decode(token, {complete: true});
 		User.findOne({_id: decoded.payload.id}, function (err, user) {
