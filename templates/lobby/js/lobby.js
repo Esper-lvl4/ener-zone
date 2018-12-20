@@ -12,6 +12,12 @@ $(function () {
 			localStorage.setItem('EnerZoneNickname', nickname);
 		})
 
+		socket.on('refresh-lobby', function (data) {
+			console.log(data);
+		})
+
+		socket.emit('create-room', 'Checking');
+
 		socket.on('failed-auth', function (message) {
 			window.location.href = '/auth/';
 		})
