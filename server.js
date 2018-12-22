@@ -104,7 +104,7 @@ lobby.on('connection', function (socket) {
 	if (!VerifyToken(socket)) {
 		return;
 	}
-	LobbyRoom(socket);
+	LobbyRoom(socket, io);
 });
 
 // Parser.

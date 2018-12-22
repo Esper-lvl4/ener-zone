@@ -7,7 +7,15 @@ const Users = {
 	setNickname: function (socket) {
 		if (socket.handshake.query.nickname === 'null' || !socket.handshake.query.nickname) {
 			let token = socket.handshake.query.token;
+			if (!token) {
+				console.log('no token');
+				return;
+			}
 			let decoded = jwt.decode(token, {complete: true});
+			if (!decoded) {
+				console.log('failed to decode');
+				return;
+			}
 			User.findOne({_id: decoded.payload.id}, function (err, user) {
 				if (err) {
 					socket.emit('something-wrong', 'Error, when tried to find a user.');

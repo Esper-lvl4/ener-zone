@@ -84,15 +84,15 @@
 
 /* Game list block */
 
-.lobby-game-list {
+.lobby-gamelist-wrap {
 	flex-grow: 2;
 	color: #333333;
 }
-.lobby-game-list ul {
+.lobby-gamelist-wrap ul {
 	list-style: none;
 	padding: 0;
 }
-.lobby-game-list li {
+.lobby-gamelist-wrap li {
 	padding: 5px 0;
 }
 
