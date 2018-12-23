@@ -13,7 +13,7 @@ const Users = {
 			}
 			let decoded = jwt.decode(token, {complete: true});
 			if (!decoded) {
-				console.log('failed to decode');
+				console.log('failed to decode token');
 				return;
 			}
 			User.findOne({_id: decoded.payload.id}, function (err, user) {
@@ -28,6 +28,31 @@ const Users = {
 				socket.emit('set-nickname', user.nickname);
 			});																												
 		}
+	},
+	getUser: function (socket) {
+		let token = socket.handshake.query.token;
+		if (!token) {
+			console.log('no token');
+			return;
+		}
+		let decoded = jwt.decode(token, {complete: true});
+		if (!decoded) {
+			console.log('failed to decode token');
+			return;
+		}
+		let userData = null;
+		User.findOne({_id: decoded.payload.id}, function (err, user) {
+			if (err) {
+				socket.emit('something-wrong', 'Error, when tried to find user.')
+				return;
+			}
+			if (!user) {
+				socket.emit('success-logout', 'User without a document in DB got token.');
+				return;
+			}
+			userData = {id: user._id, nickname: user.nickname};
+		});
+		return userData;
 	}
 }
 

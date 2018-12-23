@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const Users = require('../users/Users');
 
 let gameRooms = [ // Array to store rooms.
-	{name: 'wixoss-open', id: '0', settings: {
+	{name: 'wixoss-open', id: '-2', settings: {
 		format: 'as', 
 		timeLimit: 'none', 
 		password: ''
@@ -12,7 +12,7 @@ let gameRooms = [ // Array to store rooms.
 		{id: '123', name: 'Admin'},
 		{id: '321', name: 'RankUp'},
 	]},
-	{name: 'wixoss-closed', id: '1', settings: {
+	{name: 'wixoss-closed', id: '-1', settings: {
 		format: 'ks', 
 		timeLimit: '300', 
 		password: '123'
@@ -25,7 +25,8 @@ let gameRooms = [ // Array to store rooms.
 let chatHistory = [ // Array to store recent messages in chat.
 	{time: '13:00', nickname: 'Kekko', message: 'Hello there!'},
 	{time: '13:30', nickname: 'Chebur', message: 'Stfu kys'},
-]; 
+];
+let roomCounter = 0;
 
 function LobbyRoom (socket, io) {
 	console.log('User entered lobby:');
@@ -44,10 +45,28 @@ function LobbyRoom (socket, io) {
 	
 	// Lobby events.
 
-	socket.on('create-room', function (room) {
-		gameRooms.push({name: room.name, settings: room.settings});
+	socket.on('create-room', function (roomObj) {
+		let allowCreation = true;
+		for (var i = 0; i < gameRooms.length; i++) {
+			if (gameRooms[i].name == roomObj.name) {
+				allowCreation = false;
+				break;
+			}
+		};
+		if (!allowCreation) {
+			socket.emit('failed-room-creation', 'Room with that name already exists. Try changing name.');
+			return;
+		}
+		var room = roomObj;
+		room.users = [].push(Users.getUser(socket));
+		if (room.users[0] === null) {
+			socket.emit('failed-room-creation', 'User, that are creating the room, does not exists');
+			return;
+		}
+		room.id = roomCounter++ + '';
+		gameRooms.push(room);
+		socket.emit('joining-room', room);
 		refreshLobbyAll();
-		console.log(gameRooms);
 	});
 
 	socket.on('delete-room', function (id) {

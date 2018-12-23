@@ -30,7 +30,7 @@
 							</ul>
 						</div>
 						<div class="lobby-buttons-wrap">
-							<button class="main-button hvr-shutter-in-horizontal">Create</button>
+							<button class="main-button hvr-shutter-in-horizontal" id="create-room-button">Create</button>
 							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Join</button>
 							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Spectate</button>
 							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Friends</button>
@@ -44,19 +44,19 @@
 							<button id="server-button">Server info</button>
 						</div>
 						<div class="chat-tab tab" id="chat-tab">
-							<ul>
+							<ul class="not-a-list">
 								<li>Msg 1</li>
 								<li>Msg 2</li>
 							</ul>
 						</div>
 						<div class="server-tab tab js-none" id="server-tab">
-							<ul>
+							<ul class="not-a-list">
 								<li>Server info 1</li>
 								<li>Server info 2</li>
 							</ul>
 						</div>
 						<div class="message-field-wrap">
-							<input class="chat-message-field" type="text" name="chat-message-field" id="chat-message-field">
+							<input class="chat-message-field main-input" type="text" name="chat-message-field" id="chat-message-field">
 							<button class="main-button hvr-shutter-in-horizontal" id="send-message">Send</button>
 						</div>
 					</div>
@@ -70,29 +70,52 @@
 		</div>
 	</div>
 
+	<div class="modal-window js-none" id="modal">
+		<div class="info-block info" id="info-block"></div>
+
+	<!-- Create game modal -->
+		<form class="create-room-form" id="create-room-form">
+			<div class="modal-close"></div>
+			<label for="room-name">Room name:</label>
+			<input class="create-room-input" type="text" name="room-name" id="room-name">
+			<label for="room-format">Game format:</label>
+			<input class="create-room-input" name="room-format" type="text" id="room-format" value="as" disabled>
+			<ul class="room-format-list not-a-list js-none">
+				<li data-value="as">All Stars</li>
+				<li data-value="ks">Key Selection</li>
+				<li data-value="nb">No Mayu's Room</li>
+			</ul>
+			<label for="room-time-limit">Time limit (seconds):</label>
+			<input class="create-room-input" type="text" name="room-time-limit" id="room-time-limit" value="180">
+			<label for="room-password">Protect with password:</label>
+			<input class="create-room-input" type="text" name="room-password" id="room-password">
+			<button class="main-button hvr-shutten-in-horizontal">Create</button>
+		</form>
+
 	<!-- Filter modal -->
 
-	<form class="filter-modal-wrap js-none">
-		<input type="number" name="people-count">
-		<input type="text" name="spectators-allowed">
-		<input type="text" name="username">
-		<input type="checkbox" name="hide-password-protected">
-	</form>
+		<form class="filter-modal-wrap js-none">
+			<input type="number" name="people-count">
+			<input type="text" name="spectators-allowed">
+			<input type="text" name="username">
+			<input type="checkbox" name="hide-password-protected">
+		</form>
 
 
 	<!-- Game is protected by password modal -->
 
-	<form class="game-password-modal js-none">
-		<span>Enter password to join this room.</span>
-		<input type="text" name="enter-game-password">
-		<button>Join</button>
-	</form>
+		<form class="game-password-modal js-none">
+			<span>Enter password to join this room.</span>
+			<input type="text" name="enter-game-password">
+			<button>Join</button>
+		</form>
 
 	<!-- Friend list modal -->
 
-	<form class="friend-list-modal js-none">
-		<!-- Still thinking -->
-	</form>
+		<form class="friend-list-modal js-none">
+			<!-- Still thinking -->
+		</form>
+	</div>
 
 
 	<script src="/socket.io/socket.io.js"></script>
