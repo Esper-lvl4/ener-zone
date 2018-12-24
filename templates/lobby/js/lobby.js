@@ -31,11 +31,12 @@ $(function () {
 				selectedRoom = this;
 				$(lobby.gameList).find('li').removeClass('js-selected-room');
 				$(event.target).addClass('js-selected-room');
+				$('#join-room-button').prop('disabled', false);
 			}
 			delete (event) {
 				socket.emit('delete-room', this.id);
 			}
-			join (event, role) {
+			join (role) {
 				socket.emit('join-room', {id: this.id, role: role});
 			}
 			start (event) {
@@ -52,11 +53,13 @@ $(function () {
 		function renderLobby () {
 			// render gamelist.
 			$(lobby.gameList).find('li').removeClass('js-selected-room');
+			$('#join-room-button').prop('disabled', true);
 			gameRooms.forEach(function (room) {
 				$(lobby.gameList).append($(room.elem).text(room.name));
 			});
 			if (selectedRoom !== null) {
 				$(selectedRoom.elem).addClass('js-selected-room');
+				$('#join-room-button').prop('disabled', false);
 			}
 		}
 
@@ -71,7 +74,6 @@ $(function () {
 				console.log('No game data were sent by server!');
 				return;
 			}
-			//gameRooms = []
 			for (var i = 0; i < data.rooms.length; i++) {
 				let skip = false;
 				for (var j = 0; j < gameRooms.length; j++) {
@@ -87,7 +89,6 @@ $(function () {
 				gameRooms[gameRooms.length - 1].initEvents();
 			}
 
-			
 			console.log(data);
 
 			chatHistory =	data.history;
@@ -98,8 +99,7 @@ $(function () {
 
 		$('#create-room-button').on('click', function (event) {
 			event.preventDefault();
-			$('#modal').removeClass('js-none');
-			$('#create-room-form').removeClass('js-none');
+			openModal('#create-room-form');
 		});
 
 		$('#create-room-form').on('submit', function (event) {
@@ -113,16 +113,47 @@ $(function () {
 				}
 			};
 			socket.emit('create-room', room);
+			closeModal(null, true);
 		})
 
 		// Joining a room.
+
+		// Check if user selected room, and if there is a password in selected room. 
+		// Allow joining if there is no password - initiate event on server.
+		$('#join-room-button').on('click', function (event) {
+			event.preventDefault();
+			if (!selectedRoom) {
+				return;
+			}
+			if (selectedRoom.settings.password === '') {
+				selectedRoom.join();
+			} else {
+				openModal('#game-password-modal');
+			}
+		})
+
+		$('#game-password-modal').on('submit', function (event) {
+			event.preventDefault();
+			if(selectedRoom.settings.password === $('#join-password').val()) {
+				selectedRoom.join();
+			} else {
+				$('#info-block').removeClass('js-none').text('Wrong password. You may try again ^^');
+			}
+		})
 
 		socket.on('joining-room', function (room) {
 			// join namespace room.
 			closeModal(null, true);
 		})
 
-		/* Close modal */
+		/* Open modals */
+
+		function openModal (modal) {
+			$('#modal').removeClass('js-none');
+			$(modal).removeClass('js-none');
+		}
+
+		/* Close modals */
 
 		function closeModal (event, all) {
 			if (all) {
@@ -144,7 +175,6 @@ $(function () {
 		// Show info.
 
 		socket.on('failed-room-creation', function (message) {
-			console.log(message);
 			$('#info-block').removeClass('js-none').text(message);
 		})
 
@@ -164,6 +194,5 @@ $(function () {
 		})
 
 		setLogout(socket);
-
 		
-	})
+});

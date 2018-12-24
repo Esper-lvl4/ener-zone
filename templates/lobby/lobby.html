@@ -31,7 +31,7 @@
 						</div>
 						<div class="lobby-buttons-wrap">
 							<button class="main-button hvr-shutter-in-horizontal" id="create-room-button">Create</button>
-							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Join</button>
+							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled id="join-room-button">Join</button>
 							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Spectate</button>
 							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Friends</button>
 							<a class="main-button hvr-shutter-in-horizontal" href="../deck-editor/">Decks</a>
@@ -74,7 +74,7 @@
 		<div class="info-block info" id="info-block"></div>
 
 	<!-- Create game modal -->
-		<form class="create-room-form" id="create-room-form">
+		<form class="create-room-form js-none" id="create-room-form">
 			<div class="modal-close"></div>
 			<label for="room-name">Room name:</label>
 			<input class="create-room-input" type="text" name="room-name" id="room-name">
@@ -104,9 +104,9 @@
 
 	<!-- Game is protected by password modal -->
 
-		<form class="game-password-modal js-none">
+		<form class="game-password-modal js-none" id="game-password-modal">
 			<span>Enter password to join this room.</span>
-			<input type="text" name="enter-game-password">
+			<input type="text" name="enter-game-password" id="join-password">
 			<button>Join</button>
 		</form>
 

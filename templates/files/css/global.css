@@ -83,10 +83,10 @@ body * {
   -webkit-transition-timing-function: ease-out;
   transition-timing-function: ease-out;
 }
-.hvr-shutter-in-horizontal:hover, .hvr-shutter-in-horizontal:focus, .hvr-shutter-in-horizontal:active {
+.hvr-shutter-in-horizontal:hover:not(:disabled), .hvr-shutter-in-horizontal:focus:not(:disabled), .hvr-shutter-in-horizontal:active:not(:disabled) {
   color: white;
 }
-.hvr-shutter-in-horizontal:hover:before, .hvr-shutter-in-horizontal:focus:before, .hvr-shutter-in-horizontal:active:before {
+.hvr-shutter-in-horizontal:hover:not(:disabled)::before, .hvr-shutter-in-horizontal:focus:not(:disabled)::before, .hvr-shutter-in-horizontal:active:not(:disabled)::before {
   -webkit-transform: scaleX(0);
   transform: scaleX(0);
 }
@@ -124,10 +124,10 @@ body * {
   -webkit-transition-timing-function: ease-out;
   transition-timing-function: ease-out;
 }
-.hvr-sweep-to-top:hover, .hvr-sweep-to-top:focus, .hvr-sweep-to-top:active {
+.hvr-sweep-to-top:hover:not(:disabled), .hvr-sweep-to-top:focus:not(:disabled), .hvr-sweep-to-top:active:not(:disabled) {
   color: white;
 }
-.hvr-sweep-to-top:hover:before, .hvr-sweep-to-top:focus:before, .hvr-sweep-to-top:active:before {
+.hvr-sweep-to-top:hover:not(:disabled)::before, .hvr-sweep-to-top:focus:not(:disabled)::before, .hvr-sweep-to-top:active:not(:disabled)::before {
   -webkit-transform: scaleY(1);
   transform: scaleY(1);
 }
