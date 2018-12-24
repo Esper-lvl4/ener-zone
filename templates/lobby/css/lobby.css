@@ -94,6 +94,7 @@
 }
 .lobby-gamelist-wrap li {
 	padding: 5px 0;
+	cursor: pointer;
 }
 
 /*****/
@@ -226,4 +227,8 @@
 
 .js-active-button {
 	font-weight: 700!important;
+}
+.js-selected-room {
+	background-color: #9999FF;
+	color: #ffffff;
 }

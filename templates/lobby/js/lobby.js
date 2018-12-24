@@ -13,6 +13,7 @@ $(function () {
 
 		var gameRooms = [];
 		var chatHistory = [];
+		var selectedRoom = null;
 
 		console.log(socket);
 
@@ -26,8 +27,10 @@ $(function () {
 				this.id = room.id;
 			}
 
-			create () {
-				//socket.emit('create-room', {name: 'wixoss-test', settings: {format: 'as', timeLimit: '600', password: '35234'}});
+			select (event) {
+				selectedRoom = this;
+				$(lobby.gameList).find('li').removeClass('js-selected-room');
+				$(event.target).addClass('js-selected-room');
 			}
 			delete (event) {
 				socket.emit('delete-room', this.id);
@@ -38,6 +41,9 @@ $(function () {
 			start (event) {
 				socket.emit('start-game', this.id);
 			}
+			initEvents() {
+				$(this.elem).on('click', this.select.bind(this));
+			}
 		}
 		/*****/
 
@@ -45,10 +51,13 @@ $(function () {
 
 		function renderLobby () {
 			// render gamelist.
-			$(lobby.gameList).empty();
+			$(lobby.gameList).find('li').removeClass('js-selected-room');
 			gameRooms.forEach(function (room) {
 				$(lobby.gameList).append($(room.elem).text(room.name));
 			});
+			if (selectedRoom !== null) {
+				$(selectedRoom.elem).addClass('js-selected-room');
+			}
 		}
 
 		/*****/
@@ -62,10 +71,22 @@ $(function () {
 				console.log('No game data were sent by server!');
 				return;
 			}
-			gameRooms = []
-			data.rooms.forEach (function (room) {
-				gameRooms.push(new GameRoom(room));
-			});
+			//gameRooms = []
+			for (var i = 0; i < data.rooms.length; i++) {
+				let skip = false;
+				for (var j = 0; j < gameRooms.length; j++) {
+					if (data.rooms[i].id === gameRooms[j].id) {
+						skip = true;
+						break;
+					}		
+				}
+				if (skip) {
+					continue;
+				}
+				gameRooms.push(new GameRoom(data.rooms[i]));
+				gameRooms[gameRooms.length - 1].initEvents();
+			}
+
 			
 			console.log(data);
 
