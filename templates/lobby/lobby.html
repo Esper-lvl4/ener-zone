@@ -25,14 +25,31 @@
 						</div>
 						<div class="lobby-gamelist-wrap">
 							<ul class="game-list" id="game-list">
-								<!--li>Game 1</li>
-								<li>Game 2</li-->
+								<!-- Output list of rooms -->
 							</ul>
 						</div>
+
+						<!-- Room -->
+
+						<div class="room-wrap js-none" id="room-wrap">
+							<div class="room-player-list">
+								<!-- Output players -->
+								yeye
+							</div>
+							<div class="room-ex-buttons">
+								<button class="main-button hvr-shutter-in-horizontal" id="room-choose-deck">Choose deck</button>
+								<button class="main-button hvr-shutter-in-horizontal" id="room-ready-button">Ready to batoru</button>
+							</div>
+						</div>
+						<!-- /Room -->
+
 						<div class="lobby-buttons-wrap">
 							<button class="main-button hvr-shutter-in-horizontal" id="create-room-button">Create</button>
 							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled id="join-room-button">Join</button>
 							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Spectate</button>
+							<button class="main-button hvr-shutter-in-horizontal js-none" id="room-open-button">OPEN!</button>
+							<button class="main-button hvr-shutter-in-horizontal js-none" id="room-invite-button">Invite</button>
+							<button class="main-button hvr-shutter-in-horizontal js-inactive js-none" disabled id="room-kick-button">Kick</button>
 							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Friends</button>
 							<a class="main-button hvr-shutter-in-horizontal" href="../deck-editor/">Decks</a>
 							<a class="main-button hvr-shutter-in-horizontal" href="../">Back</a>

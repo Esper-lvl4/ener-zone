@@ -126,7 +126,7 @@ $(function () {
 				return;
 			}
 			if (selectedRoom.settings.password === '') {
-				selectedRoom.join();
+				selectedRoom.join('player');
 			} else {
 				openModal('#game-password-modal');
 			}
@@ -135,15 +135,27 @@ $(function () {
 		$('#game-password-modal').on('submit', function (event) {
 			event.preventDefault();
 			if(selectedRoom.settings.password === $('#join-password').val()) {
-				selectedRoom.join();
+				selectedRoom.join('player');
 			} else {
 				$('#info-block').removeClass('js-none').text('Wrong password. You may try again ^^');
 			}
 		})
 
+		function initRoom () {
+			$('#room-wrap').removeClass('js-none');
+			$('.lobby-filter-wrap').addClass('js-none');
+			$('#game-list').addClass('js-none');
+		}
+
 		socket.on('joining-room', function (room) {
 			// join namespace room.
 			closeModal(null, true);
+			initRoom();
+			console.log(room);
+		})
+
+		socket.on('refresh-room', function (room) {
+			console.log(room.users);
 		})
 
 		/* Open modals */
@@ -176,6 +188,10 @@ $(function () {
 
 		socket.on('failed-room-creation', function (message) {
 			$('#info-block').removeClass('js-none').text(message);
+		})
+
+		socket.on('error-message', function (message) {
+			console.log(message);
 		})
 
 		// Clear info.

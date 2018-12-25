@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const Users = require('../users/Users');
 
 let gameRooms = [ // Array to store rooms.
-	{name: 'wixoss-open', id: '-2', settings: {
+	/*{name: 'wixoss-open', id: '-2', settings: {
 		format: 'as', 
 		timeLimit: 'none', 
 		password: ''
@@ -20,13 +20,13 @@ let gameRooms = [ // Array to store rooms.
 	users: [
 		{id: '456', name: 'Renekton'},
 		{id: '654', name: 'Kekko'},
-	]},
+	]},*/
 ]; 
 let chatHistory = [ // Array to store recent messages in chat.
 	{time: '13:00', nickname: 'Kekko', message: 'Hello there!'},
 	{time: '13:30', nickname: 'Chebur', message: 'Stfu kys'},
 ];
-let roomCounter = 0;
+let roomCounter = 1;
 
 function LobbyRoom (socket, io) {
 	console.log('User entered lobby:');
@@ -45,7 +45,7 @@ function LobbyRoom (socket, io) {
 	
 	// Lobby events.
 
-	socket.on('create-room', function (roomObj) {
+	socket.on('create-room', async function (roomObj) {
 		let allowCreation = true;
 		for (var i = 0; i < gameRooms.length; i++) {
 			if (gameRooms[i].name == roomObj.name) {
@@ -58,12 +58,15 @@ function LobbyRoom (socket, io) {
 			return;
 		}
 		var room = roomObj;
-		room.users = [].push(Users.getUser(socket));
+		room.users = [];
+		room.users.push(await Users.getUser(socket));
+		console.log(room.users);
 		if (room.users[0] === null) {
 			socket.emit('failed-room-creation', 'User, that are creating the room, does not exists');
 			return;
 		}
 		room.id = roomCounter++ + '';
+		room.socketRoom = 'room-' + room.id;
 		gameRooms.push(room);
 		socket.emit('joining-room', room);
 		refreshLobbyAll();
@@ -72,6 +75,33 @@ function LobbyRoom (socket, io) {
 	socket.on('delete-room', function (id) {
 		refreshLobbyAll();
 	});
+
+	// Joining rooms.
+
+	socket.on('join-room', async function (info) {
+		console.log(info);
+		if (!info || !info.role || !info.id) {
+			socket.emit('error-message', 'Error joining the game');
+		}
+		for (var i = 0; i < gameRooms.length; i++) {
+			console.log(info.id === gameRooms[i].id);
+			if (info.id === gameRooms[i].id) {
+				var user = await Users.getUser(socket);
+				console.log(user);
+				if(!user) {
+					socket.emit('error-message', 'User, that tries to joing the game, does not exists');
+					break;
+				}
+				gameRooms[i].users.push(user);
+				socket.join(gameRooms[i].socketRoom);
+				socket.emit('joining-room', gameRooms[i]);
+				io.to(gameRooms[i].socketRoom).emit('refresh-room', gameRooms[i]);
+
+				refreshLobbyAll();
+				break;
+			}
+		}
+	})
 
 	socket.on('init-game', function (data) {
 

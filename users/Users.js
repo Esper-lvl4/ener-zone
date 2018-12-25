@@ -29,7 +29,7 @@ const Users = {
 			});																												
 		}
 	},
-	getUser: function (socket) {
+	getUser: async function (socket) {
 		let token = socket.handshake.query.token;
 		if (!token) {
 			console.log('no token');
@@ -41,7 +41,7 @@ const Users = {
 			return;
 		}
 		let userData = null;
-		User.findOne({_id: decoded.payload.id}, function (err, user) {
+		await User.findOne({_id: decoded.payload.id}, function (err, user) {
 			if (err) {
 				socket.emit('something-wrong', 'Error, when tried to find user.')
 				return;
