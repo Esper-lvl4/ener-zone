@@ -26,11 +26,13 @@ let chatHistory = [ // Array to store recent messages in chat.
 	{time: '13:00', nickname: 'Kekko', message: 'Hello there!'},
 	{time: '13:30', nickname: 'Chebur', message: 'Stfu kys'},
 ];
+
 let roomCounter = 1;
 
 function LobbyRoom (socket, io) {
-	console.log('User entered lobby:');
-	Users.setNickname(socket);
+	console.log('User entered lobby');
+	
+	Users.checkState(socket);
 
 	// init or refresh lobby's room list and chat. Do it every 10 seconds afterwards.
 	function refreshLobbyOne () {

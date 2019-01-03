@@ -1,3 +1,5 @@
+const Users = require('../users/Users');
+
 function MainMenu (socket) {
 	console.log('User entered main menu');
 	
@@ -6,8 +8,9 @@ function MainMenu (socket) {
 	});
 
 	socket.on('logout', function (user) {
+		Users.updateState(socket, 'remove', socket.handshake.query.token);
 		socket.emit('success-logout', {auth: false, token: null});
-	})
+	});
 }
 
 module.exports = MainMenu;

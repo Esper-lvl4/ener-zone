@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const Users = require('../users/Users');
 
 var key = {
 	'secret': 'kappadin',
@@ -9,11 +10,17 @@ function verifyToken (socket) {
 	let access = false;
 
 	if (!token) { 
+		if (Users.checkState(socket)) {
+			Users.updateState(socket, 'remove', token);
+		};
 		socket.emit('failed-auth', 'There was no token.');
 		return access;
 	}
 	jwt.verify(token, key.secret, function (err, decoded) {
-		if (err) {
+		if (err) {		
+			if (Users.checkState(socket)) {
+				Users.updateState(socket, 'remove', token);
+			};
 			socket.emit('failed-auth', 'Invalid token');
 		}
 		access = true;

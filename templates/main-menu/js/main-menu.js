@@ -14,6 +14,5 @@ $(function () {
 		})
 
 		setLogout(socket);
-
 		
 	})

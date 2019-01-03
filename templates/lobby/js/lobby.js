@@ -2,7 +2,6 @@ $(function () {
 		var socket = io('/lobby', {
 			query: {
 				token: localStorage.getItem('EnerZoneToken'),
-				nickname: localStorage.getItem('EnerZoneNickname') ? localStorage.getItem('EnerZoneNickname') : null,
 			},
 		});
 
@@ -61,13 +60,11 @@ $(function () {
 				$(selectedRoom.elem).addClass('js-selected-room');
 				$('#join-room-button').prop('disabled', false);
 			}
+			// render chat.
+			// ...
 		}
 
 		/*****/
-
-		socket.on('set-nickname', function (nickname) {
-			localStorage.setItem('EnerZoneNickname', nickname);
-		})
 
 		socket.on('refresh-lobby', function (data) {
 			if (!data) {
@@ -192,6 +189,7 @@ $(function () {
 
 		socket.on('error-message', function (message) {
 			console.log(message);
+			console.log(socket);
 		})
 
 		// Clear info.

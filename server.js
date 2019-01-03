@@ -73,8 +73,9 @@ app.get('/', (req, res) => {
 mainMenu.on('connection', function(socket) {
 	if (!VerifyToken(socket)) {
 		return;
+	} else {
+		MainMenu(socket);
 	};
-	MainMenu(socket);
 });
 
 // Deck Editor.
@@ -88,8 +89,9 @@ const deckEditor = io.of('/deck-editor');
 deckEditor.on('connection', function(socket) {
 	if (!VerifyToken(socket)) {
 		return;
+	} else {
+		DeckEditor(socket);
 	};
-	DeckEditor(socket);
 });
 
 // Lobby. 
@@ -103,8 +105,9 @@ const lobby = io.of('/lobby');
 lobby.on('connection', function (socket) {
 	if (!VerifyToken(socket)) {
 		return;
-	}
-	LobbyRoom(socket, io);
+	} else {
+		LobbyRoom(socket, io);
+	};
 });
 
 // Parser.
