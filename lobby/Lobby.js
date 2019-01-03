@@ -69,8 +69,10 @@ function LobbyRoom (socket, io) {
 		}
 		room.id = roomCounter++ + '';
 		room.socketRoom = 'room-' + room.id;
+		room.state = false;
 		gameRooms.push(room);
 		socket.emit('joining-room', room);
+		Users.updateState(socket, 'move', `/lobby/${room.socketRoom}`);
 		refreshLobbyAll();
 	});
 
@@ -97,6 +99,7 @@ function LobbyRoom (socket, io) {
 				gameRooms[i].users.push(user);
 				socket.join(gameRooms[i].socketRoom);
 				socket.emit('joining-room', gameRooms[i]);
+				Users.updateState(socket, 'move', `/lobby/${gameRooms[i].socketRoom}`);
 				io.to(gameRooms[i].socketRoom).emit('refresh-room', gameRooms[i]);
 
 				refreshLobbyAll();

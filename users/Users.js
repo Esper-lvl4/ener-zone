@@ -23,9 +23,6 @@ const Users = {
 				token: socket.handshake.query.token, 
 				location: socket.nsp.name,
 			});
-			console.log(this.state);
-		} else {
-			console.log("already tracking this user's state");
 		}
 		return check;
 	},
@@ -62,13 +59,13 @@ const Users = {
 
 	// Handler for changes in user's state. Below are functions, that gets executed by this.
 	updateState: function (socket, action) {
-		//const socket = sock;
 		let args;
 		if (arguments.length > 2) {
 			args = [].slice.call(arguments);
 			args = args.slice(2);
 		}
 		this[action](socket, args);
+		console.log(this.state);
 	},
 
 	// Change location of the user.
@@ -79,7 +76,7 @@ const Users = {
 				break;
 			}
 		}
-		console.log('movedTo');
+		console.log('move');
 	},
 
 	// Change nickname of the user.
@@ -125,7 +122,7 @@ const Users = {
 				socket.emit('success-logout', 'User without a document in DB got token.');
 				return;
 			}
-			userData = {id: user._id, nickname: user.nickname};
+			userData = {id: user._id, nickname: user.nickname, token: token};
 		});
 		return userData;
 	}

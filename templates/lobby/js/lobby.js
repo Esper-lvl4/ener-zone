@@ -142,6 +142,7 @@ $(function () {
 			$('#room-wrap').removeClass('js-none');
 			$('.lobby-filter-wrap').addClass('js-none');
 			$('#game-list').addClass('js-none');
+			$('.lobby-buttons-wrap').addClass('js-none');
 		}
 
 		socket.on('joining-room', function (room) {
