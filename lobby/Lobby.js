@@ -38,7 +38,7 @@ function LobbyRoom (socket, io) {
 	function refreshLobbyOne () {
 		socket.emit('refresh-lobby', {rooms: gameRooms, history: chatHistory});
 	}
-	refreshLobbyOne();
+	refreshLobbyOne(); // refresh lobby for every user, that just connected to lobby.
 
 	// Refresh lobby for all.
 	function refreshLobbyAll () {
@@ -46,6 +46,30 @@ function LobbyRoom (socket, io) {
 	}
 	
 	// Lobby events.
+
+	socket.on('check-user-location', function (message) {
+		if (gameRooms.length === 0) {return;}
+		let token = socket.handshake.query.token;
+		if (!token) {
+			socket.emit('success-logout', 'no token');
+		}
+		let userState = Users.getUserState(socket);
+		if (!userState) {
+			return;
+		} else if (userState.location.match('/room')) {
+			let roomID = userState.location.replace('/lobby/room-', '');
+			for (let i = 0; i < gameRooms.length; i++) {
+				if (+gameRooms[i].id === +roomID) {
+					// Copy room object and send the copy without tokens to client. 
+					let room = Object.assign({}, gameRooms[i]);
+					room.users.forEach(function (user) {
+						user.token = undefined;
+					});
+					socket.emit('restore-room', room);
+				}
+			}
+		}
+	})
 
 	socket.on('create-room', async function (roomObj) {
 		let allowCreation = true;
@@ -60,18 +84,30 @@ function LobbyRoom (socket, io) {
 			return;
 		}
 		var room = roomObj;
+		room.id = roomCounter++ + '';
+		room.socketRoom = 'room-' + room.id;
+		room.state = false;
 		room.users = [];
 		room.users.push(await Users.getUser(socket));
-		console.log(room.users);
 		if (room.users[0] === null) {
 			socket.emit('failed-room-creation', 'User, that are creating the room, does not exists');
 			return;
 		}
-		room.id = roomCounter++ + '';
-		room.socketRoom = 'room-' + room.id;
-		room.state = false;
 		gameRooms.push(room);
+
+		// delete tokens from room before sending it to client;
+		let tokens = [];
+		for (var u in room.users) {
+			tokens.push(room.users[u].token);
+			delete room.users[u].token;
+		}
 		socket.emit('joining-room', room);
+
+		// restore tokens.
+		for (var t in tokens) {
+			room.users[t].token = tokens[t];
+		}
+
 		Users.updateState(socket, 'move', `/lobby/${room.socketRoom}`);
 		refreshLobbyAll();
 	});
@@ -83,7 +119,6 @@ function LobbyRoom (socket, io) {
 	// Joining rooms.
 
 	socket.on('join-room', async function (info) {
-		console.log(info);
 		if (!info || !info.role || !info.id) {
 			socket.emit('error-message', 'Error joining the game');
 		}
@@ -91,14 +126,26 @@ function LobbyRoom (socket, io) {
 			console.log(info.id === gameRooms[i].id);
 			if (info.id === gameRooms[i].id) {
 				var user = await Users.getUser(socket);
-				console.log(user);
 				if(!user) {
 					socket.emit('error-message', 'User, that tries to joing the game, does not exists');
 					break;
 				}
 				gameRooms[i].users.push(user);
 				socket.join(gameRooms[i].socketRoom);
-				socket.emit('joining-room', gameRooms[i]);
+				
+				// delete tokens from room before sending it to client;
+				let tokens = [];
+				for (var u in gameRooms[i].users) {
+					tokens.push(gameRooms[i].users[u].token);
+					delete gameRooms[i].users[u].token;
+				}
+				socket.emit('joining-room', room);
+
+				// restore tokens.
+				for (var t in tokens) {
+					gameRooms[i].users[t].token = tokens[t];
+				}
+
 				Users.updateState(socket, 'move', `/lobby/${gameRooms[i].socketRoom}`);
 				io.to(gameRooms[i].socketRoom).emit('refresh-room', gameRooms[i]);
 
@@ -106,7 +153,33 @@ function LobbyRoom (socket, io) {
 				break;
 			}
 		}
-	})
+	});
+
+	// Closing rooms.
+
+	socket.on('close-room', function (data) {
+		let token = socket.handshake.query.token;
+		if (!token) {
+			socket.emit('success-logout', 'no token');
+			return;
+		}
+		for (let i = 0; i < gameRooms.length; i++) {
+			let breaker = false;
+			for (let j = 0; j < gameRooms[i].users.length; j++) {
+				if (token === gameRooms[i].users[j].token) {
+					breaker = true;
+					break;
+				}
+			}
+			if (breaker) {
+				socket.emit('closed-room', gameRooms[i].id);
+				gameRooms.splice(i, 1);
+				Users.updateState(socket, 'move', '/lobby');
+				refreshLobbyAll();
+				break;
+			}
+		}
+	});
 
 	socket.on('init-game', function (data) {
 

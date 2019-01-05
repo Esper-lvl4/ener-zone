@@ -27,6 +27,21 @@ const Users = {
 		return check;
 	},
 
+	getUserState: function (socket) {
+		let token = socket.handshake.query.token;
+		if (!token) {
+			socket.emit('success-logout', 'no token');
+		}
+		let result = false;
+		for (let i = 0; i < this.state.length; i++) {
+			if (this.state[i].token === token) {
+				result = this.state[i];
+				break;
+			}
+		}
+		return result;
+	},
+
 	// Set nickname to user's object in Users.state.
 
 	setNickname: function (sock) {
@@ -101,30 +116,34 @@ const Users = {
 		console.log('remove');
 	},
 
-	getUser: async function (socket) {
-		let token = socket.handshake.query.token;
-		if (!token) {
-			console.log('no token');
-			return;
-		}
-		let decoded = jwt.decode(token, {complete: true});
-		if (!decoded) {
-			console.log('failed to decode token');
-			return;
-		}
-		let userData = null;
-		await User.findOne({_id: decoded.payload.id}, function (err, user) {
-			if (err) {
-				socket.emit('something-wrong', 'Error, when tried to find user.')
-				return;
+	getUser: function (socket, opt) {
+		return new Promise ((resolve, reject) => {
+			let token = socket.handshake.query.token;
+			if (!token) {
+				reject('no token');
 			}
-			if (!user) {
-				socket.emit('success-logout', 'User without a document in DB got token.');
-				return;
+			let decoded = jwt.decode(token, {complete: true});
+			if (!decoded) {
+				reject('failed to decode token');
 			}
-			userData = {id: user._id, nickname: user.nickname, token: token};
+			let userData = null;
+			User.findOne({_id: decoded.payload.id}, function (err, user) {
+				if (err) {
+					socket.emit('something-wrong', 'Error, when tried to find user.')
+					reject('Error, when tried to find user.');
+				}
+				if (!user) {
+					socket.emit('success-logout', 'User without a document in DB got token.');
+					reject('User without a document in DB got token.');
+				}
+				if (opt === 'no token') {
+					userData = {id: user._id, nickname: user.nickname};
+				} else {
+					userData = {id: user._id, nickname: user.nickname, token: token};
+				}		
+				resolve(userData);
+			});
 		});
-		return userData;
 	}
 }
 

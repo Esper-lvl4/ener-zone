@@ -16,6 +16,9 @@ $(function () {
 
 		console.log(socket);
 
+		// Check if user is already in the room.
+		socket.emit('check-user-location', 'check');
+
 		// Room class. Forced to do it like that to prevent users from changing room's id in console.
 		class GameRoom {
 			constructor (room) {
@@ -32,8 +35,8 @@ $(function () {
 				$(event.target).addClass('js-selected-room');
 				$('#join-room-button').prop('disabled', false);
 			}
-			delete (event) {
-				socket.emit('delete-room', this.id);
+			delete () {
+				this.elem.remove();
 			}
 			join (role) {
 				socket.emit('join-room', {id: this.id, role: role});
@@ -51,7 +54,8 @@ $(function () {
 
 		function renderLobby () {
 			// render gamelist.
-			$(lobby.gameList).find('li').removeClass('js-selected-room');
+			//$(lobby.gameList).find('li').removeClass('js-selected-room');
+			$(lobby.gameList).empty();
 			$('#join-room-button').prop('disabled', true);
 			gameRooms.forEach(function (room) {
 				$(lobby.gameList).append($(room.elem).text(room.name));
@@ -71,6 +75,7 @@ $(function () {
 				console.log('No game data were sent by server!');
 				return;
 			}
+			gameRooms = [];
 			for (var i = 0; i < data.rooms.length; i++) {
 				let skip = false;
 				for (var j = 0; j < gameRooms.length; j++) {
@@ -138,22 +143,55 @@ $(function () {
 			}
 		})
 
-		function initRoom () {
+		function initRoom (room) {
 			$('#room-wrap').removeClass('js-none');
 			$('.lobby-filter-wrap').addClass('js-none');
 			$('#game-list').addClass('js-none');
 			$('.lobby-buttons-wrap').addClass('js-none');
 		}
 
+		function closeRoom (id) {
+			$('#room-wrap').addClass('js-none');
+			$('.lobby-filter-wrap').removeClass('js-none');
+			$('#game-list').removeClass('js-none');
+			$('.lobby-buttons-wrap').removeClass('js-none');
+			for (var i = 0; i < gameRooms.length; i++) {
+				if (gameRooms[i].id === id) {
+					gameRooms[i].delete();
+					gameRooms.splice(i, 1);
+					console.log(gameRooms);
+					break;
+				}
+			}
+		}
+
 		socket.on('joining-room', function (room) {
 			// join namespace room.
 			closeModal(null, true);
-			initRoom();
+			initRoom(room);
 			console.log(room);
 		})
 
 		socket.on('refresh-room', function (room) {
 			console.log(room.users);
+		})
+
+		// restore room if anything strange happened.
+		socket.on('restore-room', function (room) {
+			closeModal(null, true);
+			initRoom(room);
+			console.log(room);
+		})
+
+		$('#room-close-button').on('click', function (event) {
+			event.preventDefault();
+			socket.emit('close-room', 'close pls');
+		});
+
+		// render lobby, when room closes.
+		socket.on('closed-room', function (id) {
+			closeRoom(id);
+			renderLobby();
 		})
 
 		/* Open modals */
