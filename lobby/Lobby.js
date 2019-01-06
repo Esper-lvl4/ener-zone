@@ -155,6 +155,32 @@ function LobbyRoom (socket, io) {
 		}
 	});
 
+	// Leaving rooms.
+
+	socket.on('leave-room', function (data) {
+		let token = socket.handshake.query.token;
+		if (!token) {
+			socket.emit('success-logout', 'no token');
+			return;
+		}
+		for (let i = 0; i < gameRooms.length; i++) {
+			let breaker = false;
+			for (let j = 0; j < gameRooms[i].users.length; j++) {
+				if (token === gameRooms[i].users[j].token) {
+					breaker = true;
+					socket.emit('left-room', gameRooms[i].id);
+					gameRooms[i].users.splice(j, 1);
+					Users.updateState(socket, 'move', '/lobby');
+					refreshLobbyAll();
+					break;
+				}
+			}
+			if (breaker) {
+				break;
+			}
+		}
+	});
+
 	// Closing rooms.
 
 	socket.on('close-room', function (data) {

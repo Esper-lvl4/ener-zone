@@ -143,6 +143,7 @@ $(function () {
 			}
 		})
 
+		// Show room to user.
 		function initRoom (room) {
 			$('#room-wrap').removeClass('js-none');
 			$('.lobby-filter-wrap').addClass('js-none');
@@ -150,6 +151,7 @@ $(function () {
 			$('.lobby-buttons-wrap').addClass('js-none');
 		}
 
+		// Close room and delete her from DOM and gameRooms array.
 		function closeRoom (id) {
 			$('#room-wrap').addClass('js-none');
 			$('.lobby-filter-wrap').removeClass('js-none');
@@ -163,6 +165,14 @@ $(function () {
 					break;
 				}
 			}
+		}
+
+		// Leave room.
+		function leaveRoom (id) {
+			$('#room-wrap').addClass('js-none');
+			$('.lobby-filter-wrap').removeClass('js-none');
+			$('#game-list').removeClass('js-none');
+			$('.lobby-buttons-wrap').removeClass('js-none');
 		}
 
 		socket.on('joining-room', function (room) {
