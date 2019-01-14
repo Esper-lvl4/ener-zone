@@ -195,12 +195,22 @@ $(function () {
 
 		$('#room-close-button').on('click', function (event) {
 			event.preventDefault();
+			console.log('test');
 			socket.emit('close-room', 'close pls');
 		});
+		$('#room-leave-button').on('click', (event) => {
+			event.preventDefault();
+			socket.emit('leave-room', 'leave pls');
+		})
 
-		// render lobby, when room closes.
+		// render lobby, when room closes or you left it.
 		socket.on('closed-room', function (id) {
 			closeRoom(id);
+			renderLobby();
+		})
+
+		socket.on('left-room', (id) => {
+			leaveRoom(id);
 			renderLobby();
 		})
 

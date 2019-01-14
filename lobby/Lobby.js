@@ -60,12 +60,17 @@ function LobbyRoom (socket, io) {
 			let roomID = userState.location.replace('/lobby/room-', '');
 			for (let i = 0; i < gameRooms.length; i++) {
 				if (+gameRooms[i].id === +roomID) {
-					// Copy room object and send the copy without tokens to client. 
-					let room = Object.assign({}, gameRooms[i]);
+					// Send the copy without tokens to client. 
+					let room = gameRooms[i];
+					let saveTokens = [];
 					room.users.forEach(function (user) {
+						saveTokens.push(user.token);
 						user.token = undefined;
 					});
 					socket.emit('restore-room', room);
+					for (let t = 0; t < saveTokens.length; t++) {
+						room.users[t] = saveTokens[t];
+					}
 				}
 			}
 		}
@@ -171,7 +176,11 @@ function LobbyRoom (socket, io) {
 					socket.emit('left-room', gameRooms[i].id);
 					gameRooms[i].users.splice(j, 1);
 					Users.updateState(socket, 'move', '/lobby');
+					if (gameRooms[i].users.length == 0) {
+						gameRooms.splice(i, 1);
+					}
 					refreshLobbyAll();
+
 					break;
 				}
 			}
@@ -192,6 +201,8 @@ function LobbyRoom (socket, io) {
 		for (let i = 0; i < gameRooms.length; i++) {
 			let breaker = false;
 			for (let j = 0; j < gameRooms[i].users.length; j++) {
+				console.log(token);
+				console.log(gameRooms[i].users[j]);
 				if (token === gameRooms[i].users[j].token) {
 					breaker = true;
 					break;
