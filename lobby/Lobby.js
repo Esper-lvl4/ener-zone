@@ -31,18 +31,68 @@ let roomCounter = 1;
 
 function LobbyRoom (socket, io) {
 	console.log('User entered lobby');
+	// function for cloning objects.
+	function cloneObject(obj) {
+		var clone = {};
+		for (var i in obj) {
+			if (obj[i] != null && typeof(obj[i]) == 'object' && obj[i].forEach) {
+				clone[i] = cloneArray(obj[i]);
+			} else if (obj[i] != null && typeof(obj[i]) == 'object') {
+				clone[i] = cloneObject(obj[i]);
+			} else {
+				clone[i] = obj[i];
+			}
+		}
+		return clone;
+	}
+	// function for cloning arrays.
+	function cloneArray(arr) {
+		var clone = [];
+		for (var a in arr) {
+			if (arr[a] != null && typeof(arr[a]) == 'object' && arr[a].forEach) {
+				clone.push(cloneArray(arr[a]));
+			} else if (arr[a] != null && typeof(arr[a]) == 'object') {
+				clone.push(cloneObject(arr[a]));
+			} else {
+				clone.push(arr[a]);
+			}
+		}
+		return clone;
+	}
 	
 	Users.checkState(socket);
 
-	// init or refresh lobby's room list and chat. Do it every 10 seconds afterwards.
+	// init or refresh lobby's room list and chat.
 	function refreshLobbyOne () {
-		socket.emit('refresh-lobby', {rooms: gameRooms, history: chatHistory});
+		if (gameRooms.length == 0) {
+			socket.emit('refresh-lobby', {rooms: gameRooms, history: chatHistory});
+		}
+		// clone rooms, then remove tokens, to not send them.
+		var roomClones = [];
+		for (var r in gameRooms) {
+			roomClones.push(cloneObject(gameRooms[r]));
+			roomClones[r].users.forEach((user) => {
+				delete user.token;
+			})
+		}
+		socket.emit('refresh-lobby', {rooms: roomClones, history: chatHistory});
 	}
 	refreshLobbyOne(); // refresh lobby for every user, that just connected to lobby.
-
+ 
 	// Refresh lobby for all.
 	function refreshLobbyAll () {
-		io.of('/lobby').emit('refresh-lobby', {rooms: gameRooms, history: chatHistory});
+		if (gameRooms.length == 0) {
+			io.of('/lobby').emit('refresh-lobby', {rooms: gameRooms, history: chatHistory});
+		}
+		// clone rooms, then remove tokens, to not send them.
+		var roomClones = [];
+		for (var r in gameRooms) {
+			roomClones.push(cloneObject(gameRooms[r]));
+			roomClones[r].users.forEach((user) => {
+				delete user.token;
+			})
+		}
+		io.of('/lobby').emit('refresh-lobby', {rooms: roomClones, history: chatHistory});
 	}
 	
 	// Lobby events.
@@ -61,16 +111,12 @@ function LobbyRoom (socket, io) {
 			for (let i = 0; i < gameRooms.length; i++) {
 				if (+gameRooms[i].id === +roomID) {
 					// Send the copy without tokens to client. 
-					let room = gameRooms[i];
-					let saveTokens = [];
-					room.users.forEach(function (user) {
-						saveTokens.push(user.token);
-						user.token = undefined;
-					});
+					let room = cloneObject(gameRooms[i]);
+					room.users.forEach((user) => {
+						delete user.token;
+					})
+					socket.join(gameRooms[i].socketRoom);
 					socket.emit('restore-room', room);
-					for (let t = 0; t < saveTokens.length; t++) {
-						room.users[t] = saveTokens[t];
-					}
 				}
 			}
 		}
@@ -100,20 +146,15 @@ function LobbyRoom (socket, io) {
 		}
 		gameRooms.push(room);
 
-		// delete tokens from room before sending it to client;
-		let tokens = [];
-		for (var u in room.users) {
-			tokens.push(room.users[u].token);
-			delete room.users[u].token;
-		}
-		socket.emit('joining-room', room);
-
-		// restore tokens.
-		for (var t in tokens) {
-			room.users[t].token = tokens[t];
-		}
-
+		// clone room and remove tokens from clone - then send it to client;
+		let roomClone = cloneObject(room);
+		roomClone.users.forEach((user) => {
+			delete user.token;
+		});
+		socket.join(gameRooms[i].socketRoom);
+		socket.emit('joining-room', roomClone);
 		Users.updateState(socket, 'move', `/lobby/${room.socketRoom}`);
+		Users.updateState(socket, 'changeRoom', gameRooms[i].socketRoom);
 		refreshLobbyAll();
 	});
 
@@ -128,7 +169,6 @@ function LobbyRoom (socket, io) {
 			socket.emit('error-message', 'Error joining the game');
 		}
 		for (var i = 0; i < gameRooms.length; i++) {
-			console.log(info.id === gameRooms[i].id);
 			if (info.id === gameRooms[i].id) {
 				var user = await Users.getUser(socket);
 				if(!user) {
@@ -138,21 +178,16 @@ function LobbyRoom (socket, io) {
 				gameRooms[i].users.push(user);
 				socket.join(gameRooms[i].socketRoom);
 				
-				// delete tokens from room before sending it to client;
-				let tokens = [];
-				for (var u in gameRooms[i].users) {
-					tokens.push(gameRooms[i].users[u].token);
-					delete gameRooms[i].users[u].token;
-				}
-				socket.emit('joining-room', room);
-
-				// restore tokens.
-				for (var t in tokens) {
-					gameRooms[i].users[t].token = tokens[t];
-				}
+				// clone room and remove tokens from clone - then send it to client;
+				let roomClone = cloneObject(gameRooms[i]);
+				roomClone.users.forEach((user) => {
+					delete user.token;
+				});
+				socket.emit('joining-room', roomClone);
 
 				Users.updateState(socket, 'move', `/lobby/${gameRooms[i].socketRoom}`);
-				io.to(gameRooms[i].socketRoom).emit('refresh-room', gameRooms[i]);
+				Users.updateState(socket, 'changeRoom', gameRooms[i].socketRoom);
+				io.to(gameRooms[i].socketRoom).emit('refresh-room', roomClone);
 
 				refreshLobbyAll();
 				break;
@@ -176,11 +211,11 @@ function LobbyRoom (socket, io) {
 					socket.emit('left-room', gameRooms[i].id);
 					gameRooms[i].users.splice(j, 1);
 					Users.updateState(socket, 'move', '/lobby');
+					Users.updateState(socket, 'changeRoom', null);
 					if (gameRooms[i].users.length == 0) {
 						gameRooms.splice(i, 1);
 					}
 					refreshLobbyAll();
-
 					break;
 				}
 			}
@@ -201,17 +236,18 @@ function LobbyRoom (socket, io) {
 		for (let i = 0; i < gameRooms.length; i++) {
 			let breaker = false;
 			for (let j = 0; j < gameRooms[i].users.length; j++) {
-				console.log(token);
-				console.log(gameRooms[i].users[j]);
 				if (token === gameRooms[i].users[j].token) {
 					breaker = true;
 					break;
 				}
 			}
 			if (breaker) {
+				//socket.emit('closed-room', gameRooms[i].id);
+				socket.to(gameRooms[i].socketRoom).emit('closed-room', gameRooms[i].id);
 				socket.emit('closed-room', gameRooms[i].id);
 				gameRooms.splice(i, 1);
 				Users.updateState(socket, 'move', '/lobby');
+				Users.updateState(socket, 'changeRoom', null);
 				refreshLobbyAll();
 				break;
 			}

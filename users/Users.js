@@ -22,6 +22,7 @@ const Users = {
 				nick: await this.setNickname(socket), 
 				token: socket.handshake.query.token, 
 				location: socket.nsp.name,
+				room: null,
 			});
 		}
 		return check;
@@ -80,7 +81,6 @@ const Users = {
 			args = args.slice(2);
 		}
 		this[action](socket, args);
-		console.log(this.state);
 	},
 
 	// Change location of the user.
@@ -91,7 +91,6 @@ const Users = {
 				break;
 			}
 		}
-		console.log('move');
 	},
 
 	// Change nickname of the user.
@@ -102,7 +101,6 @@ const Users = {
 				break;
 			}
 		}
-		console.log('rename');
 	},
 
 	// Remove user from state, when he leaves the client.
@@ -113,7 +111,14 @@ const Users = {
 				break;
 			}
 		}
-		console.log('remove');
+	},
+
+	changeRoom: function (socket, roomName) {
+		for (let i = 0; i < this.state.length; i++) {
+			if (socket.handshake.query.token == this.state[i].token) {
+				this.state[i].room = roomName;
+			}
+		}
 	},
 
 	getUser: function (socket, opt) {
@@ -137,10 +142,10 @@ const Users = {
 					reject('User without a document in DB got token.');
 				}
 				if (opt === 'no token') {
-					userData = {id: user._id, nickname: user.nickname};
+					userData = {id: user._id + '', nickname: user.nickname};
 				} else {
-					userData = {id: user._id, nickname: user.nickname, token: token};
-				}		
+					userData = {id: user._id + '', nickname: user.nickname, token: token};
+				}
 				resolve(userData);
 			});
 		});

@@ -195,7 +195,6 @@ $(function () {
 
 		$('#room-close-button').on('click', function (event) {
 			event.preventDefault();
-			console.log('test');
 			socket.emit('close-room', 'close pls');
 		});
 		$('#room-leave-button').on('click', (event) => {
