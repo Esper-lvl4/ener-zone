@@ -128,7 +128,7 @@ $(function () {
 				return;
 			}
 			if (selectedRoom.settings.password === '') {
-				selectedRoom.join('player');
+				selectedRoom.join({id: selectedRoom.id, role: 'player'});
 			} else {
 				openModal('#game-password-modal');
 			}
@@ -137,9 +137,22 @@ $(function () {
 		$('#game-password-modal').on('submit', function (event) {
 			event.preventDefault();
 			if(selectedRoom.settings.password === $('#join-password').val()) {
-				selectedRoom.join('player');
+				selectedRoom.join({id: selectedRoom.id, role: 'player'});
 			} else {
 				$('#info-block').removeClass('js-none').text('Wrong password. You may try again ^^');
+			}
+		})
+
+		// Spectating a room.
+		$('#spectate-room-button').on('click', function (event) {
+			event.preventDefault();
+			if (!selectedRoom) {
+				return;
+			}
+			if (selectedRoom.settings.password === '') {
+				selectedRoom.join({id: selectedRoom.id, role: 'spectator'});
+			} else {
+				openModal('#game-password-modal');
 			}
 		})
 

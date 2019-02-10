@@ -7,6 +7,7 @@
 	<link rel="stylesheet" type="text/css" href="/lobby/css/lobby.css">
 </head>
 <body>
+<div id="app">
 	<div class="global-wrap">
 		<div class="global-size">
 			<div class="global-header">
@@ -21,11 +22,15 @@
 								<input type="checkbox" name="progress-filter" id="progress-filter" placeholder="Search for rooms by name">
 								<label for="progress-filter">Show rooms, where game has started.</label>
 							</div>
-							<button class="filters-modal-button main-button hvr-shutter-in-horizontal" id="filters-modal-button">Filters</button>
+							<button class="filters-modal-button main-button hvr-shutter-in-horizontal" @click="toggleModal('filter')">Filters</button>
 						</div>
 						<div class="lobby-gamelist-wrap">
 							<ul class="game-list" id="game-list">
 								<!-- Output list of rooms -->
+								<game-room v-for="room in gameRooms" room="room" inline-template>
+									<li id="">{{room.name}}</li>
+								</game-room>
+								
 							</ul>
 						</div>
 
@@ -37,6 +42,9 @@
 								yeye
 							</div>
 							<div class="room-ex-buttons">
+								<button class="main-button hvr-shutter-in-horizontal" id="room-open-button">OPEN!</button>
+								<button class="main-button hvr-shutter-in-horizontal" id="room-invite-button">Invite</button>
+								<button class="main-button hvr-shutter-in-horizontal" disabled id="room-kick-button">Kick</button>
 								<button class="main-button hvr-shutter-in-horizontal" id="room-choose-deck">Choose deck</button>
 								<button class="main-button hvr-shutter-in-horizontal" id="room-ready-button">Ready to batoru</button>
 								<button class="main-button hvr-shutter-in-horizontal" id="room-close-button">Close room</button>
@@ -46,13 +54,10 @@
 						<!-- /Room -->
 
 						<div class="lobby-buttons-wrap">
-							<button class="main-button hvr-shutter-in-horizontal" id="create-room-button">Create</button>
-							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled id="join-room-button">Join</button>
-							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Spectate</button>
-							<button class="main-button hvr-shutter-in-horizontal js-none" id="room-open-button">OPEN!</button>
-							<button class="main-button hvr-shutter-in-horizontal js-none" id="room-invite-button">Invite</button>
-							<button class="main-button hvr-shutter-in-horizontal js-inactive js-none" disabled id="room-kick-button">Kick</button>
-							<button class="main-button hvr-shutter-in-horizontal js-inactive" disabled>Friends</button>
+							<button class="main-button hvr-shutter-in-horizontal" @click="toggleModal('create')">Create</button>
+							<button class="main-button hvr-shutter-in-horizontal" v-bind:disabled="allowJoining" @click="toggleModal('password')">Join</button>
+							<button class="main-button hvr-shutter-in-horizontal" v-bind:disabled="allowJoining" @click="toggleModal('password')">Spectate</button>
+							<button class="main-button hvr-shutter-in-horizontal" disabled @click="toggleModal('friends')">Friends</button>
 							<a class="main-button hvr-shutter-in-horizontal" href="../deck-editor/">Decks</a>
 							<a class="main-button hvr-shutter-in-horizontal" href="../">Back</a>
 						</div>
@@ -89,12 +94,12 @@
 		</div>
 	</div>
 
-	<div class="modal-window js-none" id="modal">
+	<div class="modal-window" id="modal" v-show="showModal">
 		<div class="info-block info" id="info-block"></div>
+		<div class="modal-close" @click="toggleModal()"></div>
 
 	<!-- Create game modal -->
-		<form class="create-room-form js-none" id="create-room-form">
-			<div class="modal-close"></div>
+		<form class="create-room-form" id="create-room-form" v-show="createRoomModal">
 			<label for="room-name">Room name:</label>
 			<input class="create-room-input" type="text" name="room-name" id="room-name">
 			<label for="room-format">Game format:</label>
@@ -113,7 +118,7 @@
 
 	<!-- Filter modal -->
 
-		<form class="filter-modal-wrap js-none">
+		<form class="filter-modal-wrap" v-show="filterModal">
 			<input type="number" name="people-count">
 			<input type="text" name="spectators-allowed">
 			<input type="text" name="username">
@@ -123,7 +128,7 @@
 
 	<!-- Game is protected by password modal -->
 
-		<form class="game-password-modal js-none" id="game-password-modal">
+		<form class="game-password-modal" id="game-password-modal" v-show="passwordModal">
 			<span>Enter password to join this room.</span>
 			<input type="text" name="enter-game-password" id="join-password">
 			<button>Join</button>
@@ -131,15 +136,17 @@
 
 	<!-- Friend list modal -->
 
-		<form class="friend-list-modal js-none">
+		<form class="friend-list-modal" v-show="friendListModal">
 			<!-- Still thinking -->
 		</form>
 	</div>
+</div>
 
 
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="/files/js/jquery-3.3.1.js"></script>
+	<script src="/files/js/vue.js"></script>
 	<script src="/files/js/global.js"></script>
-	<script type="text/javascript" src="/lobby/js/lobby.js"></script>
+	<script src="/lobby/js/lobby-vue.js"></script>
 </body>
 </html>
