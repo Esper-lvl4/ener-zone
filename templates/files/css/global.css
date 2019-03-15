@@ -179,6 +179,12 @@ body * {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
 }
+.modal-wrap {
+  position: relative;
+  padding: 25px 15px 15px;
+  border-radius: 20px;
+  background-color: #f1f1f1;
+}
 .modal-window form {
   position: relative;
 }

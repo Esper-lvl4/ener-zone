@@ -31,6 +31,7 @@ let roomCounter = 1;
 
 function LobbyRoom (socket, io) {
 	console.log('User entered lobby');
+	socket.emit('error-message', 'emits-broken?');
 	// function for cloning objects.
 	function cloneObject(obj) {
 		var clone = {};
@@ -152,6 +153,7 @@ function LobbyRoom (socket, io) {
 			delete user.token;
 		});
 		socket.join(gameRooms[i].socketRoom);
+		console.log(roomClone);
 		socket.emit('joining-room', roomClone);
 		Users.updateState(socket, 'move', `/lobby/${room.socketRoom}`);
 		Users.updateState(socket, 'changeRoom', gameRooms[i].socketRoom);

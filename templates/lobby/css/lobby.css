@@ -193,9 +193,6 @@
 	display: flex;
 	flex-flow: column nowrap;
 	width: 400px;
-	padding: 25px 15px 15px;
-	border-radius: 20px;
-	background-color: #f1f1f1;
 }
 .create-room-form label {
 	text-align: center;
