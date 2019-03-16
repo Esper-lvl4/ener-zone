@@ -24,11 +24,11 @@
 							</div>
 							<button class="filters-modal-button main-button hvr-shutter-in-horizontal" @click="toggleModal('filter')">Filters</button>
 						</div>
-						<div class="lobby-gamelist-wrap" :class="{'js-none': roomActive}">
+						<div class="lobby-gamelist-wrap" :class="{'js-none': roomActive}" @click.self="unselectRoom()">
 							<ul class="game-list" id="game-list">
 								<!-- Output list of rooms -->
-								<game-room v-for="room in gameRooms" key="room.id" room="room" inline-template>
-									<li :id="'room-' + room.id">{{name}}</li>
+								<game-room v-for="room in gameRooms" :key="room.id" :room="room" inline-template>
+									<li :id="'room-' + id" :class="{'js-selected-room': $parent.selectedRoom == room}" @click="selectRoom($event)">{{room.name}}</li>
 								</game-room>
 								
 							</ul>
@@ -129,7 +129,7 @@
 
 		<!-- Game is protected by password modal -->
 
-			<form class="game-password-modal" id="game-password-modal" v-show="passwordModal">
+			<form class="game-password-modal" id="game-password-modal" v-show="passwordModal" @submit.prevent="console.log('hello there')">
 				<span>Enter password to join this room.</span>
 				<input type="text" name="enter-game-password" id="join-password">
 				<button>Join</button>

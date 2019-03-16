@@ -69,6 +69,9 @@
 				this.roomActive = false;
 				this.currentRoom = null;
 			},
+			unselectRoom: function () {
+				this.selectedRoom = null;
+			},
 
 			// Socket emits.
 
@@ -162,13 +165,19 @@
 					}
 				},
 				methods: {
+					selectRoom: function (event) {
+						if (event) {
+							this.$parent.selectedRoom = this.room;
+						} else {
+							this.$parent.selectedRoom = null;
+						}
+					},
 					join: function (role) {
 						socket.emit('join-room', {id: this.id, role: role});
 					},
 					start: function (event) {
 					socket.emit('start-game', this.id);
 					},
-
 				}
 			}
 		}
