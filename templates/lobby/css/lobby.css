@@ -123,6 +123,37 @@
 .lobby-button:not(:last-child) {
 	margin-right: 15px;
 }
+.rdy-active {
+	color: #ffffff;
+}
+.rdy-active::before {
+	background: green;
+}
+
+/*****/
+
+/* Room styles */
+
+.room-wrap {
+	display: flex;
+	flex-flow: row-reverse wrap;
+	justify-content: space-between;
+	height: 100%;
+}
+.room-player-list {
+	flex-grow: 2;
+}
+.room-ex-buttons {
+	width: 25%;
+	padding: 0 15px 0 0;
+}
+.room-ex-buttons button {
+	width: 100%;
+	margin-top: 15px;
+}
+.room-ex-buttons button:first-of-type {
+	margin-top: 0;
+}
 
 /*****/
 

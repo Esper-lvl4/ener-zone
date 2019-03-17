@@ -36,27 +36,34 @@
 
 						<!-- Room -->
 
-						<div class="room-wrap" :class="{'js-none': !roomActive}" id="room-wrap">
+						<div class="room-wrap" :class="{'js-none': !roomActive}">
 							<div class="room-player-list">
 								<!-- Output players -->
-								yeye
+								<h2>List of players:</h2>
+								<div v-for="player in currentRoomPlayers" class="room-player">
+									<span>{{player.nickname}} </span><span>({{player.role}})</span><span>: {{player.ready ? 'ready' : 'not ready'}}</span>
+								</div>
+								<h2>List of spectators</h2>
+								<div v-for="player in currentRoomSpectators" class="room-player">
+									<span>{{player.nickname}} </span><span>({{player.role}})</span>
+								</div>
 							</div>
 							<div class="room-ex-buttons">
-								<button class="main-button hvr-shutter-in-horizontal" id="room-open-button">OPEN!</button>
-								<button class="main-button hvr-shutter-in-horizontal" id="room-invite-button">Invite</button>
-								<button class="main-button hvr-shutter-in-horizontal" disabled id="room-kick-button">Kick</button>
-								<button class="main-button hvr-shutter-in-horizontal" id="room-choose-deck">Choose deck</button>
-								<button class="main-button hvr-shutter-in-horizontal" id="room-ready-button">Ready to batoru</button>
-								<button class="main-button hvr-shutter-in-horizontal" id="room-close-button" @click="closeRoom()">Close room</button>
-								<button class="main-button hvr-shutter-in-horizontal" id="room-leave-button">Leave room</button>
+								<button class="main-button hvr-shutter-in-horizontal" v-if="userIsRoomPlayer">OPEN!</button>
+								<button :class="{'rdy-active': readiness}" class="main-button hvr-shutter-in-horizontal" @click="readyToPlay()" v-if="userIsRoomPlayer">Ready to batoru</button>
+								<button class="main-button hvr-shutter-in-horizontal" v-if="userIsRoomPlayer">Choose deck</button>
+								<button class="main-button hvr-shutter-in-horizontal"  v-if="userIsRoomPlayer">Invite</button>
+								<button class="main-button hvr-shutter-in-horizontal" v-if="userIsRoomHost">Kick</button>
+								<button class="main-button hvr-shutter-in-horizontal" v-if="userIsRoomHost" @click="closeRoom()">Close room</button>
+								<button class="main-button hvr-shutter-in-horizontal" @click="leaveRoom()">Leave room</button>
 							</div>
 						</div>
 						<!-- /Room -->
 
 						<div class="lobby-buttons-wrap" :class="{'js-none': roomActive}">
 							<button class="main-button hvr-shutter-in-horizontal" @click="toggleModal('create')">Create</button>
-							<button class="main-button hvr-shutter-in-horizontal" :disabled="!roomIsSelected" @click="toggleModal('password')">Join</button>
-							<button class="main-button hvr-shutter-in-horizontal" :disabled="!roomIsSelected" @click="toggleModal('password')">Spectate</button>
+							<button class="main-button hvr-shutter-in-horizontal" :disabled="!roomIsSelected" @click="joinButtonClick()">Join</button>
+							<button class="main-button hvr-shutter-in-horizontal" :disabled="!roomIsSelected" @click="spectateRoom()">Spectate</button>
 							<button class="main-button hvr-shutter-in-horizontal" disabled @click="toggleModal('friends')">Friends</button>
 							<a class="main-button hvr-shutter-in-horizontal" href="../deck-editor/">Decks</a>
 							<a class="main-button hvr-shutter-in-horizontal" href="../">Back</a>
@@ -129,7 +136,7 @@
 
 		<!-- Game is protected by password modal -->
 
-			<form class="game-password-modal" id="game-password-modal" v-show="passwordModal" @submit.prevent="console.log('hello there')">
+			<form class="game-password-modal" id="game-password-modal" v-show="passwordModal" @submit.prevent="checkRoomPassword($event)">
 				<span>Enter password to join this room.</span>
 				<input type="text" name="enter-game-password" id="join-password">
 				<button>Join</button>

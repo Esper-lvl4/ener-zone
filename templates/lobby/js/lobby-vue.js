@@ -26,6 +26,10 @@
 			// Room props
 			roomActive: false,
 			currentRoom: null,
+			currentRoomRole: '',
+			currentRoomPlayers: [],
+			currentRoomSpectators: [],
+			readiness: false,
 
 			// Modals props
 			showModal: false,
@@ -63,6 +67,7 @@
 				this.toggleModal();
 				this.roomActive = true;
 				this.currentRoom = room;
+				this.refreshRoom(room);
 			},
 			returnToLobby: function () {
 				this.toggleModal();
@@ -72,11 +77,32 @@
 			unselectRoom: function () {
 				this.selectedRoom = null;
 			},
+			joinButtonClick: function () {
+				if (this.selectedRoom.settings.password === '') {
+					this.joinRoom('player');
+				} else {
+					this.toggleModal('password');
+				}
+			},
+			checkRoomPassword: function (event) {
+				if (event.target[0].value === this.selectedRoom.settings.password) {
+					this.joinRoom('player');
+				} else {
+					alert('Wrong password');
+					this.toggleModal();
+				}
+			},
 
 			// Socket emits.
 
 			createRoom: function () {
 				socket.emit('create-room', this.roomCreationObj);
+			},
+			joinRoom: function (role) {
+				socket.emit('join-room', {id: this.selectedRoom.id, role: role});
+			},
+			spectateRoom: function () {
+				socket.emit('join-room', {id: this.selectedRoom.id, role: 'spectator'});
 			},
 			closeRoom: function () {
 				socket.emit('close-room', 'close pls');
@@ -84,11 +110,18 @@
 			leaveRoom: function () {
 				socket.emit('leave-room', 'leave pls');
 			},
+			readyToPlay: function () {
+				socket.emit('player-readiness', !this.readiness);
+			},
 
 			// socket events handlers.
 
-			restoreRoom: function (room) {
+			restoreRoom: function (room, role, rdy) {
 				this.initRoom(room);
+				this.currentRoomRole = role;
+				if (rdy !== undefined) {
+					this.readiness = rdy;
+				}
 				console.log(room);
 			},
 			refreshLobby: function (data) {
@@ -101,15 +134,29 @@
 
 				chatHistory =	data.history;
 			},
-			joiningRoom: function (room) {
+			joiningRoom: function (room, role) {
 				console.log(room);
+				this.currentRoomRole = role;
 				this.initRoom(room);
 			},
 			closedRoom: function (room) {
 				this.returnToLobby(room);
 			},
-			refreshRoom: function (room) {
-				console.log(room.users);
+			refreshRoom: function (room, rdy) {
+				this.currentRoom = room;
+				this.currentRoomPlayers = [];
+				this.currentRoomSpectators = [];
+				if (rdy !== undefined) {
+					this.readiness = rdy;
+				}
+				console.log(this.readiness);
+				for (let i = 0; i < room.users.length; i++) {
+					if (room.users[i].role === 'player' || room.users[i].role === 'host') {
+						this.currentRoomPlayers.push(room.users[i]);
+					} else if (room.users[i].role === 'spectator') {
+						this.currentRoomSpectators.push(room.users[i]);
+					}
+				}
 			},
 			leftRoom: function () {
 				this.returnToLobby();
@@ -152,6 +199,15 @@
 			roomIsSelected: function () {
 				return this.selectedRoom ? true : false;
 			},
+			userIsRoomHost: function () {
+				return this.currentRoomRole == 'host';
+			},
+			userIsRoomPlayer: function () {
+				return this.currentRoomRole == 'player' || this.userIsRoomHost;
+			},
+			userIsRoomSpectator: function () {
+				return this.currentRoomRole == 'spectator';
+			}
 		},
 		components: {
 			'game-room': {
@@ -172,9 +228,6 @@
 							this.$parent.selectedRoom = null;
 						}
 					},
-					join: function (role) {
-						socket.emit('join-room', {id: this.id, role: role});
-					},
 					start: function (event) {
 					socket.emit('start-game', this.id);
 					},
@@ -183,34 +236,4 @@
 		}
 	})
 	globalObject.init();
-})()
-
-// Class for rooms.
-			class GameRoom {
-				constructor (room) {
-					this.name = room.name;
-					this.settings = room.settings;
-					this.users = room.users;
-					this.elem = $('<li>');
-					this.id = room.id;
-				}
-
-				select (event) {
-					selectedRoom = this;
-					$(lobby.gameList).find('li').removeClass('js-selected-room');
-					$(event.target).addClass('js-selected-room');
-					$('#join-room-button').prop('disabled', false);
-				}
-				delete () {
-					this.elem.remove();
-				}
-				join (role) {
-					socket.emit('join-room', {id: this.id, role: role});
-				}
-				start (event) {
-					socket.emit('start-game', this.id);
-				}
-				initEvents() {
-					$(this.elem).on('click', this.select.bind(this));
-				}
-			}
+})();

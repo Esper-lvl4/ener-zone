@@ -117,7 +117,7 @@ function LobbyRoom (socket, io) {
 						delete user.token;
 					})
 					socket.join(gameRooms[i].socketRoom);
-					socket.emit('restore-room', room);
+					socket.emit('restore-room', room, userState.role, userState.ready);
 				}
 			}
 		}
@@ -145,6 +145,7 @@ function LobbyRoom (socket, io) {
 			socket.emit('failed-room-creation', 'User, that are creating the room, does not exists');
 			return;
 		}
+		room.users[0].role = 'host';
 		gameRooms.push(room);
 
 		// clone room and remove tokens from clone - then send it to client;
@@ -154,9 +155,10 @@ function LobbyRoom (socket, io) {
 		});
 		socket.join(gameRooms[i].socketRoom);
 		console.log(roomClone);
-		socket.emit('joining-room', roomClone);
+		socket.emit('joining-room', roomClone, room.users[0].role);
+		Users.updateState(socket, 'ready', false);
 		Users.updateState(socket, 'move', `/lobby/${room.socketRoom}`);
-		Users.updateState(socket, 'changeRoom', gameRooms[i].socketRoom);
+		Users.updateState(socket, 'changeRoom', gameRooms[i].socketRoom, room.users[0].role);
 		refreshLobbyAll();
 	});
 
@@ -170,13 +172,25 @@ function LobbyRoom (socket, io) {
 		if (!info || !info.role || !info.id) {
 			socket.emit('error-message', 'Error joining the game');
 		}
-		for (var i = 0; i < gameRooms.length; i++) {
+		outer: for (var i = 0; i < gameRooms.length; i++) {
 			if (info.id === gameRooms[i].id) {
+				let playerCount = 0;
+				for (let j = 0; j < gameRooms[i].users.length; j++) {
+					if (gameRooms[i].users[j].role == 'player' || gameRooms[i].users[j].role == 'host') {
+						playerCount++;
+					}
+					if (playerCount == 2) {
+						socket.emit('error-message', 'The room is full. You can spectate this game, if you want.');
+						break outer;
+					}
+				}
 				var user = await Users.getUser(socket);
 				if(!user) {
 					socket.emit('error-message', 'User, that tries to joing the game, does not exists');
 					break;
 				}
+				user.role = info.role;
+				user.rdy = false;
 				gameRooms[i].users.push(user);
 				socket.join(gameRooms[i].socketRoom);
 				
@@ -185,11 +199,13 @@ function LobbyRoom (socket, io) {
 				roomClone.users.forEach((user) => {
 					delete user.token;
 				});
-				socket.emit('joining-room', roomClone);
+				socket.emit('joining-room', roomClone, info.role);
 
+				Users.updateState(socket, 'ready', false);
 				Users.updateState(socket, 'move', `/lobby/${gameRooms[i].socketRoom}`);
-				Users.updateState(socket, 'changeRoom', gameRooms[i].socketRoom);
-				io.to(gameRooms[i].socketRoom).emit('refresh-room', roomClone);
+				Users.updateState(socket, 'changeRoom', gameRooms[i].socketRoom, info.role);
+
+				socket.to(gameRooms[i].socketRoom).emit('refresh-room', roomClone);
 
 				refreshLobbyAll();
 				break;
@@ -212,10 +228,29 @@ function LobbyRoom (socket, io) {
 					breaker = true;
 					socket.emit('left-room', gameRooms[i].id);
 					gameRooms[i].users.splice(j, 1);
+					
+					Users.updateState(socket, 'ready', false);
 					Users.updateState(socket, 'move', '/lobby');
-					Users.updateState(socket, 'changeRoom', null);
-					if (gameRooms[i].users.length == 0) {
+					Users.updateState(socket, 'changeRoom', null, '');
+
+					// Check if there are still players in the room. Dont count spectators.
+					let closeGame = true;
+					for (let k = 0; k < gameRooms[i].users.length; k++) {
+						if (gameRooms[i].users[k].role == 'player' || gameRooms[i].users[k].role == 'host') {
+							closeGame = false;
+							break;
+						}
+					}
+					if (closeGame) {
+						socket.to(gameRooms[i].socketRoom).emit('closed-room', gameRooms[i].id);
 						gameRooms.splice(i, 1);
+					} else {
+						// clone room and remove tokens from clone - then send it to client;
+						let roomClone = cloneObject(gameRooms[i]);
+						roomClone.users.forEach((user) => {
+							delete user.token;
+						});
+						socket.to(gameRooms[i].socketRoom).emit('refresh-room', roomClone);
 					}
 					refreshLobbyAll();
 					break;
@@ -244,13 +279,44 @@ function LobbyRoom (socket, io) {
 				}
 			}
 			if (breaker) {
-				//socket.emit('closed-room', gameRooms[i].id);
 				socket.to(gameRooms[i].socketRoom).emit('closed-room', gameRooms[i].id);
 				socket.emit('closed-room', gameRooms[i].id);
 				gameRooms.splice(i, 1);
+
+				Users.updateState(socket, 'ready', false);
 				Users.updateState(socket, 'move', '/lobby');
-				Users.updateState(socket, 'changeRoom', null);
+				Users.updateState(socket, 'changeRoom', null, '');
 				refreshLobbyAll();
+				break;
+			}
+		}
+	});
+
+	// Player is ready.
+
+	socket.on('player-readiness', function (value) {
+		let token = socket.handshake.query.token;
+		if (!token) {
+			socket.emit('success-logout', 'no token');
+			return;
+		}
+		for (let i = 0; i < gameRooms.length; i++) {
+			let breaker = false;
+			for (let j = 0; j < gameRooms[i].users.length; j++) {
+				if (token === gameRooms[i].users[j].token) {
+					breaker = true;
+					gameRooms[i].users[j].ready = value;
+					break;
+				}
+			}
+			if (breaker) {
+				Users.updateState(socket, 'ready', value);
+				let roomClone = cloneObject(gameRooms[i]);
+				roomClone.users.forEach((user) => {
+					delete user.token;
+				});
+				socket.to(gameRooms[i].socketRoom).emit('refresh-room', roomClone);
+				socket.emit('refresh-room', roomClone, value);
 				break;
 			}
 		}

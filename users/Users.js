@@ -5,7 +5,7 @@ const Users = {
 
 	state: [
 		// store user's state here.
-		// {nick: 'KappaLord', token: '', location: '/lobby'},
+		// {nick: 'KappaLord', token: '', location: '/lobby', role: 'player'},
 	],
 
 	// Check if state of user is tracked. If not - start tracking it.
@@ -23,6 +23,7 @@ const Users = {
 				token: socket.handshake.query.token, 
 				location: socket.nsp.name,
 				room: null,
+				ready: false,
 			});
 		}
 		return check;
@@ -85,9 +86,10 @@ const Users = {
 
 	// Change location of the user.
 	move: function (socket, args) {
+		let [location] = args;
 		for (let i = 0; i < this.state.length; i++) {
 			if (socket.handshake.query.token == this.state[i].token) {
-				this.state[i].location = args[0];
+				this.state[i].location = location;
 				break;
 			}
 		}
@@ -95,9 +97,10 @@ const Users = {
 
 	// Change nickname of the user.
 	rename: function (socket, args) {
+		let [nick] = args;
 		for (let i = 0; i < this.state.length; i++) {
 			if (socket.handshake.query.token == this.state[i].token) {
-				this.state[i].nick = args[0];
+				this.state[i].nick = nick;
 				break;
 			}
 		}
@@ -105,21 +108,34 @@ const Users = {
 
 	// Remove user from state, when he leaves the client.
 	remove: function (socket, args) {
+		let [token] = args;
 		for (let i = 0; i < this.state.length; i++) {
-			if (args[0] == this.state[i].token) {
+			if (token == this.state[i].token) {
 				this.state.splice(i, 1);
 				break;
 			}
 		}
 	},
 
-	changeRoom: function (socket, roomName) {
+	changeRoom: function (socket, args) {
+		let [roomName, role] = args;
 		for (let i = 0; i < this.state.length; i++) {
 			if (socket.handshake.query.token == this.state[i].token) {
 				this.state[i].room = roomName;
+				this.state[i].role = role;
 			}
 		}
 	},
+
+	ready: function (socket, args) {
+		let [value] = args;
+		for (let i = 0; i < this.state.length; i++) {
+			if (socket.handshake.query.token == this.state[i].token) {
+				this.state[i].ready = value;
+			}
+		}
+	},
+	/*****/
 
 	getUser: function (socket, opt) {
 		return new Promise ((resolve, reject) => {
