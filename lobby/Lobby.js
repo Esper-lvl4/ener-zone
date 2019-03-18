@@ -3,15 +3,7 @@ const jwt = require('jsonwebtoken');
 const Users = require('../users/Users');
 
 let gameRooms = [ // Array to store rooms.
-	/*{name: 'wixoss-open', id: '-2', settings: {
-		format: 'as', 
-		timeLimit: 'none', 
-		password: ''
-	}, 
-	users: [
-		{id: '123', name: 'Admin'},
-		{id: '321', name: 'RankUp'},
-	]},
+	/*
 	{name: 'wixoss-closed', id: '-1', settings: {
 		format: 'ks', 
 		timeLimit: '300', 
@@ -23,8 +15,8 @@ let gameRooms = [ // Array to store rooms.
 	]},*/
 ]; 
 let chatHistory = [ // Array to store recent messages in chat.
-	{time: '13:00', nickname: 'Kekko', message: 'Hello there!'},
-	{time: '13:30', nickname: 'Chebur', message: 'Stfu kys'},
+	{time: '13:00', nickname: 'Kekko', text: 'Hello there!'},
+	{time: '13:30', nickname: 'Chebur', text: 'Stfu kys'},
 ];
 
 let roomCounter = 1;
@@ -99,12 +91,14 @@ function LobbyRoom (socket, io) {
 	// Lobby events.
 
 	socket.on('check-user-location', function (message) {
+		let userState = Users.getUserState(socket);
+		// Emit nickname for chat. Maybe I should make separate event for this.
+		socket.emit('save-nick', userState.nick);
 		if (gameRooms.length === 0) {return;}
 		let token = socket.handshake.query.token;
 		if (!token) {
 			socket.emit('success-logout', 'no token');
 		}
-		let userState = Users.getUserState(socket);
 		if (!userState) {
 			return;
 		} else if (userState.location.match('/room')) {
@@ -322,13 +316,15 @@ function LobbyRoom (socket, io) {
 		}
 	});
 
+	// Start game, when all players are ready.
 	socket.on('init-game', function (data) {
 
 	});
 
 	// Chat events.
 
-	socket.on('chat-message', function (data) {
+	socket.on('chat-message', async function (message) {
+		chatHistory.push(message);
 		refreshLobbyAll();
 	});
 };

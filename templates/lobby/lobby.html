@@ -76,8 +76,7 @@
 						</div>
 						<div class="chat-tab tab" id="chat-tab">
 							<ul class="not-a-list">
-								<li>Msg 1</li>
-								<li>Msg 2</li>
+								<li v-for="(message, index) in chatHistory" :key="index">[{{message.time}}] {{message.nickname}}: {{message.text}}</li>
 							</ul>
 						</div>
 						<div class="server-tab tab js-none" id="server-tab">
@@ -87,8 +86,8 @@
 							</ul>
 						</div>
 						<div class="message-field-wrap">
-							<input class="chat-message-field main-input" type="text" name="chat-message-field" id="chat-message-field">
-							<button class="main-button hvr-shutter-in-horizontal" id="send-message">Send</button>
+							<input class="chat-message-field main-input" v-model="messageInput" type="text" name="chat-message-field">
+							<button class="main-button hvr-shutter-in-horizontal" @click="postMessage()">Send</button>
 						</div>
 					</div>
 				</div>

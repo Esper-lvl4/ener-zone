@@ -37,6 +37,10 @@
 			passwordModal: false,
 			filterModal: false,
 			friendListModal: false,
+
+			// Chat props
+			chatHistory: [],
+			messageInput: '',
 		},
 		methods: {
 
@@ -93,7 +97,7 @@
 				}
 			},
 
-			// Socket emits.
+			// Socket emits(lobby).
 
 			createRoom: function () {
 				socket.emit('create-room', this.roomCreationObj);
@@ -114,6 +118,20 @@
 				socket.emit('player-readiness', !this.readiness);
 			},
 
+			// Socket emits (chat).
+
+			postMessage: function () {
+				let date = new Date();
+				date = date.getHours() + ':' + date.getMinutes();
+				let message = {
+					time: date,
+					nickname: localStorage.getItem('Nickname'),
+					text: this.messageInput,
+				}
+				socket.emit('chat-message', message);
+				this.messageInput = '';
+			},
+
 			// socket events handlers.
 
 			restoreRoom: function (room, role, rdy) {
@@ -132,7 +150,7 @@
 				this.gameRooms = data.rooms;
 				console.log(this.gameRooms);
 
-				chatHistory =	data.history;
+				this.chatHistory =	data.history;
 			},
 			joiningRoom: function (room, role) {
 				console.log(room);
@@ -172,7 +190,13 @@
 			},
 			init: function () {
 				socket.emit('check-user-location', 'check');
-
+				
+				socket.on('save-nick', (nick) => {
+					if (!localStorage.getItem('Nickname')) {
+						localStorage.setItem('Nickname', nick);
+					}
+					console.log(localStorage.getItem('Nickname'));
+				});
 				socket.on('restore-room', this.restoreRoom);
 				socket.on('refresh-lobby', this.refreshLobby);
 				socket.on('joining-room', this.joiningRoom);
