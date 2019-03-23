@@ -1,283 +1,304 @@
-$(function () {
-		var socket = io('/lobby', {
-			query: {
-				token: localStorage.getItem('EnerZoneToken'),
-			},
-		});
+(function(){
+	// Initialize everything nessesary.
+	// Socket.io
+	var socket = io('/lobby', {
+		query: {
+			token: localStorage.getItem('EnerZoneToken'),
+		},
+	});
+	console.log(socket);
 
-		// Lobby config.
-		var lobby = {
-			gameList: $('#game-list'),
-		}
-
-		var gameRooms = [];
-		var chatHistory = [];
-		var selectedRoom = null;
-
-		console.log(socket);
-
-		// Check if user is already in the room.
-		socket.emit('check-user-location', 'check');
-
-		// Room class. Forced to do it like that to prevent users from changing room's id in console.
-		class GameRoom {
-			constructor (room) {
-				this.name = room.name;
-				this.settings = room.settings;
-				this.users = room.users;
-				this.elem = $('<li>');
-				this.id = room.id;
-			}
-
-			select (event) {
-				selectedRoom = this;
-				$(lobby.gameList).find('li').removeClass('js-selected-room');
-				$(event.target).addClass('js-selected-room');
-				$('#join-room-button').prop('disabled', false);
-			}
-			delete () {
-				this.elem.remove();
-			}
-			join (role) {
-				socket.emit('join-room', {id: this.id, role: role});
-			}
-			start (event) {
-				socket.emit('start-game', this.id);
-			}
-			initEvents() {
-				$(this.elem).on('click', this.select.bind(this));
-			}
-		}
-		/*****/
-
-		/* Function for rendering lobby */
-
-		function renderLobby () {
-			// render gamelist.
-			//$(lobby.gameList).find('li').removeClass('js-selected-room');
-			$(lobby.gameList).empty();
-			$('#join-room-button').prop('disabled', true);
-			gameRooms.forEach(function (room) {
-				$(lobby.gameList).append($(room.elem).text(room.name));
-			});
-			if (selectedRoom !== null) {
-				$(selectedRoom.elem).addClass('js-selected-room');
-				$('#join-room-button').prop('disabled', false);
-			}
-			// render chat.
-			// ...
-		}
-
-		/*****/
-
-		socket.on('refresh-lobby', function (data) {
-			if (!data) {
-				console.log('No game data were sent by server!');
-				return;
-			}
-			gameRooms = [];
-			for (var i = 0; i < data.rooms.length; i++) {
-				let skip = false;
-				for (var j = 0; j < gameRooms.length; j++) {
-					if (data.rooms[i].id === gameRooms[j].id) {
-						skip = true;
-						break;
-					}		
-				}
-				if (skip) {
-					continue;
-				}
-				gameRooms.push(new GameRoom(data.rooms[i]));
-				gameRooms[gameRooms.length - 1].initEvents();
-			}
-
-			console.log(data);
-
-			chatHistory =	data.history;
-			renderLobby();
-		})
-
-		// Create new room.
-
-		$('#create-room-button').on('click', function (event) {
-			event.preventDefault();
-			openModal('#create-room-form');
-		});
-
-		$('#create-room-form').on('submit', function (event) {
-			event.preventDefault();
-			var room = {
-				name: $('#room-name').val(),
+	var globalObject = new Vue({
+		el: '#app',
+		data: {
+			// Lobby props
+			gameRooms: [],
+			selectedRoom: null,
+			roomCreationObj: {
+				name: '',
 				settings: {
-					format: $('#room-format').val(),
-					timeLimit: $('#room-time-limit').val(),
-					password: $('#room-password').val(),
+					format: 'as',
+					timeLimit: '180',
+					password: '',
+				},
+			},
+
+			// Room props
+			roomActive: false,
+			currentRoom: null,
+			currentRoomRole: '',
+			currentRoomPlayers: [],
+			currentRoomSpectators: [],
+			readiness: false,
+
+			// Modals props
+			showModal: false,
+			createRoomModal: false,
+			passwordModal: false,
+			filterModal: false,
+			friendListModal: false,
+
+			// Chat props
+			chatHistory: [],
+			roomHistory: [],
+			activeTab: 'chat',
+			messageInput: '',
+			messagesIsForbidden: false,
+		},
+		methods: {
+
+			// Dom manipulation methods
+
+			toggleModal: function (modal) {
+				if (modal) {
+					this.showModal = true;
+				} else {
+					this.showModal = false;
+					return;
 				}
-			};
-			socket.emit('create-room', room);
-			closeModal(null, true);
-		})
+				this.createRoomModal = false;
+				this.passwordModal = false;
+				this.filterModal = false;
+				this.friendListModal = false;
+				if (modal == 'password') {
+					this.passwordModal = true;
+				} else if (modal == 'create') {
+					this.createRoomModal = true;
+				} else if (modal == 'filter') {
+					this.filterModal = true;
+				} else if (modal == 'friends') {
+					this.friendListModal = true;
+				}
+			},
+			initRoom: function (room) {
+				this.toggleModal();
+				this.roomActive = true;
+				this.currentRoom = room;
+				this.refreshRoom(room);
+			},
+			returnToLobby: function () {
+				this.toggleModal();
+				this.roomActive = false;
+				this.currentRoom = null;
+				this.roomHistory = [];
+				this.activeTab = 'chat';
+			},
+			unselectRoom: function () {
+				this.selectedRoom = null;
+			},
+			joinButtonClick: function () {
+				if (this.selectedRoom.settings.password === '') {
+					this.joinRoom('player');
+				} else {
+					this.toggleModal('password');
+				}
+			},
+			checkRoomPassword: function (event) {
+				if (event.target[0].value === this.selectedRoom.settings.password) {
+					this.joinRoom('player');
+				} else {
+					alert('Wrong password');
+					this.toggleModal();
+				}
+			},
 
-		// Joining a room.
+			// Chat methods.
 
-		// Check if user selected room, and if there is a password in selected room. 
-		// Allow joining if there is no password - initiate event on server.
-		$('#join-room-button').on('click', function (event) {
-			event.preventDefault();
-			if (!selectedRoom) {
-				return;
+			changeChatTab: function (tab) {
+				if (!tab) {
+					return;
+				} else {
+					this.activeTab = tab;
+				}
+			},
+			allowMessages: function () {
+				this.messagesIsForbidden = false;
+			},
+
+			// Socket emits(lobby).
+
+			createRoom: function () {
+				socket.emit('create-room', this.roomCreationObj);
+			},
+			joinRoom: function (role) {
+				socket.emit('join-room', {id: this.selectedRoom.id, role: role});
+			},
+			spectateRoom: function () {
+				socket.emit('join-room', {id: this.selectedRoom.id, role: 'spectator'});
+			},
+			closeRoom: function () {
+				socket.emit('close-room', 'close pls');
+			},
+			leaveRoom: function () {
+				socket.emit('leave-room', 'leave pls');
+			},
+			readyToPlay: function () {
+				socket.emit('player-readiness', !this.readiness);
+			},
+
+			// Socket emits (chat).
+
+			postMessage: function () {
+				if (this.messageInput == '' || this.messagesIsForbidden) {
+					return;
+				}
+				this.messagesIsForbidden = true;
+				let date = new Date();
+				date = date.getHours() + ':' + date.getMinutes();
+				let message = {
+					time: date,
+					nickname: localStorage.getItem('Nickname'),
+					text: this.messageInput,
+				}
+				if (this.activeTab === 'chat') {
+					socket.emit('chat-message', message);
+				} else if (this.activeTab === 'room') {
+					socket.emit('room-message', message);
+				}
+				
+				this.messageInput = '';
+				setTimeout(this.allowMessages, 1000);
+			},
+
+			// socket events handlers.
+
+			restoreRoom: function (room, role, rdy) {
+				this.initRoom(room);
+				this.currentRoomRole = role;
+				this.roomHistory = room.chat;
+				if (rdy !== undefined) {
+					this.readiness = rdy;
+				}
+				console.log(room);
+			},
+			refreshLobby: function (data) {
+				if (!data) {
+					console.log('No game data were sent by server!');
+					return;
+				}
+				this.gameRooms = data;
+				console.log(this.gameRooms);
+			},
+			refreshChat: function (data) {
+				if (!data) {
+					console.log('No chat data were sent by server!');
+					return;
+				}
+				this.chatHistory =	data;
+			},
+			refreshRoomChat: function (data) {
+				this.roomHistory = data;
+				console.log(this.roomHistory);
+			},
+			joiningRoom: function (room, role) {
+				console.log(room);
+				this.currentRoomRole = role;
+				this.initRoom(room);
+			},
+			closedRoom: function (room) {
+				this.returnToLobby();
+			},
+			refreshRoom: function (room, rdy) {
+				this.currentRoom = room;
+				this.currentRoomPlayers = [];
+				this.currentRoomSpectators = [];
+				if (rdy !== undefined) {
+					this.readiness = rdy;
+				}
+				for (let i = 0; i < room.users.length; i++) {
+					if (room.users[i].role === 'player' || room.users[i].role === 'host') {
+						this.currentRoomPlayers.push(room.users[i]);
+					} else if (room.users[i].role === 'spectator') {
+						this.currentRoomSpectators.push(room.users[i]);
+					}
+				}
+			},
+			leftRoom: function () {
+				this.returnToLobby();
+			},
+
+			// Socket Error handlers. 
+
+			failedRoomCreation: function (message) {
+				console.log(message);
+			},
+			errorMessage: function (message) {
+				console.log(message);
+			},
+
+			// Initializing app.
+			init: function () {
+				socket.emit('check-user-location', 'check');
+				
+				socket.on('save-nick', (nick) => {
+					if (!localStorage.getItem('Nickname')) {
+						localStorage.setItem('Nickname', nick);
+					}
+				});
+				socket.on('restore-room', this.restoreRoom);
+				socket.on('refresh-lobby', this.refreshLobby);
+				socket.on('joining-room', this.joiningRoom);
+				socket.on('closed-room', this.closedRoom);
+				socket.on('refresh-room', this.refreshRoom);
+				socket.on('left-room', this.leftRoom);
+
+				socket.on('refresh-chat', this.refreshChat);
+				socket.on('refresh-room-chat', this.refreshRoomChat);
+
+				socket.on('failed-room-creation', this.failedRoomCreation);
+				socket.on('error-message', this.errorMessage);
+
+
+				socket.on('failed-auth', (message) => {
+					window.location.href = '/auth/';
+				})
+
+				socket.on('success-logout', (message) => {
+					window.location.href = '/auth/';
+				})
+
+				setLogout(socket);
+			},
+		},
+		computed: {
+			roomIsSelected: function () {
+				return this.selectedRoom ? true : false;
+			},
+			userIsRoomHost: function () {
+				return this.currentRoomRole == 'host';
+			},
+			userIsRoomPlayer: function () {
+				return this.currentRoomRole == 'player' || this.userIsRoomHost;
+			},
+			userIsRoomSpectator: function () {
+				return this.currentRoomRole == 'spectator';
 			}
-			if (selectedRoom.settings.password === '') {
-				selectedRoom.join({id: selectedRoom.id, role: 'player'});
-			} else {
-				openModal('#game-password-modal');
-			}
-		})
-
-		$('#game-password-modal').on('submit', function (event) {
-			event.preventDefault();
-			if(selectedRoom.settings.password === $('#join-password').val()) {
-				selectedRoom.join({id: selectedRoom.id, role: 'player'});
-			} else {
-				$('#info-block').removeClass('js-none').text('Wrong password. You may try again ^^');
-			}
-		})
-
-		// Spectating a room.
-		$('#spectate-room-button').on('click', function (event) {
-			event.preventDefault();
-			if (!selectedRoom) {
-				return;
-			}
-			if (selectedRoom.settings.password === '') {
-				selectedRoom.join({id: selectedRoom.id, role: 'spectator'});
-			} else {
-				openModal('#game-password-modal');
-			}
-		})
-
-		// Show room to user.
-		function initRoom (room) {
-			$('#room-wrap').removeClass('js-none');
-			$('.lobby-filter-wrap').addClass('js-none');
-			$('#game-list').addClass('js-none');
-			$('.lobby-buttons-wrap').addClass('js-none');
-		}
-
-		// Close room and delete her from DOM and gameRooms array.
-		function closeRoom (id) {
-			$('#room-wrap').addClass('js-none');
-			$('.lobby-filter-wrap').removeClass('js-none');
-			$('#game-list').removeClass('js-none');
-			$('.lobby-buttons-wrap').removeClass('js-none');
-			for (var i = 0; i < gameRooms.length; i++) {
-				if (gameRooms[i].id === id) {
-					gameRooms[i].delete();
-					gameRooms.splice(i, 1);
-					console.log(gameRooms);
-					break;
+		},
+		components: {
+			'game-room': {
+				props: ['room'],
+				data: function () {
+					return {
+						name: this.room.name,
+						settings: this.room.settings,
+						users: this.room.users,
+						id: this.room.id
+					}
+				},
+				methods: {
+					selectRoom: function (event) {
+						if (event) {
+							this.$parent.selectedRoom = this.room;
+						} else {
+							this.$parent.selectedRoom = null;
+						}
+					},
+					start: function (event) {
+					socket.emit('start-game', this.id);
+					},
 				}
 			}
 		}
-
-		// Leave room.
-		function leaveRoom (id) {
-			$('#room-wrap').addClass('js-none');
-			$('.lobby-filter-wrap').removeClass('js-none');
-			$('#game-list').removeClass('js-none');
-			$('.lobby-buttons-wrap').removeClass('js-none');
-		}
-
-		socket.on('joining-room', function (room) {
-			// join namespace room.
-			closeModal(null, true);
-			initRoom(room);
-			console.log(room);
-		})
-
-		socket.on('refresh-room', function (room) {
-			console.log(room.users);
-		})
-
-		// restore room if anything strange happened.
-		socket.on('restore-room', function (room) {
-			closeModal(null, true);
-			initRoom(room);
-			console.log(room);
-		})
-
-		$('#room-close-button').on('click', function (event) {
-			event.preventDefault();
-			socket.emit('close-room', 'close pls');
-		});
-		$('#room-leave-button').on('click', (event) => {
-			event.preventDefault();
-			socket.emit('leave-room', 'leave pls');
-		})
-
-		// render lobby, when room closes or you left it.
-		socket.on('closed-room', function (id) {
-			closeRoom(id);
-			renderLobby();
-		})
-
-		socket.on('left-room', (id) => {
-			leaveRoom(id);
-			renderLobby();
-		})
-
-		/* Open modals */
-
-		function openModal (modal) {
-			$('#modal').removeClass('js-none');
-			$(modal).removeClass('js-none');
-		}
-
-		/* Close modals */
-
-		function closeModal (event, all) {
-			if (all) {
-				$('#modal').addClass('js-none');
-				$('#modal > *').addClass('js-none');
-			}
-			else if($(event.target).hasClass('modal-close')) {
-				$(event.target).parents('form').addClass('js-none');
-				$(event.target).parents('.modal-window').addClass('js-none');
-			} 
-			else if ($(event.target).hasClass('modal-window')) {
-				$(event.target).addClass('js-none');
-				$(event.target).find('form').addClass('js-none');
-			} 
-		}
-		$('.modal-close').on('click', closeModal);
-		$('#modal').on('click', closeModal);
-
-		// Show info.
-
-		socket.on('failed-room-creation', function (message) {
-			$('#info-block').removeClass('js-none').text(message);
-		})
-
-		socket.on('error-message', function (message) {
-			console.log(message);
-			console.log(socket);
-		})
-
-		// Clear info.
-		function clearInfo () {
-			$('#info-block').empty().addClass('js-none');
-		}
-
-		$('#modal input').on('input change', clearInfo);
-
-		socket.on('failed-auth', function (message) {
-			window.location.href = '/auth/';
-		})
-
-		socket.on('success-logout', function (message) {
-			window.location.href = '/auth/';
-		})
-
-		setLogout(socket);
-		
-});
+	})
+	globalObject.init();
+})();

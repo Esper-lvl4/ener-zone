@@ -24,7 +24,7 @@
 }
 .lobby-chat-block {
 	display: flex;
-	flex-flow: column wrap;
+	flex-flow: column nowrap;
 	width: 40%;
 	height: 100%;
 	padding: 5px;
@@ -193,6 +193,7 @@
 	margin-bottom: 10px;
 	border: 1px solid #333333;
 	color: #333333;
+	overflow: auto;
 }
 .tab li {
 	padding: 0 5px;

@@ -2,7 +2,83 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const Users = require('../users/Users');
 
-let gameRooms = [ // Array to store rooms.
+// function for cloning objects.
+function cloneObject(obj) {
+	var clone = {};
+	for (var i in obj) {
+		if (obj[i] != null && typeof(obj[i]) == 'object' && obj[i].forEach) {
+			clone[i] = cloneArray(obj[i]);
+		} else if (obj[i] != null && typeof(obj[i]) == 'object') {
+			clone[i] = cloneObject(obj[i]);
+		} else {
+			clone[i] = obj[i];
+		}
+	}
+	return clone;
+}
+
+// function for cloning arrays.
+function cloneArray(arr) {
+	var clone = [];
+	for (var a in arr) {
+		if (arr[a] != null && typeof(arr[a]) == 'object' && arr[a].forEach) {
+			clone.push(cloneArray(arr[a]));
+		} else if (arr[a] != null && typeof(arr[a]) == 'object') {
+			clone.push(cloneObject(arr[a]));
+		} else {
+			clone.push(arr[a]);
+		}
+	}
+	return clone;
+}
+
+// functions for removing tokens from rooms before sending them. For all rooms and for one room.
+function removeTokens (roomsArray) {
+	let roomClones = [];
+	// Clone rooms, then remove tokens, to not send them, and dont affect initial room objects.
+	for (let r in roomsArray) {
+		roomClones.push(cloneObject(roomsArray[r]));
+		roomClones[r].users.forEach((user) => {
+			delete user.token;
+		})
+	}
+	return roomClones;
+}
+function removeTokensOne (roomObj) {
+	// Clone room, then remove tokens, to not send them, and dont affect initial room object.
+	let roomClone = cloneObject(roomObj);
+	roomClone.users.forEach((user) => {
+		delete user.token;
+	})
+	return roomClone;
+}
+
+// functions to search for rooms. By ID and by user jwt.
+function searchRoomId (id) {
+	if (!id) {return false;}
+
+	for (let i = 0; i < gameRooms.length; i++) {
+		if (id === gameRooms[i].id) {
+			return {room: gameRooms[i], index: i};
+		}
+	}
+	return false;
+}
+function searchRoomToken (token) {
+	if (!token) {return false;}
+
+	for (let i = 0; i < gameRooms.length; i++) {
+		for (let j = 0; j < gameRooms[i].users.length; j++) {
+			if (token === gameRooms[i].users[j].token) {
+				return {room: gameRooms[i], index: i, userIndex: j};
+				break;
+			}
+		}
+	}
+	return false;
+}
+
+var gameRooms = [ // Array to store rooms.
 	/*
 	{name: 'wixoss-closed', id: '-1', settings: {
 		format: 'ks', 
@@ -14,79 +90,50 @@ let gameRooms = [ // Array to store rooms.
 		{id: '654', name: 'Kekko'},
 	]},*/
 ]; 
-let chatHistory = [ // Array to store recent messages in chat.
+var chatHistory = [ // Array to store recent messages in chat.
 	{time: '13:00', nickname: 'Kekko', text: 'Hello there!'},
 	{time: '13:30', nickname: 'Chebur', text: 'Stfu kys'},
 ];
 
-let roomCounter = 1;
+var roomCounter = 1;
+
 
 function LobbyRoom (socket, io) {
 	console.log('User entered lobby');
-	socket.emit('error-message', 'emits-broken?');
-	// function for cloning objects.
-	function cloneObject(obj) {
-		var clone = {};
-		for (var i in obj) {
-			if (obj[i] != null && typeof(obj[i]) == 'object' && obj[i].forEach) {
-				clone[i] = cloneArray(obj[i]);
-			} else if (obj[i] != null && typeof(obj[i]) == 'object') {
-				clone[i] = cloneObject(obj[i]);
-			} else {
-				clone[i] = obj[i];
-			}
-		}
-		return clone;
-	}
-	// function for cloning arrays.
-	function cloneArray(arr) {
-		var clone = [];
-		for (var a in arr) {
-			if (arr[a] != null && typeof(arr[a]) == 'object' && arr[a].forEach) {
-				clone.push(cloneArray(arr[a]));
-			} else if (arr[a] != null && typeof(arr[a]) == 'object') {
-				clone.push(cloneObject(arr[a]));
-			} else {
-				clone.push(arr[a]);
-			}
-		}
-		return clone;
-	}
 	
 	Users.checkState(socket);
 
-	// init or refresh lobby's room list and chat.
+	// Refresh lobby for one socket.
 	function refreshLobbyOne () {
 		if (gameRooms.length == 0) {
-			socket.emit('refresh-lobby', {rooms: gameRooms, history: chatHistory});
+			socket.emit('refresh-lobby', gameRooms);
 		}
-		// clone rooms, then remove tokens, to not send them.
-		var roomClones = [];
-		for (var r in gameRooms) {
-			roomClones.push(cloneObject(gameRooms[r]));
-			roomClones[r].users.forEach((user) => {
-				delete user.token;
-			})
-		}
-		socket.emit('refresh-lobby', {rooms: roomClones, history: chatHistory});
+		let roomClones = removeTokens(gameRooms);
+		socket.emit('refresh-lobby', roomClones);
 	}
-	refreshLobbyOne(); // refresh lobby for every user, that just connected to lobby.
  
 	// Refresh lobby for all.
 	function refreshLobbyAll () {
 		if (gameRooms.length == 0) {
-			io.of('/lobby').emit('refresh-lobby', {rooms: gameRooms, history: chatHistory});
+			io.of('/lobby').emit('refresh-lobby', gameRooms);
 		}
-		// clone rooms, then remove tokens, to not send them.
-		var roomClones = [];
-		for (var r in gameRooms) {
-			roomClones.push(cloneObject(gameRooms[r]));
-			roomClones[r].users.forEach((user) => {
-				delete user.token;
-			})
-		}
-		io.of('/lobby').emit('refresh-lobby', {rooms: roomClones, history: chatHistory});
+		let roomClones = removeTokens(gameRooms);
+		io.of('/lobby').emit('refresh-lobby', roomClones);
 	}
+
+	// refresh chat for one socket.
+	function refreshChatOne () {
+		socket.emit('refresh-chat', chatHistory);
+	}
+
+	// refresh chat for all.
+	function refreshChatAll () {
+		io.of('/lobby').emit('refresh-chat', chatHistory);
+	}
+
+	// refresh lobby and chat for every user, that just connected to lobby. This is done on page refresh too.
+	refreshLobbyOne(); 
+	refreshChatOne();
 	
 	// Lobby events.
 
@@ -103,16 +150,13 @@ function LobbyRoom (socket, io) {
 			return;
 		} else if (userState.location.match('/room')) {
 			let roomID = userState.location.replace('/lobby/room-', '');
-			for (let i = 0; i < gameRooms.length; i++) {
-				if (+gameRooms[i].id === +roomID) {
-					// Send the copy without tokens to client. 
-					let room = cloneObject(gameRooms[i]);
-					room.users.forEach((user) => {
-						delete user.token;
-					})
-					socket.join(gameRooms[i].socketRoom);
-					socket.emit('restore-room', room, userState.role, userState.ready);
-				}
+			let room = searchRoomId(roomID).room;
+			if (!room) {
+				socket.emit('error-message', 'Could not find room to refresh')
+			} else {
+				let roomClone = removeTokensOne(room);
+				socket.join(room.socketRoom);
+				socket.emit('restore-room', roomClone, userState.role, userState.ready);
 			}
 		}
 	})
@@ -133,6 +177,7 @@ function LobbyRoom (socket, io) {
 		room.id = roomCounter++ + '';
 		room.socketRoom = 'room-' + room.id;
 		room.state = false;
+		room.chat = [];
 		room.users = [];
 		room.users.push(await Users.getUser(socket));
 		if (room.users[0] === null) {
@@ -143,10 +188,7 @@ function LobbyRoom (socket, io) {
 		gameRooms.push(room);
 
 		// clone room and remove tokens from clone - then send it to client;
-		let roomClone = cloneObject(room);
-		roomClone.users.forEach((user) => {
-			delete user.token;
-		});
+		let roomClone = removeTokensOne(room);
 		socket.join(gameRooms[i].socketRoom);
 		console.log(roomClone);
 		socket.emit('joining-room', roomClone, room.users[0].role);
@@ -156,53 +198,53 @@ function LobbyRoom (socket, io) {
 		refreshLobbyAll();
 	});
 
-	socket.on('delete-room', function (id) {
-		refreshLobbyAll();
-	});
-
 	// Joining rooms.
 
 	socket.on('join-room', async function (info) {
 		if (!info || !info.role || !info.id) {
 			socket.emit('error-message', 'Error joining the game');
 		}
-		outer: for (var i = 0; i < gameRooms.length; i++) {
-			if (info.id === gameRooms[i].id) {
-				let playerCount = 0;
-				for (let j = 0; j < gameRooms[i].users.length; j++) {
-					if (gameRooms[i].users[j].role == 'player' || gameRooms[i].users[j].role == 'host') {
+		let room = searchRoomId(info.id).room;
+		console.log(room);
+		if (!room) {
+			socket.emit('error-message', 'Could not find room to join.')
+		} else {
+
+			// check if there is space for more players.
+			let playerCount = 0;
+			if (info.role !== 'spectator') {
+				console.log(room);
+				for (let j = 0; j < room.users.length; j++) {
+					if (room.users[j].role == 'player' || room.users[j].role == 'host') {
 						playerCount++;
 					}
-					if (playerCount == 2) {
+					if (playerCount === 2) {
 						socket.emit('error-message', 'The room is full. You can spectate this game, if you want.');
-						break outer;
+						break;
 					}
 				}
+			}
+			if (info.role === 'spectator' || playerCount < 2) {
 				var user = await Users.getUser(socket);
 				if(!user) {
 					socket.emit('error-message', 'User, that tries to joing the game, does not exists');
-					break;
+					return;
 				}
 				user.role = info.role;
 				user.rdy = false;
-				gameRooms[i].users.push(user);
-				socket.join(gameRooms[i].socketRoom);
-				
-				// clone room and remove tokens from clone - then send it to client;
-				let roomClone = cloneObject(gameRooms[i]);
-				roomClone.users.forEach((user) => {
-					delete user.token;
-				});
+				room.users.push(user);
+				socket.join(room.socketRoom);
+			
+				let roomClone = removeTokensOne(room);
 				socket.emit('joining-room', roomClone, info.role);
 
 				Users.updateState(socket, 'ready', false);
-				Users.updateState(socket, 'move', `/lobby/${gameRooms[i].socketRoom}`);
-				Users.updateState(socket, 'changeRoom', gameRooms[i].socketRoom, info.role);
+				Users.updateState(socket, 'move', `/lobby/${room.socketRoom}`);
+				Users.updateState(socket, 'changeRoom', room.socketRoom, info.role);
 
-				socket.to(gameRooms[i].socketRoom).emit('refresh-room', roomClone);
+				socket.to(room.socketRoom).emit('refresh-room', roomClone);
 
 				refreshLobbyAll();
-				break;
 			}
 		}
 	});
@@ -215,44 +257,33 @@ function LobbyRoom (socket, io) {
 			socket.emit('success-logout', 'no token');
 			return;
 		}
-		for (let i = 0; i < gameRooms.length; i++) {
-			let breaker = false;
-			for (let j = 0; j < gameRooms[i].users.length; j++) {
-				if (token === gameRooms[i].users[j].token) {
-					breaker = true;
-					socket.emit('left-room', gameRooms[i].id);
-					gameRooms[i].users.splice(j, 1);
+		let roomObj = searchRoomToken(token);
+		if (!roomObj) {
+			socket.emit('error-message', 'Could not find room to leave from. Maybe this room does not exist already.');
+		} else {
+			socket.emit('left-room', roomObj.room.id);
+			roomObj.users.splice(roomObj.userIndex, 1);
 					
-					Users.updateState(socket, 'ready', false);
-					Users.updateState(socket, 'move', '/lobby');
-					Users.updateState(socket, 'changeRoom', null, '');
+			Users.updateState(socket, 'ready', false);
+			Users.updateState(socket, 'move', '/lobby');
+			Users.updateState(socket, 'changeRoom', null, '');
 
-					// Check if there are still players in the room. Dont count spectators.
-					let closeGame = true;
-					for (let k = 0; k < gameRooms[i].users.length; k++) {
-						if (gameRooms[i].users[k].role == 'player' || gameRooms[i].users[k].role == 'host') {
-							closeGame = false;
-							break;
-						}
-					}
-					if (closeGame) {
-						socket.to(gameRooms[i].socketRoom).emit('closed-room', gameRooms[i].id);
-						gameRooms.splice(i, 1);
-					} else {
-						// clone room and remove tokens from clone - then send it to client;
-						let roomClone = cloneObject(gameRooms[i]);
-						roomClone.users.forEach((user) => {
-							delete user.token;
-						});
-						socket.to(gameRooms[i].socketRoom).emit('refresh-room', roomClone);
-					}
-					refreshLobbyAll();
+			// Check if there are still players in the room. Dont count spectators.
+			let closeGame = true;
+			for (let k = 0; k < roomObj.room.users.length; k++) {
+				if (roomObj.room.users[k].role == 'player' || roomObj.room.users[k].role == 'host') {
+					closeGame = false;
 					break;
 				}
 			}
-			if (breaker) {
-				break;
+			if (closeGame) {
+				socket.to(roomObj.room.socketRoom).emit('closed-room', roomObj.room.id);
+				gameRooms.splice(roomObj.index, 1);
+			} else {
+				let roomClone = removeTokesOne(roomObj.room);
+				socket.to(roomObj.room.socketRoom).emit('refresh-room', roomClone);
 			}
+			refreshLobbyAll();
 		}
 	});
 
@@ -264,25 +295,18 @@ function LobbyRoom (socket, io) {
 			socket.emit('success-logout', 'no token');
 			return;
 		}
-		for (let i = 0; i < gameRooms.length; i++) {
-			let breaker = false;
-			for (let j = 0; j < gameRooms[i].users.length; j++) {
-				if (token === gameRooms[i].users[j].token) {
-					breaker = true;
-					break;
-				}
-			}
-			if (breaker) {
-				socket.to(gameRooms[i].socketRoom).emit('closed-room', gameRooms[i].id);
-				socket.emit('closed-room', gameRooms[i].id);
-				gameRooms.splice(i, 1);
+		let roomObj = searchRoomToken(token);
+		if (!roomObj) {
+			socket.emit('error-message', 'Could not find room to close. Maybe this room does not exist.');
+		} else {
+			socket.to(roomObj.room.socketRoom).emit('closed-room', roomObj.room.id);
+			socket.emit('closed-room', roomObj.room.id);
+			gameRooms.splice(roomObj.index, 1);
 
-				Users.updateState(socket, 'ready', false);
-				Users.updateState(socket, 'move', '/lobby');
-				Users.updateState(socket, 'changeRoom', null, '');
-				refreshLobbyAll();
-				break;
-			}
+			Users.updateState(socket, 'ready', false);
+			Users.updateState(socket, 'move', '/lobby');
+			Users.updateState(socket, 'changeRoom', null, '');
+			refreshLobbyAll();
 		}
 	});
 
@@ -294,25 +318,15 @@ function LobbyRoom (socket, io) {
 			socket.emit('success-logout', 'no token');
 			return;
 		}
-		for (let i = 0; i < gameRooms.length; i++) {
-			let breaker = false;
-			for (let j = 0; j < gameRooms[i].users.length; j++) {
-				if (token === gameRooms[i].users[j].token) {
-					breaker = true;
-					gameRooms[i].users[j].ready = value;
-					break;
-				}
-			}
-			if (breaker) {
-				Users.updateState(socket, 'ready', value);
-				let roomClone = cloneObject(gameRooms[i]);
-				roomClone.users.forEach((user) => {
-					delete user.token;
-				});
-				socket.to(gameRooms[i].socketRoom).emit('refresh-room', roomClone);
-				socket.emit('refresh-room', roomClone, value);
-				break;
-			}
+		let roomObj = searchRoomToken(token);
+		if (!roomObj) {
+			socket.emit('error-message', 'Could not find room to change player readiness. Maybe your room does not exist.');
+		} else {
+			roomObj.room.users[roomObj.userIndex].ready = value;
+			Users.updateState(socket, 'ready', value);
+			let roomClone = removeTokensOne(roomObj.room);
+			socket.to(roomObj.room.socketRoom).emit('refresh-room', roomClone);
+			socket.emit('refresh-room', roomClone, value);
 		}
 	});
 
@@ -324,8 +338,29 @@ function LobbyRoom (socket, io) {
 	// Chat events.
 
 	socket.on('chat-message', async function (message) {
+		if (messagesIsForbidden) {
+			return;
+		}
+		messagesIsForbidden = true;
 		chatHistory.push(message);
-		refreshLobbyAll();
+		refreshChatAll();
+		setTimeout(allowMessages, 3000);
+	});
+	socket.on('room-message', async function (message) {
+		if (messagesIsForbidden) {
+			return;
+		}
+		messagesIsForbidden = true;
+		let token = socket.handshake.query.token;
+		if (!token) {
+			socket.emit('success-logout', 'no token');
+			return;
+		}
+		let room = searchRoomToken(token).room;
+		room.chat.push(message);
+		socket.to(room.socketRoom).emit('refresh-room-chat', room.chat);
+		socket.emit('refresh-room-chat', room.chat);
+		setTimeout(allowMessages, 3000);
 	});
 };
 

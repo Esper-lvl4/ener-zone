@@ -71,22 +71,21 @@
 					</div>
 					<div class="lobby-chat-block">
 						<div class="chat-buttons">
-							<button class="js-active-button" id="chat-button">Chat</button>
-							<button id="server-button">Server info</button>
+							<button class="js-active-button" @click.prevent="changeChatTab('chat')">Chat</button>
+							<button v-if="roomActive" @click.prevent="changeChatTab('room')">Room Chat</button>
 						</div>
-						<div class="chat-tab tab" id="chat-tab">
+						<div class="chat-tab tab" :class="{'js-none': activeTab !== 'chat'}">
 							<ul class="not-a-list">
 								<li v-for="(message, index) in chatHistory" :key="index">[{{message.time}}] {{message.nickname}}: {{message.text}}</li>
 							</ul>
 						</div>
-						<div class="server-tab tab js-none" id="server-tab">
+						<div class="server-tab tab" :class="{'js-none': activeTab !== 'room'}" v-if="roomActive">
 							<ul class="not-a-list">
-								<li>Server info 1</li>
-								<li>Server info 2</li>
+								<li v-for="(message, index) in roomHistory" :key="index">[{{message.time}}] {{message.nickname}}: {{message.text}}</li>
 							</ul>
 						</div>
 						<div class="message-field-wrap">
-							<input class="chat-message-field main-input" v-model="messageInput" type="text" name="chat-message-field">
+							<input class="chat-message-field main-input" v-model="messageInput" type="text" name="chat-message-field" @keypress.enter="postMessage()">
 							<button class="main-button hvr-shutter-in-horizontal" @click="postMessage()">Send</button>
 						</div>
 					</div>
@@ -155,6 +154,6 @@
 	<script src="/files/js/jquery-3.3.1.js"></script>
 	<script src="/files/js/vue.js"></script>
 	<script src="/files/js/global.js"></script>
-	<script src="/lobby/js/lobby-vue.js"></script>
+	<script src="/lobby/js/lobby.js"></script>
 </body>
 </html>
