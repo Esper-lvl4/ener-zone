@@ -30,6 +30,7 @@
 			currentRoomPlayers: [],
 			currentRoomSpectators: [],
 			readiness: false,
+			readyToStart: false,
 
 			// Modals props
 			showModal: false,
@@ -135,6 +136,12 @@
 			readyToPlay: function () {
 				socket.emit('player-readiness', !this.readiness);
 			},
+			open: function () {
+				console.log(this.readyToStart);
+				if (this.readyToStart === true) {
+					socket.emit('init-game', this.currentRoom.id);
+				}
+			},
 
 			// Socket emits (chat).
 
@@ -216,6 +223,9 @@
 			leftRoom: function () {
 				this.returnToLobby();
 			},
+			readyToOpen: function () { // Ready to start the game.
+				this.readyToStart = true;
+			},
 
 			// Socket Error handlers. 
 
@@ -241,6 +251,7 @@
 				socket.on('closed-room', this.closedRoom);
 				socket.on('refresh-room', this.refreshRoom);
 				socket.on('left-room', this.leftRoom);
+				socket.on('ready-to-open', this.readyToOpen);
 
 				socket.on('refresh-chat', this.refreshChat);
 				socket.on('refresh-room-chat', this.refreshRoomChat);

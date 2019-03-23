@@ -49,8 +49,8 @@
 								</div>
 							</div>
 							<div class="room-ex-buttons">
-								<button class="main-button hvr-shutter-in-horizontal" v-if="userIsRoomPlayer">OPEN!</button>
-								<button :class="{'rdy-active': readiness}" class="main-button hvr-shutter-in-horizontal" @click="readyToPlay()" v-if="userIsRoomPlayer">Ready to batoru</button>
+								<button class="main-button hvr-shutter-in-horizontal" v-if="userIsRoomPlayer" :disabled="readyToStart ? false : true" @click="open()">OPEN!</button>
+								<button :class="{'rdy-active': readiness}" class="main-button hvr-shutter-in-horizontal" @click="readyToPlay" v-if="userIsRoomPlayer">Ready to batoru</button>
 								<button class="main-button hvr-shutter-in-horizontal" v-if="userIsRoomPlayer">Choose deck</button>
 								<button class="main-button hvr-shutter-in-horizontal"  v-if="userIsRoomPlayer">Invite</button>
 								<button class="main-button hvr-shutter-in-horizontal" v-if="userIsRoomHost">Kick</button>

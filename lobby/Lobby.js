@@ -131,6 +131,22 @@ function LobbyRoom (socket, io) {
 		io.of('/lobby').emit('refresh-chat', chatHistory);
 	}
 
+	// Function to check if game in some room can be started.
+
+	function canStartGame (room) {
+		let users = room.users;
+		for (let i = 0, counter = 0; i < users.length; i++) {
+			if (users[i].ready === true) {
+				counter++;
+			}
+			if (counter === 2) {
+				socket.to(room.socketRoom).emit('ready-to-open', '');
+				socket.emit('ready-to-open', '');
+				break;
+			}
+		}
+	}
+
 	// refresh lobby and chat for every user, that just connected to lobby. This is done on page refresh too.
 	refreshLobbyOne(); 
 	refreshChatOne();
@@ -157,6 +173,9 @@ function LobbyRoom (socket, io) {
 				let roomClone = removeTokensOne(room);
 				socket.join(room.socketRoom);
 				socket.emit('restore-room', roomClone, userState.role, userState.ready);
+
+				// then check if game can be started.
+				canStartGame(room);
 			}
 		}
 	})
@@ -327,12 +346,16 @@ function LobbyRoom (socket, io) {
 			let roomClone = removeTokensOne(roomObj.room);
 			socket.to(roomObj.room.socketRoom).emit('refresh-room', roomClone);
 			socket.emit('refresh-room', roomClone, value);
+
+			// then check if game can be started.
+			canStartGame(roomObj.room);
 		}
 	});
 
 	// Start game, when all players are ready.
-	socket.on('init-game', function (data) {
-
+	socket.on('init-game', function (id) {
+		let room = searchRoomId(id).room;
+		room.state = true;
 	});
 
 	// Chat events.
@@ -341,16 +364,13 @@ function LobbyRoom (socket, io) {
 		if (messagesIsForbidden) {
 			return;
 		}
-		messagesIsForbidden = true;
 		chatHistory.push(message);
 		refreshChatAll();
-		setTimeout(allowMessages, 3000);
 	});
 	socket.on('room-message', async function (message) {
 		if (messagesIsForbidden) {
 			return;
 		}
-		messagesIsForbidden = true;
 		let token = socket.handshake.query.token;
 		if (!token) {
 			socket.emit('success-logout', 'no token');
@@ -360,7 +380,6 @@ function LobbyRoom (socket, io) {
 		room.chat.push(message);
 		socket.to(room.socketRoom).emit('refresh-room-chat', room.chat);
 		socket.emit('refresh-room-chat', room.chat);
-		setTimeout(allowMessages, 3000);
 	});
 };
 
