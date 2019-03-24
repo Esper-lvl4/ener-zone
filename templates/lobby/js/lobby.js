@@ -45,6 +45,39 @@
 			activeTab: 'chat',
 			messageInput: '',
 			messagesIsForbidden: false,
+
+			// Game props
+			gameActive: true,
+			cardHover: {
+				image: '/files/img/default-card.jpg',
+				name: '',
+				props: '',
+				class: '',
+				cost: '',
+				timing: '',
+				power: '',
+				limitCon: '',
+				text: 'Gl hf',
+			},
+
+			// Zones status.
+			lrigTrashZone: [],
+			trashZone: [],
+			mainDeckZone: [],
+			lrigDeckZone: [],
+			lrigZone: {
+				lrig: {},
+				key: {},
+				under: [],
+			},
+			lifeClothZone: [],
+			checkZone: [],
+			enerZone: [],
+			signiZones: [
+				{card: {}, under: {}},
+				{card: {}, under: {}},
+				{card: {}, under: {}},
+			],
 		},
 		methods: {
 

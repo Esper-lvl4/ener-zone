@@ -201,6 +201,113 @@
 
 /*****/
 
+/* Game styles */
+
+.game-wrap {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+}
+
+.info-block {
+	display: flex;
+	flex-flow: column wrap;
+	min-width: 280px;
+	width: 20%;
+}
+.info-block span {
+	text-transform: capitalize;
+}
+.info-img {
+	width: 200px;
+	margin: 0 auto;
+}
+.info-text img {
+	margin-bottom: -6px;
+}
+
+.top-player-field {
+	display: grid;
+	grid: 
+		[row1-start] "lrig-trash lrig-deck life-cloth life-cloth ener-zone" 128px [row1-end]
+		[row2-start] "trash lrig-zone lrig-zone check-zone ener-zone" 128px [row2-end]
+		[row3-start] "main-deck signi-zone signi-zone signi-zone ener-zone" 128px [row3-end]
+		/ 220px 220px 220px 220px 180px;
+	grid-gap: 5px 5px;
+	justify-content: end;
+	padding: 5px 5px 0 0;
+}
+.lrig-trash-zone {
+	grid-area: lrig-trash;
+}
+.lrig-deck-zone {
+	grid-area: lrig-deck;
+}
+.life-cloth-zone {
+	grid-area: life-cloth;
+}
+.ener-zone {
+	grid-area: ener-zone;
+}
+.ener-zone .zone-content {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-end;
+}
+.trash-zone {
+	grid-area: trash;
+}
+.lrig-zone {
+	grid-area: lrig-zone;
+}
+.check-zone {
+	grid-area: check-zone;
+}
+.main-deck-zone {
+	grid-area: main-deck;
+}
+.signi-zones {
+	grid-area: signi-zone;
+}
+.signi-zones .zone-content {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-evenly;
+}
+.game-zone {
+	position: relative;
+	padding: 3px;
+	border: 1px solid #020c22;
+	border-radius: 5px;
+}
+.game-zone::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1;
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: 5px;
+	background: #999999;
+}
+.zone-content {
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
+	border-radius: 5px;
+	background: #ffffff;
+}
+
+.card {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+/*****/
+
 /* Message block */
 
 .message-field-wrap {

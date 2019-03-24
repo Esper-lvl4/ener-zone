@@ -136,6 +136,12 @@ body * {
 
 /* Styles, that are used everywhere */
 
+.wrap-size {
+  width: 1366px;
+  height: 768px;
+  margin: 0 auto;
+  border: 1px solid #000000;
+}
 .main-title {
 	text-align: center;
 	font-size: 30px;
