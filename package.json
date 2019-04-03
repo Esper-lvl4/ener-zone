@@ -1,38 +1,56 @@
 {
   "name": "ener-zone",
-  "version": "0.0.2",
-  "description": "A client for playing wixoss tcg online",
-  "main": "server.js",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "test": "\"start\": \"node server.js\"",
-    "start": "node server.js"
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
-  "repository": {
-    "type": "git-hub",
-    "url": "https://github.com/Rank-Up/ener-zone"
-  },
-  "keywords": [
-    "wixoss",
-    "tcg",
-    "batoru"
-  ],
-  "author": "Rank Up",
-  "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0-rc.2",
+    "core-js": "^2.6.5",
     "express": "^4.16.4",
     "express-file-store": "^1.0.3",
     "express-session": "^1.15.6",
-    "jsonwebtoken": "^8.4.0",
-    "mongoose": "^5.3.7",
-    "path": "^0.12.7",
-    "request": "^2.88.0",
-    "socket.io": "^2.1.1"
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.4.21",
+    "socket.io": "^2.2.0",
+    "vue": "^2.6.6"
   },
   "devDependencies": {
-    "webpack": "^4.29.3",
-    "webpack-cli": "^3.2.3",
-    "webpack-dev-server": "^3.1.14"
-  }
+    "@vue/cli-plugin-babel": "^3.5.0",
+    "@vue/cli-plugin-eslint": "^3.5.0",
+    "@vue/cli-service": "^3.5.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.8.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "vue-template-compiler": "^2.5.21",
+    "webpack": "^4.29.6"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "rules": {},
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
 }

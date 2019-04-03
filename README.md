@@ -1,44 +1,29 @@
 # ener-zone
-Online client for Wixoss TCG. 
 
-Change list.
+## Project setup
+```
+npm install
+```
 
-v.0.0.4
-- Changes to inner structure of the client. For better workflow =)
-  
-v.0.0.3
-- Done making authentication and authorization.
-  - Sign Up.
-  - Login.
-  - Logout.
-  - Authorization.
-    - All parts of app are not available, if you're not authenticated. Except for /auth.
-    - For now I'm storing token in the localStorage.
-    - I wrote redirections on frontend. Maybe will change that later on.
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
 
-v.0.0.2
-- Created client side structure:
-  - Main menu.
-  - Deck editor.
-  - Lobby.
-  - Game.
-- Done programming Deck editor.
-  - Now it gets all cards from database
-  - Can filter through all the cards by:
-    - name.
-    - color.
-    - level.
-    - limit.
-    - power.
-    - limiting condition.
-    - use timing.
-    - etc.
-  - Can save decks, and load decks. Though it will be updated, when I implement registration and users.
-  - Can delete decks.
+### Compiles and minifies for production
+```
+npm run build
+```
 
-  v.0.0.1
-- Wrote wixoss-wiki parser.
-- Got all cards stored in MongoDB.
-- Can now get cards from database in brawser.
-    
-    
+### Run your tests
+```
+npm run test
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
