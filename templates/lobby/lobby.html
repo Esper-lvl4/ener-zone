@@ -14,7 +14,7 @@
 				<h1 class="lobby-title">Wixoss Client v.0.0.4</h1>
 			</div>
 			<div class="global-main">
-				<div class="lobby-wrap js-none">
+				<div class="lobby-wrap" v-if="!gameActive">
 					<div class="lobby-list-block">
 						<div class="lobby-filter-wrap" :class="{'js-none': roomActive}">
 							<input class="lobby-name-filter main-input"type="text" name="name-filter" id="name-filter">
@@ -108,7 +108,7 @@
 					<div class="top-player-field">
 						<div class="lrig-trash-zone game-zone">
 							<div class="zone-content">
-								lrig-trash
+								<img :src="cardHover.image" alt="noname">
 							</div>
 						</div>
 						<div class="lrig-deck-zone game-zone">

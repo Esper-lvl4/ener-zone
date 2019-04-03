@@ -281,7 +281,7 @@ function LobbyRoom (socket, io) {
 			socket.emit('error-message', 'Could not find room to leave from. Maybe this room does not exist already.');
 		} else {
 			socket.emit('left-room', roomObj.room.id);
-			roomObj.users.splice(roomObj.userIndex, 1);
+			roomObj.room.users.splice(roomObj.userIndex, 1);
 					
 			Users.updateState(socket, 'ready', false);
 			Users.updateState(socket, 'move', '/lobby');
