@@ -64,13 +64,15 @@ authPage.on('connection', function (socket) {
 
 const mainMenu = io.of('/main-menu');
 
-app.get('/', (req, res) => {
+app.get('/route', (req, res) => {
 
   res.sendFile(__dirname + '/templates/main-menu/main-menu.html');
 
 })
 
 mainMenu.on('connection', function(socket) {
+	socket.emit('hello-there', 'hello-there');
+
 	if (!VerifyToken(socket)) {
 		return;
 	} else {
@@ -122,6 +124,6 @@ parserRoom.on('connection', function(socket) {
 	Database(socket);
 });
 
-server.listen(8080, function() {
-	console.log('listening on *:8080');
+server.listen(3000, function() {
+	console.log('listening on *:3000');
 });

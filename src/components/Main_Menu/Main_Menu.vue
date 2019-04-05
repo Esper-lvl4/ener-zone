@@ -1,56 +1,63 @@
 <template>
-  <div class="menu-wrap">
-    <button 
-      v-for="link in menuLinks" 
-      class="main-button hvr-shutter-in-horizontal" 
-      @click="menuClickHandler(link.page, link.modal)">
-        {{link.eng}}
-    </button>
-    <!--a class="main-button hvr-shutter-in-horizontal" id="play" href="/lobby/">Play</a>
-    <a class="main-button hvr-shutter-in-horizontal" id="deck-editor" href="/deck-editor/">Deck Editor</a>
-    <a class="main-button hvr-shutter-in-horizontal" id="options" href="#">Options</a>
-    <a class="main-button hvr-shutter-in-horizontal" id="profile" href="#">Profile</a>
-    <a class="main-button hvr-shutter-in-horizontal" id="language" href="#">Language</a>
-    <a class="main-button hvr-shutter-in-horizontal" id="parse" href="/parse-db/">Parser</a>
-    <a class="main-button hvr-shutter-in-horizontal" id="logout" href="#">Logout</a-->
+  <div class="global-main">
+    <div class="menu-wrap" :class="{'hide-menu': isMainMenu}">
+      <button 
+        v-for="(link, index) in menuComponents" :key="index"
+        class="main-button hvr-shutter-in-horizontal" 
+        @click.prevent="menuClickHandler(index)">
+          {{link.eng}}
+      </button>
+    </div>
+
+    <login-form v-if="loginModal"/>
   </div>
 </template>
 
 <script>
+import LoginForm from './Login_Form.vue';
+
 export default {
   name: 'main-menu',
+  components: {
+    LoginForm,
+  },
   props: [
     'lang'
   ],
   data(){
     return {
-      menuLinks: [
-        {eng: 'Play', ru: 'Играть', page: 'lobby-page'},
-        {eng: 'Deck Editor', ru: 'Редактор колод', page: 'deck-editor'},
-        {eng: 'Options', ru: 'Настройки', modal: 'options'},
-        {eng: 'Profile', ru: 'Профиль', modal: 'profile'},
-        {eng: 'Language', ru: 'Язык', modal: 'language'},
-        {eng: 'Parser', ru: 'Парсер', page: 'parser-page'},
-        {eng: 'Logout', ru: 'Выйти'},
-      ],
+      menuComponents: {
+        lobbyPage: {eng: 'Play', ru: 'Играть', page: 'lobby-page', isActive: false},
+        deckEditor: {eng: 'Deck Editor', ru: 'Редактор колод', page: 'deck-editor', isActive: false},
+        options: {eng: 'Options', ru: 'Настройки', modal: 'options', isActive: false},
+        profile: {eng: 'Profile', ru: 'Профиль', modal: 'profile', isActive: false},
+        language: {eng: 'Language', ru: 'Язык', modal: 'language', isActive: false},
+        admin: {eng: 'Parser', ru: 'Парсер', page: 'parser-page', isActive: false},
+        logout: {eng: 'Logout', ru: 'Выйти'},
+      },
+      loginModal: false,
+    }
+  },
+  computed: {
+    isMainMenu(){
+      let result = true;
+      for (let i = 0; i < this.menuComponents.length; i++) {
+        if (this.menuComponents[i].isActive) {
+          result = false;
+          break;
+        }
+      }
+      return result;
     }
   },
   methods: {
-    menuClickHandler(page, modal){
-      // Change pages in parent element when needed. Emit evet for that.
-      if (page) {
-        this.$emit('change-page', page);
-      }
-
-      // Open modal when needed.
-      if (modal) {
-
-      }
+    menuClickHandler(j){
+      this.menuComponents.forEach((item) => {
+        item.isActive = false;
+      })
+      this.menuComponents[j].isActive = true;
     }
   },
-  mounted(){
-    console.log('menu: rdy;')
-  }
 }
 </script>
 
@@ -65,6 +72,7 @@ export default {
 }
 .menu-wrap .main-button {
   width: 50%;
+  color: #000000;
 }
 
 .login-wrap, .sign-up-wrap {

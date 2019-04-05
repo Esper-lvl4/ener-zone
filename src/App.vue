@@ -5,30 +5,13 @@
         <div class="global-header">
           <h1 class="main-title">{{version}}</h1>
         </div>
-        <div class="global-main">
-          <main-menu v-if="pages['main-menu']" @change-page="changePage"/>
-        </div>
+        <main-menu/>
       </div>
     </div>
     <div class="global-footer">
       <div class="global-size">
         <span>Open!</span>
       </div>
-    </div>
-
-    <!-- Login popup -->
-
-    <div class="login-wrap js-none js-dissolve" id="login-wrap">
-      <form class="login-form" id="login-form">
-        <div class="info"></div>
-        <label>Username</label>
-        <input type="text" name="username" id="login-username">
-        <label>Password</label>
-        <input type="text" name="password" id="login-password">
-        <label>Remember me</label>
-        <input type="checkbox" name="remember" id="login-remember">
-        <button id="login-submit">Log in</button>
-      </form>
     </div>
 
     <!-- Sign Up popup -->
@@ -61,20 +44,6 @@ export default {
   data(){
     return {
       version: 'Wixoss Client v.0.0.45',
-      pages: {
-        'main-menu': true,
-        'lobby-page': false,
-        'deck-editor': false,
-        'parser-page': false,
-      }
-    }
-  },
-  methods: {
-    changePage(page){
-      for (let i in this.pages) {
-        this.pages[i] = false;
-      }
-      this.pages[page] = true;
     }
   },
 }
