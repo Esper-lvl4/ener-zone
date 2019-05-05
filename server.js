@@ -64,17 +64,20 @@ authPage.on('connection', function (socket) {
 
 const mainMenu = io.of('/main-menu');
 
-app.get('/', (req, res) => {
+app.get('/route', (req, res) => {
 
   res.sendFile(__dirname + '/templates/main-menu/main-menu.html');
 
 })
 
 mainMenu.on('connection', function(socket) {
+	socket.emit('hello-there', 'hello-there');
+
 	if (!VerifyToken(socket)) {
 		return;
+	} else {
+		MainMenu(socket);
 	};
-	MainMenu(socket);
 });
 
 // Deck Editor.
@@ -88,8 +91,9 @@ const deckEditor = io.of('/deck-editor');
 deckEditor.on('connection', function(socket) {
 	if (!VerifyToken(socket)) {
 		return;
+	} else {
+		DeckEditor(socket);
 	};
-	DeckEditor(socket);
 });
 
 // Lobby. 
@@ -103,8 +107,9 @@ const lobby = io.of('/lobby');
 lobby.on('connection', function (socket) {
 	if (!VerifyToken(socket)) {
 		return;
-	}
-	LobbyRoom(socket);
+	} else {
+		LobbyRoom(socket, io);
+	};
 });
 
 // Parser.

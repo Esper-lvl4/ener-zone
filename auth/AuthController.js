@@ -31,6 +31,7 @@ function socketRouter (socket) {
 			User.create({
 				username: userObj.name,
 				password: hashedPass,
+				nickname: userObj.name,
 				avatarPass: '/users/default-pic.png',
 				options: {
 					infoPosition: 'left',
