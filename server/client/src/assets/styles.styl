@@ -1,0 +1,988 @@
+/* Variables and mixins */
+$dark = #333333
+$white = #f1f1f1
+$main-bg = rgba(22, 13, 51, 0.75)
+$shadow = 2px 2px 10px 3px #111111
+
+$dark-bg = rgba(49, 41, 85, 0.85)
+$dark-border = 1px solid rgb(59, 45, 106)
+$dark-block-bg = rgb(49, 41, 85)
+$dark-input-bg = rgba(86, 86, 151, 0.5)
+$lighter-dark-bg = rgba(55, 43, 96, 0.3)
+
+
+$blue-bg = #9999ff
+
+flex($dir = row, $wrap = wrap, $just = flex-start, $align = flex-start)
+	display: flex
+	flex-flow: $dir $wrap
+	justify-content: $just
+	align-items: $align
+
+/*****/
+
+/* Global Styles */
+
+@import url('https://fonts.googleapis.com/css?family=Raleway:400,400i,700,700i')
+
+html
+	height: 100%
+
+body
+	flex(column, nowrap, flex-start, stretch)
+	min-height: 100%
+	padding: 0
+	margin: 0
+	background: $white
+	font: 16px/20px 'Raleway', sans-serif
+	color: $white
+
+	*
+		box-sizing: border-box
+
+.global-wrap
+	position:relative
+	flex-grow: 2
+	flex(column, nowrap, center);
+	height: 100%
+	&::before {
+		content: ''
+		position: absolute
+		top: 0
+		left: 0
+		z-index: 1
+		display: block
+		width: 100%
+		height: 100%
+		background-color: $main-bg
+	}
+
+.global-header
+	flex-grow: 0
+
+.global-main
+	flex-grow: 1
+	flex(column, nowrap, center, center)
+
+.global-footer
+	flex-shrink: 0
+
+.global-size
+	position: relative
+	z-index: 2
+	display: flex
+	flex-direction: column
+	width: 1366px
+	height: 100%
+	margin: 0 auto
+
+/*****/
+
+/* Styles, that are used everywhere */
+
+.wrap-size
+	width: 1366px
+	height: 768px
+	margin: 0 auto
+	border: 1px solid #000000
+
+.main-title
+	text-align: center
+	font-size: 30px
+	color: $white
+
+.main-button
+	position: relative
+	padding: 10px 20px
+	border: none
+	outline: none
+	box-shadow: none
+	background: transparent
+	color: $white
+	cursor: pointer
+	font-size: 20px
+	text-align: center
+	text-decoration: none
+	transition: all 0.3s linear
+	&:hover
+		background-color: $blue-bg
+
+
+.main-input
+	padding: 5px 15px
+	border: none
+	outline: none
+	box-shadow: none
+	border-radius: 15px
+	background-color: $dark-input-bg
+	color: $white
+
+.not-a-list
+	list-style: none
+	padding: 0
+
+
+.modal-window
+	position: fixed
+	top: 0
+	left: 0
+	z-index: 100
+	display: flex
+	flex-flow: column nowrap
+	justify-content: center
+	align-items: center
+	width: 100%
+	height: 100%
+	background-color: rgba(0, 0, 0, 0.6)
+
+	form
+		position: relative
+
+	.main-input
+		margin: 10px 0
+
+.modal-wrap
+	position: relative
+	flex(column, nowrap, flex-start, center)
+	padding: 25px 15px 15px
+	background-color: $dark-bg
+
+.modal-close
+	position: absolute
+	top: 5px
+	right: 5px
+	width: 20px
+	height: 20px
+	cursor: pointer
+
+	&::before, &::after
+		content: ''
+		position: absolute
+		top: 0
+		left: 50%
+		width: 2px
+		height: 100%
+		transform: translateX(-50%)
+		background-color: $white
+
+	&::before
+		transform: rotate(45deg)
+
+	&::after
+		transform: rotate(-45deg)
+
+.alert-wrap
+	position: fixed
+	top: 0
+	left: 0
+	flex(row, nowrap, center, center)
+	width: 100%
+	height: 100%
+	background: rgba(0, 0, 0, 0.6);
+
+.block-style
+	background: $dark-bg
+	box-shadow: $shadow
+	color: $white
+
+.block-style-thick
+	background: $dark-block-bg
+	color: $white
+
+/*****/
+
+/* Main menu styles */
+
+.menu-wrap
+	position: absolute
+	top: 0
+	left: 0
+	z-index: 5
+	flex(column, nowrap, space-between, flex-start)
+	padding-right: 20px
+	margin: 0 auto
+	&.hidden .menu-icon
+		width: 45px
+		padding-left: 0
+		overflow: hidden
+		color: transparent
+
+.menu-icon
+	max-width: 200px
+	width: 100%
+	padding-left: 45px
+	text-align: left
+	background: $dark-block-bg
+	color: $white
+
+	&::after
+		content: ''
+		position: absolute
+		top: 50%
+		left: 10px
+		z-index: 1
+		transform: translateY(-50%)
+		display: block
+		width: 25px
+		height: 25px
+		background: url(/src/assets/img/cog.svg) 50% 50%/100% no-repeat;
+
+.cog-icon::after
+	background-image: url(/src/assets/img/cog.png);
+
+.cards-icon::after
+	background-image: url(/src/assets/img/cards-icon1.png);
+
+.sword-icon::after
+	background-image: url(/src/assets/img/sword-icon1.png);
+
+.profile-icon::after
+	background-image: url(/src/assets/img/profile-icon1.png);
+
+.language-icon::after
+	background-image: url(/src/assets/img/language-icon1.png);
+
+.parser-icon::after
+	background-image: url(/src/assets/img/parser-icon1.png);
+
+.exit-icon::after
+	background-image: url(/src/assets/img/exit-icon1.png);
+
+.menu-arrow
+	position: absolute
+	top: 50%
+	right: 0
+	transform: translateY(-50%)
+	display: block
+	width: 20px
+	height: 40px
+	border: none
+	outline: none
+	box-shadow: none
+	background-color: $dark-block-bg
+
+	&::after, &::before
+		content: ''
+		position: absolute
+		left: 0
+		display: block
+		width: 100%
+		height: 2px
+		background-color: $white
+	&::after
+		bottom: 12px
+		transform: rotate(-45deg)
+	&::before
+		top: 12px
+		transform: rotate(45deg)
+
+
+
+.login-wrap, .sign-up-wrap
+	position: absolute
+	top: 0
+	left: 0
+	display: flex
+	flex-flow: row wrap
+	justify-content: center
+	align-items: center
+	width: 100%
+	height: 100%
+	background-color: rgba(255, 255, 255, 0.5)
+	opacity: 1
+	transition: all 1s ease
+
+
+.login-wrap .login-form, .sign-up-wrap .sign-up-form
+	display: flex
+	flex-flow: column wrap
+	align-items: center
+	align-content: center
+	width: 400px
+	padding: 100px 50px
+	background: $dark
+	color: #ffffff
+
+.info
+	padding: 5px
+	text-align: center
+	color: #ff3333
+
+.error
+	border: 2px solid #ff3333
+
+/*****/
+
+/* Deck Editor styles */
+
+button, a, .search-submit
+	text-decoration: none
+
+button:hover, a:hover, .search-submit
+	cursor: pointer
+	text-decoration: none
+
+
+.deck-editor-wrap
+	width: 1280px
+	height: 800px
+	margin: 0 auto
+	display: flex
+	flex-flow: row nowrap
+
+
+.info-block
+	display: flex
+	flex-flow: column nowrap
+	min-width: 280px
+	width: 20%
+	line-height: 1.4
+
+	& > span
+		text-transform: capitalize
+
+	a
+		color: $white
+
+.info-img
+	max-width: 250px
+	height: auto
+	margin: 0 auto
+
+.info-text
+	overflow-y: auto
+	img
+		margin-bottom: -6px
+
+
+main
+	width: 80%
+	padding: 0 5px
+	display: flex
+	flex-flow: column wrap
+	flex-grow: 2
+
+.main-deck img, .lrig-deck img
+	width: 80px
+	height: auto
+
+.deck-manage
+	position: relative
+	display: flex
+	flex-flow: row nowrap
+	align-content: center
+	width: 100%
+	height: 30px
+	margin: 0 0 10px
+	background: $dark-block-bg
+
+.deck-manage > button, .deck-manage > a, .search-submit, .more-button
+	display: block
+	width: 16%
+	flex-grow: 2
+	border: none
+	outline: none
+	text-align: center
+	text-transform: capitalize
+	color: #f1f1f1
+	font-size: 16px
+	background-color: transparent
+	transition: all 0.3s linear
+	&:hover
+		background-color: $blue-bg
+
+.deck-manage a
+	padding: 5px 0 0
+
+.main-deck, .lrig-deck
+	flex(column, nowrap, flex-start, stretch)
+	width: 100%
+	flex-grow: 2
+
+.lrig-deck
+	flex-grow: 0
+	height: 20%
+	margin-top: 10px
+
+.deck-titles
+	margin: 2px 0
+	font-size: 18px
+	text-align: center
+
+.main-card-block, .lrig-card-block
+	display: flex
+	flex-flow: row wrap
+	justify-content: center
+	align-items: flex-start
+	align-content: flex-start
+	max-height: 348.9px
+	height: 100%
+	border-radius: 5px
+	overflow-y: auto
+.lrig-card-block
+	align-content: center
+
+.card
+	position: relative
+	cursor: pointer
+	&:hover
+		filter: contrast(125%)
+
+.card-count
+	position: absolute
+	right: 0
+	bottom: 0
+	box-sizing: border-box
+	width: 20px
+	height: 20px
+	padding-top: 0px
+	border-radius: 50%
+	border: 2px solid $white
+	background-color: $dark-bg
+	font-size: 14px
+	font-weight: 600
+	text-align: center
+	line-height: 15px
+
+
+.l-deck-check, .m-deck-check
+	width: 100%
+
+
+.search-block
+	width: 100%
+	max-height: 215px
+	padding: 0 5px
+	display: flex
+	flex-flow: column nowrap
+
+	img
+		display: block
+		max-width: 228px
+		width: auto
+		max-height: 100%
+		height: auto
+		height: auto
+		align-self: center
+		cursor: pointer
+		&:hover
+			filter: contrast(125%)
+
+.search-block-form
+	display: flex
+	flex-flow: row wrap
+	justify-content: space-between
+	width: 100%
+
+.search-result
+	display: flex
+	flex-flow: column wrap
+	justify-content: center
+	overflow-x: scroll
+	height: 180px;
+
+.more-button
+	width: 20%
+	margin: 5px 5px 5px 0
+	padding: 5px 0 0
+
+.search-field
+	flex-grow: 2
+	display: block
+	width: 70%
+	margin: 5px 15px 5px 5px
+
+
+/* Save deck block styles */
+
+.save-deck-block
+	position: absolute
+	top:  100%
+	left: 18%
+	z-index: 10
+	display: flex
+	flex(column, nowrap, flex-start, center)
+	width: 50%
+	overflow: hidden
+	transition: all 0.3s linear 0s
+
+	input
+		width: 90%
+		margin: 15px 0
+
+/* Load deck styles and Delete block styles */
+
+.deck-list-block, .delete-list-block
+	position: absolute
+	top:  100%
+	left: 16%
+	z-index: 10
+	display: flex
+	flex-flow: column wrap
+	align-content: center
+	width: 300px
+	height: 300px
+	overflow-y: auto
+	transition: all 0.3s linear 0s
+
+.delete-list-block
+	left: 42%
+
+.deck-list, .delete-list
+	width: 100%
+	list-style: none
+	padding: 10px
+
+	a, li
+		color: $white
+		text-decoration: none
+		&:hover
+			cursor: pointer
+			background-color: #000000
+
+.delete-alert
+	background-color: #2098D1
+
+
+/* Filter styles */
+
+.filter-block
+	position: absolute
+	top:  100%
+	left: 0
+	z-index: 10
+	width: 100%
+	height: 400px
+	overflow: hidden
+	transition: all 0.3s linear 0s
+
+	form
+		display: flex
+		flex-flow: row wrap
+		width: 100%
+
+	label
+		margin: 0 0 5px 10px
+
+	input, select
+		margin-bottom: 5px
+
+	select, input[type="number"]
+		border: none
+		border-radius: 15px
+		padding: 5px 15px
+
+.filter-first, .filter-second
+	display: flex
+	flex-flow: column wrap
+	width: 50%
+	padding: 20px
+
+.filter-small-inputs
+	display: flex
+	flex-flow: row wrap
+	justify-content: space-between
+
+	div
+		flex-grow: 2
+		width: 30%
+		&:not(:last-of-type)
+			margin-right: 10px
+
+	input
+		max-width: 100%
+
+.filter-submit
+	width: 100%
+	padding: 20px
+	text-align: center
+
+/*****/
+
+.lobbytitle
+	text-align: center
+	color: #9ea4b0
+
+.lobby-wrap
+	display: flex
+	flex-flow: row nowrap
+	justify-content: space-between
+	width: 1366px
+	height: 768px
+	margin: 0 auto
+
+.lobby-list-block
+	display: flex
+	flex-flow: column wrap
+	flex-grow: 2
+	width: 50%
+	height: 100%
+	padding: 5px
+	border-right: none
+	border-top-left-radius: 10px
+	border-bottom-left-radius: 10px
+
+.lobby-chat-block
+	display: flex
+	flex-flow: column nowrap
+	width: 40%
+	height: 100%
+	padding: 5px
+	border-left: none
+	border-top-right-radius: 10px
+	border-bottom-right-radius: 10px
+
+
+/* Filter block */
+
+.lobby-filter-wrap
+	display: flex
+	flex-flow: row wrap
+	justify-content: space-between
+	align-items: center
+	padding: 0 5px
+
+.lobby-name-filter
+	width: 40%
+	padding: 10px 15px
+	margin-right: 15px
+	border: none
+	border-radius: 25px
+	background-color: $dark-input-bg
+
+.progress-filter-wrap
+	position: relative
+	display: flex
+	flex-flow: row wrap
+	align-items: center
+	padding-left: 25px
+	color: $white
+
+	input
+		display: none
+		&:checked ~ label::before
+			background: $white
+
+	label
+		cursor: pointer
+		&::before
+			content: ''
+			position: absolute
+			top: 0
+			left: 0
+			display: block
+			width: 15px
+			height: 15px
+			border: 2px solid $white
+			border-radius: 50%
+			cursor: pointer
+
+/*****/
+
+/*Game list block */
+.lobby-gamelist-wrap
+	flex-grow: 2
+	margin-top: 10px
+	padding: 5px 25px
+
+	ul
+		list-style: none
+		padding: 0
+
+	li
+		padding: 5px 0
+		cursor: pointer
+
+
+/*****/
+
+/* Lobby buttons block */
+
+.lobby-buttons-wrap
+	display: flex
+	flex-flow: row wrap
+	justify-content: center
+	margin-top: 10px
+	padding: 5px
+
+.lobby-button
+	display: block
+	flex-grow: 2
+	width: 10%
+	padding: 10px 15px
+	border: none
+	border-radius: 25px
+	background: linear-gradient(45deg, #666666, #333333)
+	color: #ffffff
+	text-align: center
+	text-decoration: none
+	cursor: pointer
+	overflow: hidden
+
+	&:not(:last-child)
+		margin-right: 15px
+
+.rdy-active
+	color: #ffffff
+
+.rdy-active::before
+	background: green
+
+/*****/
+
+/* Room styles */
+
+.room-wrap
+	display: flex
+	flex-flow: row-reverse wrap
+	justify-content: space-between
+	height: 100%
+
+.room-player-list
+	flex-grow: 2
+	padding: 10px
+
+.room-ex-buttons
+	width: 25%
+	margin-right: 10px
+	padding: 0 15px 0 0
+
+	button
+		width: 100%
+		margin-top: 15px
+
+		&:first-of-type
+			margin-top: 0
+
+
+/*****/
+
+/* Chat tabs-buttons */
+
+.chat-buttons
+	display: flex
+	flex-flow: row wrap
+
+	button
+		display: block
+		width: 45%
+		padding: 10px 15px
+		border: none
+		outline: none
+		box-shadow: none
+		text-align: center
+		cursor: pointer
+		background: transparent
+		color: $white
+
+		&:first-of-type
+			border-top-left-radius: 15px
+			border-right: 1px solid #333333
+
+		&:last-of-type
+			border-top-right-radius: 15px
+			border-left: 1px solid #333333
+
+
+/*****/
+
+/* Chat tabs*/
+
+.tab
+	flex-grow: 2
+	width: 100%
+	margin-top: 10px
+	overflow: auto
+
+	li
+		padding: 0 5px
+
+/*****/
+
+/* Game styles */
+
+.game-wrap
+	display: flex
+	flex-flow: row nowrap
+	justify-content: space-between
+
+	img
+		max-width: 100%
+		max-height: 100%
+		width: auto
+		height: auto
+
+.info-block
+	display: flex
+	flex-flow: column wrap
+	min-width: 280px
+	width: 20%
+	padding: 5px
+
+	span
+		text-transform: capitalize
+
+.info-img
+	max-width: 100%
+	width: auto
+	max-height: 280px
+	height: auto
+	margin: 0 auto
+
+.info-text img
+	margin-bottom: -6px
+
+.top-player-field
+	display: grid
+	grid-template: repeat(3, 128px)\/220px 220px 220px 220px 180px
+	grid-template-areas: "lrig-trash lrig-deck life-cloth life-cloth ener-zone"\
+		"trash lrig-zone lrig-zone check-zone ener-zone"\
+		"main-deck signi-zone signi-zone signi-zone ener-zone"
+	grid-gap: 5px 5px
+	justify-content: end
+	padding: 5px 5px 0 0
+
+.lrig-trash-zone
+	grid-area: lrig-trash
+
+.lrig-deck-zone
+	grid-area: lrig-deck
+
+.life-cloth-zone
+	grid-area: life-cloth
+
+.ener-zone
+	grid-area: ener-zone
+
+.ener-zone .zone-content
+	display: flex
+	flex-flow: column nowrap
+	justify-content: flex-end
+
+.trash-zone
+	grid-area: trash
+
+.lrig-zone
+	grid-area: lrig-zone
+
+.check-zone
+	grid-area: check-zone
+
+.main-deck-zone
+	grid-area: main-deck
+
+.signi-zones
+	grid-area: signi-zone
+
+.signi-zones .zone-content
+	display: flex
+	flex-flow: row nowrap
+	justify-content: space-evenly
+
+.game-zone
+	position: relative
+	padding: 3px
+	border: 1px solid #020c22
+	border-radius: 5px
+
+.game-zone::after
+	content: ''
+	position: absolute
+	top: 0
+	left: 0
+	z-index: 1
+	display: block
+	width: 100%
+	height: 100%
+	border-radius: 5px
+	background: #999999
+
+.zone-content
+	position: relative
+	z-index: 2
+	width: 100%
+	height: 100%
+	border-radius: 5px
+	background: #ffffff
+
+
+.card
+	max-width: 100%
+	max-height: 100%
+
+
+/*****/
+
+/* Message block */
+
+.message-field-wrap
+	display: flex
+	flex-flow: row wrap
+	justify-content: space-between
+	margin-top: 10px
+	padding: 5px
+
+.chat-message-field
+	flex-grow: 2
+	width: 60%
+	margin-right: 15px
+	padding: 10px 15px
+	border: none
+	border-radius: 0
+
+/*****/
+
+/* Modals */
+
+.create-room-form
+	display: flex
+	flex-flow: column nowrap
+	width: 400px
+
+.create-room-form label
+	text-align: center
+
+.create-room-input
+	padding: 10px 15px
+	margin-bottom: 15px
+	border: none
+	outline: none
+	border-radius: 25px
+	background-color: #999999
+	color: #ffffff
+
+.game-password-modal
+	flex(column, nowrap, space-between, center)
+
+/*****/
+
+/* Information */
+
+.info
+	padding: 5px
+	text-align: center
+	color: #ff3333
+
+.error
+	border: 2px solid #ff3333
+
+
+/* Script styles */
+
+.js-none
+	display: none!important
+
+.js-hide
+	visibility: hidden!important
+
+.js-dissolve
+	opacity: 0!important
+
+.js-active-button
+	font-weight: 700!important
+
+.js-selected-room
+	background-color: #9999FF
+	color: #ffffff
+
+/*****/
