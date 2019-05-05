@@ -1,7 +1,6 @@
 const IO = require('socket.io');
 const express = require('express');
 const session = require('express-session');
-const FileStore = require('express-file-store');
 const mongoose = require('mongoose');
 const cheerio = require('cheerio');
 const jwt = require('jsonwebtoken');
@@ -12,7 +11,6 @@ const bodyParser = require('body-parser');
 const request = require('request');
 const path = require('path');
 const http = require('http');
-const fs = require('fs');
 
 const AuthController = require('./auth/AuthController');
 const UserDB = require('./users/User');
@@ -25,7 +23,6 @@ const Parser = require('./database/Parser');
 const Database = require('./database/Database');
 const LobbyRoom = require('./lobby/Lobby');
 const DeckEditor = require('./deck-editor/DeckEditor');
-const MainMenu = require('./main-menu/MainMenu');
 
 const app = express();
 const server = http.Server(app);
@@ -42,12 +39,6 @@ mongoose.connection.on('open', function (err) {
 	console.log('Connected to database.');
 });
 
-// Saved decks path.
-
-var fileStore = FileStore('fs', {
-  path: __dirname + '/saves/',
-});
-
 app.use(express.static(path.resolve(__dirname, 'templates/')));
 
 // Authentication and Authorization.
@@ -62,63 +53,10 @@ io.on('connection', function(socket) {
 		return;
 	} else {
 		socket.emit('loginSuccess', {auth: true, token: socket.handshake.query.token});
-
 		DeckEditor(socket);
 		LobbyRoom(socket, io);
 	};
 })
-
-// Main menu.
-
-const mainMenu = io.of('/main-menu');
-
-app.get('/', (req, res) => {
-
-  res.sendFile(path.resolve(__dirname + '/client/index.html'));
-
-})
-
-mainMenu.on('connection', function(socket) {
-
-	if (!VerifyToken(socket)) {
-		return;
-	} else {
-		MainMenu(socket);
-	};
-});
-
-// Deck Editor.
-
-app.all('/deck-editor/', (req, res) => {
-  res.sendFile(__dirname + '/templates/deck-editor/deck-editor.html');
-})
-
-const deckEditor = io.of('/deck-editor');
-
-deckEditor.on('connected', function(socket) {
-
-	if (!VerifyToken(socket)) {
-		return;
-	} else {
-		DeckEditor(socket);
-	};
-});
-
-// Lobby.
-
-app.get('/lobby/', (req, res) => {
-	res.sendFile(__dirname + '/templates/lobby/lobby.html');
-})
-
-const lobby = io.of('/lobby');
-
-lobby.on('connection', function (socket) {
-	if (!VerifyToken(socket)) {
-		return;
-	} else {
-		LobbyRoom(socket, io);
-	};
-});
 
 // Parser.
 

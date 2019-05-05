@@ -1,4 +1,3 @@
-const fs = require('fs');
 const CardDB = require('../database/CardDB');
 const User = require('../users/User');
 const Users = require('../users/Users');
