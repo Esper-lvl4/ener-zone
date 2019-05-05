@@ -23,6 +23,7 @@ const Parser = require('./database/Parser');
 const Database = require('./database/Database');
 const LobbyRoom = require('./lobby/Lobby');
 const DeckEditor = require('./deck-editor/DeckEditor');
+const Game = require('./game/Game');
 
 const app = express();
 const server = http.Server(app);
@@ -55,6 +56,7 @@ io.on('connection', function(socket) {
 		socket.emit('loginSuccess', {auth: true, token: socket.handshake.query.token});
 		DeckEditor(socket);
 		LobbyRoom(socket, io);
+		Game(socket, io);
 	};
 })
 
