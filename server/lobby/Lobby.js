@@ -123,7 +123,7 @@ function LobbyRoom (socket, io) {
 
 	// Function to check if game in some room can be started.
 
-	function canStartGame (room) {
+	/*function canStartGame (room) {
 		let users = room.users;
 		for (let i = 0, counter = 0; i < users.length; i++) {
 			if (users[i].ready === true) {
@@ -135,7 +135,7 @@ function LobbyRoom (socket, io) {
 				break;
 			}
 		}
-	}
+	}*/
 
 	// refresh lobby and chat for every user, that just connected to lobby. This is done on page refresh too.
 	socket.on('getGameList', function () {
@@ -244,7 +244,6 @@ function LobbyRoom (socket, io) {
 					return;
 				}
 				user.role = info.role;
-				user.rdy = false;
 				room.users.push(user);
 				socket.join(room.socketRoom);
 
@@ -325,7 +324,7 @@ function LobbyRoom (socket, io) {
 
 	// Player is ready.
 
-	socket.on('playerReadiness', function (value) {
+	socket.on('playerReadiness', function () {
 		let token = socket.handshake.query.token;
 		if (!token) {
 			socket.emit('successLogout', 'no token');
@@ -335,14 +334,14 @@ function LobbyRoom (socket, io) {
 		if (!roomObj) {
 			socket.emit('errorMessage', 'Could not find room to change player readiness. Maybe your room does not exist.');
 		} else {
-			roomObj.room.users[roomObj.userIndex].ready = value;
-			Users.updateState(socket, 'ready', value);
+			roomObj.room.users[roomObj.userIndex].ready = !roomObj.room.users[roomObj.userIndex].ready;
+			Users.updateState(socket, 'ready', roomObj.room.users[roomObj.userIndex].ready);
 			let roomClone = removeTokensOne(roomObj.room);
 			socket.to(roomObj.room.socketRoom).emit('refreshRoom', roomClone);
 			socket.emit('refreshRoom', roomClone);
 
 			// then check if game can be started.
-			canStartGame(roomObj.room);
+			//canStartGame(roomObj.room);
 		}
 	});
 
@@ -351,7 +350,8 @@ function LobbyRoom (socket, io) {
 		let room = searchRoomId(id).room;
 		room.state = true;
 		socket.to(room.socketRoom).emit('gameInProgress', room);
-		refreshLobbyAll(); 
+		socket.emit('gameInProgress', room);
+		refreshLobbyAll();
 	});
 
 	// Chat events.

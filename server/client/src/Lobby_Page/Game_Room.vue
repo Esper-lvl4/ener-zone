@@ -13,7 +13,7 @@
 		</div>
 		<div class="room-ex-buttons block-style">
 			<button class="main-button" v-if="userIsRoomPlayer" :disabled="!readyToStart" @click="open()">OPEN!</button>
-			<button :class="{'rdy-active': readiness}" class="main-button" @click="readyToPlay()" v-if="userIsRoomPlayer">Ready to batoru</button>
+			<button class="main-button" @click="readyToPlay()" v-if="userIsRoomPlayer">Ready to batoru</button>
 			<button class="main-button" v-if="userIsRoomPlayer">Choose deck</button>
 			<button class="main-button"  v-if="userIsRoomPlayer">Invite</button>
 			<button class="main-button" v-if="userIsRoomHost">Kick</button>
@@ -30,7 +30,6 @@ export default {
 	],
 	data() {
 		return {
-			readiness: false,
 			numberOfPlayers: 2,
 		}
 	},
@@ -50,9 +49,6 @@ export default {
 		users() {
 			let players = [];
 			let spectators = [];
-			if (this.room.rdy !== undefined) {
-				this.readiness = rdy;
-			}
 			for (let i = 0; i < this.room.users.length; i++) {
 				if (this.room.users[i].role === 'player' || this.room.users[i].role === 'host') {
 					players.push(this.room.users[i]);
@@ -72,9 +68,9 @@ export default {
 			return this.role == 'spectator';
 		},
 		readyToStart() {
-			if (this.readiness && users.players.length == this.numberOfPlayers) {
+			if (this.users.players.length == this.numberOfPlayers) {
 				let result = true;
-				for (let player of users.players) {
+				for (let player of this.users.players) {
 					if (player.ready === false) {
 						result = false
 					}
@@ -93,9 +89,10 @@ export default {
 			this.$socket.emit('leaveRoom', 'leave pls');
 		},
 		readyToPlay: function () {
-			this.$socket.emit('playerReadiness', !this.readiness);
+			this.$socket.emit('playerReadiness');
 		},
 		open: function () {
+			console.log(this.readyToStart);
 			if (this.readyToStart === true) {
 				this.$socket.emit('initGame', this.currentRoom.id);
 			}
