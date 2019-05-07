@@ -57,6 +57,9 @@ io.on('connection', function(socket) {
 		DeckEditor(socket);
 		LobbyRoom(socket, io);
 		Game(socket, io);
+
+		// Parser
+		Database(socket);
 	};
 })
 

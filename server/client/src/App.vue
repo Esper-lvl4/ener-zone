@@ -73,6 +73,9 @@ export default {
 		clearErrors() {
 			this.$store.commit('clearErrors');
 		}
+	},
+	mounted() {
+		this.$socket.emit('checkUserLocation', 'check');
 	}
 }
 </script>

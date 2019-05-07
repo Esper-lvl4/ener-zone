@@ -172,7 +172,6 @@ export default {
 		},
 	},
 	mounted() {
-		this.$socket.emit('checkUserLocation', 'check');
 		this.$socket.emit('getGameList');
 	},
 }

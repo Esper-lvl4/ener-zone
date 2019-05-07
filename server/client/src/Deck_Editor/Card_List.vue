@@ -1,6 +1,6 @@
 <template>
   <div class="search-block block-style">
-    <form class="search-block-form">
+    <form class="search-block-form" @submit.prevent>
       <input class="search-field main-input" type="text" v-model="filterName">
       <button class="more-button none" @click="showMoreCards(20)">More cards</button>
     </form>

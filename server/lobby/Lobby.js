@@ -121,22 +121,6 @@ function LobbyRoom (socket, io) {
 		io.sockets.emit('refreshChat', chatHistory);
 	}
 
-	// Function to check if game in some room can be started.
-
-	/*function canStartGame (room) {
-		let users = room.users;
-		for (let i = 0, counter = 0; i < users.length; i++) {
-			if (users[i].ready === true) {
-				counter++;
-			}
-			if (counter === 2) {
-				socket.to(room.socketRoom).emit('readyToOpen', '');
-				socket.emit('readyToOpen', '');
-				break;
-			}
-		}
-	}*/
-
 	// refresh lobby and chat for every user, that just connected to lobby. This is done on page refresh too.
 	socket.on('getGameList', function () {
 		refreshLobbyOne();
@@ -166,8 +150,12 @@ function LobbyRoom (socket, io) {
 			} else {
 				let roomClone = removeTokensOne(room);
 				socket.join(room.socketRoom);
-				socket.emit('restoreRoom', roomClone);
-
+				if (room.state) {
+					socket.emit('restoreGame', roomClone);
+				} else {
+					socket.emit('restoreRoom', roomClone);
+				}
+				
 				// then check if game can be started.
 				canStartGame(room);
 			}
@@ -339,9 +327,6 @@ function LobbyRoom (socket, io) {
 			let roomClone = removeTokensOne(roomObj.room);
 			socket.to(roomObj.room.socketRoom).emit('refreshRoom', roomClone);
 			socket.emit('refreshRoom', roomClone);
-
-			// then check if game can be started.
-			//canStartGame(roomObj.room);
 		}
 	});
 

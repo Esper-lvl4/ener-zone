@@ -99,6 +99,7 @@ export default {
         for (let image of matched) {
           let altText = image.getAttribute('alt');
           let src = this.getSrc(altText);
+					console.log(altText);
           image.setAttribute('src', src);
           image.setAttribute('alt', altText);
           image.setAttribute('width', '22');
@@ -111,42 +112,67 @@ export default {
 
     // Replace image's src depending on the alt of an initial image.
     getSrc(alt) {
-      let src = '';
+      let src = '/src/assets/img/';
       switch (alt) {
         case 'Heaven':
-          src = '/src/assets/img/heaven.png';
+          src += 'heaven.png';
           break;
         case 'Life Burst':
-          src = '/src/assets/img/life-burst.png';
+          src += 'life-burst.png';
           break;
         case 'RedIcon':
         case 'Red':
-          src = '/src/assets/img/red.png';
+          src += 'red.png';
           break;
+				case 'Red0':
+					src += 'Red0.png';
+					break;
         case 'BlueIcon':
         case 'Blue':
-          src = '/src/assets/img/blue.png';
+          src += 'blue.png';
           break;
+				case 'Blue0':
+					src += 'Blue0.png';
+					break;
         case 'GreenIcon':
         case 'Green':
-          src = '/src/assets/img/green.png';
+          src += 'green.png';
           break;
+				case 'Green0':
+					src += 'Green0.png';
+					break;
         case 'WhiteIcon':
         case 'White':
-          src = '/src/assets/img/white.png';
+          src += 'white.png';
           break;
+				case 'White0':
+					src += 'White0.png';
+					break;
         case 'BlackIcon':
         case 'Black':
-          src = '/src/assets/img/black.png';
+          src += 'black.png';
           break;
+				case 'Black0':
+					src += 'Black0.png';
+					break;
         case 'ColorlessIcon':
         case 'Colorless':
-          src: '/src/assets/img/colorless.png';
+          src += 'colorless.png';
           break;
+				case 'Colorless0':
+					src += 'colorless0.png';
+					break;
         case 'CoinIcon':
         case 'Coin':
-          src: '/src/assets/img/coin.png';
+          src += 'coin.png';
           break;
+				case 'DownIcon':
+				case 'Down':
+					src += 'down.png';
+					break;
+				default:
+					src = '';
+					break;
       }
       return src;
     },
