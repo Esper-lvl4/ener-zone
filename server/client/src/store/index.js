@@ -11,6 +11,7 @@ export const store = new Vuex.Store({
 		userDecks: null,
 		chat: [],
 		gameRooms: [],
+		currentRoom: null,
 		errorMessage: '',
 	},
 	getters: {},
@@ -26,6 +27,9 @@ export const store = new Vuex.Store({
 		},
 		filterDatabase(state, result) {
 			state.filteredDatabase = result;
+		},
+		changeCurrentRoom(state, room) {
+			state.currentRoom = room;
 		},
 		errorMessage(state, err) {
 			state.errorMessage = err;

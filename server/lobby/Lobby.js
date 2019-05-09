@@ -98,7 +98,6 @@ function LobbyRoom (socket, io) {
 		}
 		let roomClones = removeTokens(gameRooms);
 		socket.emit('refreshLobby', roomClones);
-		console.log('refresh one');
 	}
 
 	// Refresh lobby for all.
@@ -108,7 +107,6 @@ function LobbyRoom (socket, io) {
 		}
 		let roomClones = removeTokens(gameRooms);
 		io.sockets.emit('refreshLobby', roomClones);
-		console.log('refresh all');
 	}
 
 	// refresh chat for one socket.
@@ -135,15 +133,17 @@ function LobbyRoom (socket, io) {
 		let userState = Users.getUserState(socket);
 		// Emit nickname for chat. Maybe I should make separate event for this.
 		socket.emit('save-nick', userState.nick);
-		if (gameRooms.length === 0) {return;}
+		if (gameRooms.length === 0) {
+			return;
+		}
 		let token = socket.handshake.query.token;
 		if (!token) {
 			socket.emit('successLogout', 'no token');
 		}
 		if (!userState) {
 			return;
-		} else if (userState.location.match('/room')) {
-			let roomID = userState.location.replace('/lobby/room-', '');
+		} else if (userState.location.match('room')) {
+			let roomID = userState.location.replace('room-', '');
 			let room = searchRoomId(roomID).room;
 			if (!room) {
 				socket.emit('errorMessage', 'Could not find room to refresh')
@@ -155,9 +155,6 @@ function LobbyRoom (socket, io) {
 				} else {
 					socket.emit('restoreRoom', roomClone);
 				}
-				
-				// then check if game can be started.
-				canStartGame(room);
 			}
 		}
 	})
@@ -191,7 +188,6 @@ function LobbyRoom (socket, io) {
 		// clone room and remove tokens from clone - then send it to client;
 		let roomClone = removeTokensOne(room);
 		socket.join(gameRooms[i].socketRoom);
-		console.log(roomClone);
 		socket.emit('joiningRoom', roomClone);
 		Users.updateState(socket, 'ready', false);
 		Users.updateState(socket, 'move', room.socketRoom);
@@ -206,7 +202,6 @@ function LobbyRoom (socket, io) {
 			socket.emit('errorMessage', 'Error joining the game');
 		}
 		let room = searchRoomId(info.id).room;
-		console.log(room);
 		if (!room) {
 			socket.emit('errorMessage', 'Could not find room to join.')
 		} else {
@@ -214,7 +209,6 @@ function LobbyRoom (socket, io) {
 			// check if there is space for more players.
 			let playerCount = 0;
 			if (info.role !== 'spectator') {
-				console.log(room);
 				for (let j = 0; j < room.users.length; j++) {
 					if (room.users[j].role == 'player' || room.users[j].role == 'host') {
 						playerCount++;
@@ -334,8 +328,8 @@ function LobbyRoom (socket, io) {
 	socket.on('initGame', function (id) {
 		let room = searchRoomId(id).room;
 		room.state = true;
-		socket.to(room.socketRoom).emit('gameInProgress', room);
-		socket.emit('gameInProgress', room);
+		socket.to(room.socketRoom).emit('restoreGame', room);
+		socket.emit('restoreGame', room);
 		refreshLobbyAll();
 	});
 

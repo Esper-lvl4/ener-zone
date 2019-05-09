@@ -13,8 +13,10 @@
       <DeleteDeck v-if="deleteDeckModal" @close-modal="closeModals" />
 
       <SaveDeck :main="main" :lrig="lrig" v-if="saveDeckModal" @close-modal="closeModals" />
+			<keep-alive>
+				<DetailedFilter v-if="filterModal" @close-modal="closeModals" />
+			</keep-alive>
 
-      <DetailedFilter v-if="filterModal" @close-modal="closeModals" />
     </div>
   </div>
 </template>

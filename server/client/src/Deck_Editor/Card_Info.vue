@@ -68,7 +68,7 @@ export default {
 
   		if (cardInfo.type.toLowerCase() == 'lrig') {
   			info.props += `/level ${cardInfo.level}/limit ${cardInfo.limit}`;
-  			if (cardInfo.coins != '0') {
+  			if (cardInfo.coins && cardInfo.coins != '0') {
   				info.props += `/coins ${cardInfo.coins}`
   			}
         info.cost = `<b>Grow cost:</b> ${cardInfo.cost}`;

@@ -49,10 +49,16 @@ export default {
     loginSuccess() {
       this.$store.commit('manageLogin', true);
     },
-		gameInProgress(room) {
-			console.log('grape');
+		restoreGame(room) {
 			this.$router.push('game');
-		}
+			this.$store.commit('changeCurrentRoom', room);
+		},
+		restoreRoom (room) {
+			console.log('restore room');
+			this.$router.push('lobby');
+			this.$store.commit('changeCurrentRoom', room);
+			this.$forceUpdate();
+		},
   },
   data() {
     return {
@@ -75,6 +81,7 @@ export default {
 		}
 	},
 	mounted() {
+		console.log('check');
 		this.$socket.emit('checkUserLocation', 'check');
 	}
 }
