@@ -126,6 +126,6 @@ export default {
 				{card: {}, under: {}},
 			],
 		}
-	}
+	},
 }
 </script>

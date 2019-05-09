@@ -5,7 +5,12 @@ const Users = {
 
 	state: [
 		// store user's state here.
-		// {nick: 'KappaLord', token: '', location: '/lobby', role: 'player'},
+		/* {
+			nick: 'KappaLord',
+			token: '',
+			location: '/lobby',
+			role: 'player',
+		},  */
 	],
 
 	// Check if state of user is tracked. If not - start tracking it.
@@ -25,8 +30,8 @@ const Users = {
 				return false;
 			}
 			this.state.push({
-				nick: userNick, 
-				token: socket.handshake.query.token, 
+				nick: userNick,
+				token: socket.handshake.query.token,
 				location: socket.nsp.name,
 				room: null,
 				ready: false,
@@ -38,7 +43,7 @@ const Users = {
 	getUserState: function (socket) {
 		let token = socket.handshake.query.token;
 		if (!token) {
-			socket.emit('success-logout', 'no token');
+			socket.emit('successLogout', 'no token');
 		}
 		let result = false;
 		for (let i = 0; i < this.state.length; i++) {
@@ -58,26 +63,26 @@ const Users = {
 		return new Promise ((resolve, reject) => {
 			let token = socket.handshake.query.token;
 			if (!token) {
-				socket.emit('success-logout', 'no token');
+				socket.emit('successLogout', 'no token');
 				reject('no token');
 			}
 			let decoded = jwt.decode(token, {complete: true});
 			if (!decoded) {
-				console.log('failed to decode token');
+				socket.emit('errorMessage', 'failed to decode token');
 				reject('cant decode');
 			}
 			User.findOne({_id: decoded.payload.id}, function (err, user) {
 				if (err) {
-					socket.emit('error-message', 'Error, when tried to find a user.');
+					socket.emit('errorMessage', 'Error, when tried to find a user.');
 					reject('user err');
 				}
 				if (!user) {
-					socket.emit('success-logout', 'User without a document in DB got token.');
+					socket.emit('successLogout', 'User without a document in DB got token.');
 					reject('User without a document in DB got token.');
 				}
 				resolve(user.nickname);
 			});
-		})																												
+		})
 	},
 
 	// Handler for changes in user's state. Below are functions, that gets executed by this.
@@ -147,20 +152,22 @@ const Users = {
 		return new Promise ((resolve, reject) => {
 			let token = socket.handshake.query.token;
 			if (!token) {
+				socket.emit('errorMessage', 'No token');
 				reject('no token');
 			}
 			let decoded = jwt.decode(token, {complete: true});
 			if (!decoded) {
+				socket.emit('errorMessage', 'Failed to decode token');
 				reject('failed to decode token');
 			}
 			let userData = null;
 			User.findOne({_id: decoded.payload.id}, function (err, user) {
 				if (err) {
-					socket.emit('something-wrong', 'Error, when tried to find user.')
+					socket.emit('errorMessage', 'Error, when tried to find user.')
 					reject('Error, when tried to find user.');
 				}
 				if (!user) {
-					socket.emit('success-logout', 'User without a document in DB got token.');
+					socket.emit('successLogout', 'User without a document in DB got token.');
 					reject('User without a document in DB got token.');
 				}
 				if (opt.returnAll) {

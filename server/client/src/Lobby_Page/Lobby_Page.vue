@@ -55,17 +55,14 @@ export default {
 	},
 	sockets: {
 		restoreRoom (room) {
-			console.log('restore');
-			console.log(room);
 			this.initRoom(room);
 		},
 		refreshLobby (data) {
 			if (!data) {
-				console.log('No game data were sent by server!');
+				this.$store.commit('errorMessage', 'No game data were sent by server!');
 				return;
 			}
 			this.gameRooms = data;
-			console.log(this.gameRooms);
 		},
 		joiningRoom (room) {
 			this.initRoom(room);
@@ -124,8 +121,6 @@ export default {
 		initRoom(room) {
 			this.toggleModal();
 			this.$store.commit('changeCurrentRoom', room);
-			console.log('init');
-			console.log(room);
 		},
 		resetLobby() {
 			this.toggleModal();
