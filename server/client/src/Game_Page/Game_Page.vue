@@ -1,6 +1,6 @@
 <template>
 	<!-- Game block -->
-	<div class="game-wrap wrap-size" v-if="gameActive">
+	<div class="game-wrap wrap-size">
 		<div class="info-block">
 			<img :src="cardHover.image" class="info-img">
 			<span>{{cardHover.name}}</span>
@@ -71,60 +71,8 @@ export default {
 	data() {
 		return {
 			// Game props
-			gameActive: false,
-			cardHover: {
-				image: '/files/img/default-card.jpg',
-				name: '',
-				props: '',
-				class: '',
-				cost: '',
-				timing: '',
-				power: '',
-				limitCon: '',
-				text: 'Gl hf',
-			},
-			// Zones status.
-			lrigTrashZone: [
-				{
-					altImages: null,
-					boosterSet: "WX-15 Incited Selector",
-					class: "Nature Spirit: Bacteria",
-					coins: null,
-					color: "Black",
-					cost: null,
-					craft: false,
-					effect: " <span style=\"color:#FFF; background: #00A33A; padding:0px 3px; border:2px solid #EEE; border-radius:3px; font-weight:bold; display:inline;\">Action</span> <a href=\"/wiki/Down\" class=\"image image-thumbnail link-internal\" title=\"Down\"><img src=\"https://vignette.wikia.nocookie.net/selector-wixoss/images/f/f9/Down.png/revision/latest?cb=20140814193330\" alt=\"Down\" class=\"\" data-image-key=\"Down.png\" data-image-name=\"Down.png\" width=\"18\" height=\"18\"></a>: Remove 1 [<a href=\"/wiki/Virus\" title=\"Virus\">Virus</a>] on your opponent&apos;s <a href=\"/wiki/Field\" title=\"Field\">field</a>. If you do, <a href=\"/wiki/Draw\" title=\"Draw\" class=\"mw-redirect\">draw</a> 1 card.\n",
-					image: "https://vignette.wikia.nocookie.net/selector-wixoss/images/4/47/WX15-117.jpg/revision/latest?cb=20161008002426",
-					ksLegal: false,
-					level: "1",
-					limit: null,
-					limitingCondition: "Nanashi",
-					link: "http://wixoss.wikia.com/wiki/Acnes,_Natural_Bacteria",
-					lrigType: null,
-					name: "Acnes, Natural Bacteria",
-					number: 1,
-					power: "1000",
-					ru: false,
-					timing: null,
-					type: "SIGNI",
-				}
-			],
-			trashZone: [],
-			mainDeckZone: [],
-			lrigDeckZone: [],
-			lrigZone: {
-				lrig: {},
-				key: {},
-				under: [],
-			},
-			lifeClothZone: [],
-			checkZone: [],
-			enerZone: [],
-			signiZones: [
-				{card: {}, under: {}},
-				{card: {}, under: {}},
-				{card: {}, under: {}},
-			],
+
+			
 		}
 	},
 }
