@@ -92,11 +92,10 @@ export default {
 			this.$socket.emit('playerReadiness');
 		},
 		open: function () {
-			console.log(this.readyToStart);
 			if (this.readyToStart === true) {
 				this.$socket.emit('initGame', this.currentRoom.id);
 			}
 		},
-	}
+	},
 }
 </script>

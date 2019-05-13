@@ -1,45 +1,12 @@
-class GameState {
-	constructor(){
-		// Zones status.
-		this.player1 = {
-			lrigTrashZone: [],
-			trashZone: [],
-			mainDeckZone: [],
-			lrigDeckZone: [],
-			lrigZone: {
-				lrig: {},
-				key: {},
-				under: [],
-			},
-			lifeClothZone: [],
-			checkZone: [],
-			enerZone: [],
-			signiZones: [
-				{card: {}, under: {}},
-				{card: {}, under: {}},
-				{card: {}, under: {}},
-			],
-		},
+import Player from './Game_Player';
 
-		this.player2 = {
-			lrigTrashZone: [],
-			trashZone: [],
-			mainDeckZone: [],
-			lrigDeckZone: [],
-			lrigZone: {
-				lrig: {},
-				key: {},
-				under: [],
-			},
-			lifeClothZone: [],
-			checkZone: [],
-			enerZone: [],
-			signiZones: [
-				{card: {}, under: {}},
-				{card: {}, under: {}},
-				{card: {}, under: {}},
-			],
-		}
+class GameState {
+	constructor(user) {
+		this.players = [];
+
+		this.phase = 'Draw phase';
+		this.turnPlayer = 1;
+		this.chatHistory = [];
 
 	}
 }
