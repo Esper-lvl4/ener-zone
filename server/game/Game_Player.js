@@ -31,7 +31,7 @@ class Player {
 		// originalZone: {name, type, index, indexOfSigniZone}
 		// destinationZone: {name, type, indexOfSigniZone}
 		// validation.
-		if (!(originalZone && destinationZone) {
+		if (!(originalZone && destinationZone)) {
 			console.log('moveCard: no zones were provided');
 		} else if (!(originalZone.index && originalZone.name && destinationZone.name)) {
 			console.log('moveCard: not enough info about zones');
@@ -43,7 +43,7 @@ class Player {
 		// removed card is saved in the variable;
 		let card = this.removeCard(originalZone);
 		this.addCard(card, destinationZone);
-	},
+	}
 	removeCard({index, name, type, indexOfSigniZone}) {
 		if (!index) {
 			console.log('removeCard: no index of the target card was provided');
@@ -81,7 +81,7 @@ class Player {
 			this[name].splice(index, 1);
 		}
 		return card;
-	},
+	}
 	addCard(card, zone) {
 		if (!card) {
 			console.log('addCard: No card was provided');
@@ -106,27 +106,27 @@ class Player {
 				this.signiZones[indexOfSigniZone].signi = card;
 			} else {
 				// if it's a card under signi
-				this.signiZones[indexOfSigniZone].under.push(card;
+				this.signiZones[indexOfSigniZone].under.push(card);
 			}
 		} else {
 			// standart iteraction.
 			this[name].push(card);
 		}
-	},
+	}
 	setCardState(zone, index) {
 		if (zone == 'lrigZone') {
 			this.lrigZone.state = !this.lrigZone.state;
 		} else if (zone == 'signiZones') {
 			this.signiZones[index].state = !this.signiZones[index].state;
 		}
-	},
+	}
 	setCardStatus(status, zone, index) {
 		if (zone == 'lrigZone') {
 			this.lrigZone.status = status;
 		} else if (zone == 'signiZones') {
 			this.signiZones[index].status = status;
 		}
-	},
+	}
 	setCardTooltip(tooltip, zone, index) {
 		if (zone == 'lrigZone') {
 			this.lrigZone.tooltip = tooltip;
