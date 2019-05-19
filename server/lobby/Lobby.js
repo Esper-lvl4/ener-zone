@@ -93,7 +93,7 @@ function LobbyRoom (socket, io) {
 
 	socket.on('joinRoom', async function (info) {
 		if (!info || !info.role || !info.id) {
-			socket.emit('errorMessage', 'Error joining the game');
+			socket.emit('errorMessage', 'Info werent provided or werent complete');
 		}
 		let room = Rooms.getById(info.id).room;
 		if (!room) {

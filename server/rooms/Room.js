@@ -97,7 +97,7 @@ class Room {
 		return true;
 	}
 	start() {
-		this.state = new GameState();
+		this.state = new GameState(this.users);
 	}
 }
 

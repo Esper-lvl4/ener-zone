@@ -1,13 +1,33 @@
-const Player = require('./Game_Player');
+const BoardState = require('./Board_State');
 
 class GameState {
-	constructor(user) {
+	constructor(users) {
 		this.players = [];
 		this.spectators = [];
+
+		for (let user of users) {
+			if (user.role == 'player') {
+				user.board = new BoardState();
+				this.players.push(user);
+			} else {
+				this.spectators.push(user);
+			}
+		}
 
 		this.phase = 'Draw phase';
 		this.turnPlayer = 1;
 		this.chatHistory = [];
+	}
+	getPlayer(socket) {
+		let token = socket.handshake.query.token;
+		for (let player of this.players) {
+			if (player.token === token) {
+				return player;
+			}
+		}
+	}
+	getBoard(socket) {
+		return this.getPlayer(socket).board;
 	}
 	changePhase(phase) {
 		this.phase = phase;
