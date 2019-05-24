@@ -161,10 +161,16 @@ class BoardState {
 			)
 		}
 	}
-	async charge(index) {
+	async chargeHand(index) {
 		await this.moveCard(
 			{name: 'hand', index: index},
-			{name: 'ener-zone'}
+			{name: 'enerZone'}
+		)
+	}
+	async callSigni(handIndex, zoneIndex) {
+		await this.moveCard(
+			{name: 'hand', index: handIndex},
+			{name: 'signiZones', type: 'signi', zoneIndex}
 		)
 	}
 }
