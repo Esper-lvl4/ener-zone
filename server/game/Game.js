@@ -6,7 +6,7 @@ function Game (socket, io) {
 	let room = Rooms.getByToken(socket.handshake.query.token).room;
 	let board = room.state.getBoard(socket);
 
-	function refresh(token) {
+	function refresh() {
 		socket.to(room.socketRoom).emit('refreshGame', room);
 		socket.emit(refreshGame, room);
 	}
@@ -17,39 +17,32 @@ function Game (socket, io) {
 		console.log('game-started');
 	}
 
-	async function drawCard (number) {
-		await board.draw(number);
-		refresh();
-	}
-
-	async function discardCard (index) {
-		await board.discard(number);
-		refresh();
-	}
-
-	async function enerCharge (number) {
-		await board.enerCharge(number);
-		refresh();
-	}
-
-	async function chargeHand (index) {
-		await board.chargeHand(index);
-		refresh();
-	}
-
-	async function callSigni (handIndex, zoneIndex) {
-		await board.callSigni(handIndex, zoneIndex);
-		refresh();
-	}
-
 	socket.on('gameStarted', gameStarted);
 
 	// Field manipulation events.
-	socket.on('drawCard', drawCard);
-	socket.on('discardCard', discardCard);
-	socket.on('enerCharge', enerCharge);
-	socket.on('handCharge', chargeHand);
-	socket.on('callSigni', callSigni);
+	socket.on('drawCard', board.drawCard.then(refresh));
+	socket.on('discardCard', board.discardCard.then(refresh));
+	socket.on('enerCharge', board.enerCharge.then(refresh));
+	socket.on('handCharge', board.chargeHand.then(refresh));
+
+	// Signi manipulation
+	socket.on('callSigni', board.callSigni.then(refresh));
+	socket.on('banishSigni', board.banishSigni.then(refresh));
+	socket.on('trashSigni', board.trashSigni.then(refresh));
+	socket.on('excludeSigni', board.excludeSigni.then(refresh));
+	socket.on('returnSigni', board.returnSigni.then(refresh));
+
+	// Lrig and keys manipulation
+	socket.on('growLrig', board.growLrig.then(refresh));
+	socket.on('returnLrig', board.returnLrig.then(refresh));
+	socket.on('removeLrig', board.removeLrig.then(refresh));
+	socket.on('payExceed', board.payExceed.then(refresh));
+	socket.on('playKey', board.playKey.then(refresh));
+	socket.on('removeKey', board.removeKey.then(refresh));
+	socket.on('returnKey', board.returnKey.then(refresh));
+
+	// Moving between easy zones
+	socket.on('moveToZone', board.moveToZone.then(refresh));
 }
 
 module.exports = Game;

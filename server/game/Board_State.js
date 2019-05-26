@@ -26,7 +26,7 @@ class SigniZone  {
 class LrigZone extends SigniZone  {
 	constructor() {
 		super();
-		this.key: null,
+		this.key: [],
 	}
 }
 
@@ -46,6 +46,7 @@ class BoardState {
 		}
 		this.removedZone = [];
 		this.hand = [];
+		this.excluded = [];
 	}
 
 	async moveCard(originalZone, destinationZone) {
@@ -68,10 +69,11 @@ class BoardState {
 			console.log(err);
 		}
 	}
-	async removeCard({index, name, type, signiIndex}) {
-		if (!index) {
-			throw new Error('removeCard: no index of the target card was provided');
-		} else if (!name) {
+	async removeCard(zone) {
+		let {index, name, type, signiIndex} = zone;
+		index = +index;
+		signiIndex = +signiIndex;
+		if (!name) {
 			throw new Error('removeCard: no zone name was provided');
 		}
 		let card = null;
@@ -83,7 +85,7 @@ class BoardState {
 				this.lrigZone.card = null;
 			} else if (type == 'key') {
 				card = this.lrigZone.key;
-				this.lrigZone.key = null;
+				this.lrigZone.key.splice(index, 1);
 			} else {
 				// if it's a card under lrig
 				card = this.lrigZone.under[index];
@@ -100,6 +102,9 @@ class BoardState {
 			}
 		} else {
 			// standart iteraction.
+			if (!index) {
+				throw new Error('removeCard: no index of the target card was provided');
+			}
 			card = this[name][index];
 			this[name].splice(index, 1);
 		}
@@ -112,12 +117,13 @@ class BoardState {
 			throw new Error('addCard: No zone was provided');
 		}
 		let {name, type, signiIndex} = zone;
+		signiIndex = +signiIndex;
 		if (name == 'lrigZone') {
 			// Lrig zone rules.
 			if (type == 'lrig') {
 				this.lrigZone.card = card;
 			} else if (type == 'key') {
-				this.lrigZone.key = card;
+				this.lrigZone.key.push(card);
 			} else {
 				// if it's a card under lrig
 				this.lrigZone.inceed(card);
@@ -167,10 +173,92 @@ class BoardState {
 			{name: 'enerZone'}
 		)
 	}
+
+	// Excludes, moving cards to trash, paying costs, life bursts, spell/arts usage
+	async moveToZone(zone, index, targetZone) {
+		await this.moveCard(
+			{name: zone, index: index},
+			{name: targetZone}
+		)
+	}
+
+	// Signi Zone actions.
 	async callSigni(handIndex, zoneIndex) {
 		await this.moveCard(
 			{name: 'hand', index: handIndex},
-			{name: 'signiZones', type: 'signi', zoneIndex}
+			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex}
+		)
+	}
+	async banishSigni(zoneIndex) {
+		await this.moveCard(
+			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex},
+			{name: 'enerZone'}
+		)
+	}
+	async trashSigni(zoneIndex) {
+		await this.moveCard(
+			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex},
+			{name: 'trash'}
+		)
+	}
+	async excludeSigni(zoneIndex) {
+		await this.moveCard(
+			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex},
+			{name: 'excluded'}
+		)
+	}
+	async returnSigni(zoneIndex) {
+		await this.moveCard(
+			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex},
+			{name: 'hand'}
+		)
+	}
+
+	// Lrig Zone actions.
+	async growLrig(index) {
+		await this.moveCard(
+			{name: 'lrigZone', type: 'lrig'},
+			{name: 'lrigZone'}
+		)
+		await this.moveCard(
+			{name: 'lrigDeck', index: index},
+			{name: 'lrigZone', type: 'lrig'}
+		)
+	}
+	async returnLrig() {
+		await this.moveCard(
+			{name: 'lrigZone', type: 'lrig'},
+			{name: 'lrigDeck'}
+		)
+	}
+	async removeLrig() {
+		await this.moveCard(
+			{name: 'lrigZone', type: 'lrig'},
+			{name: 'lrigTrash'}
+		)
+	}
+	async payExceed(index) {
+		await this.moveCard(
+			{name: 'lrigZone', index: index},
+			{name: 'lrigTrash'}
+		)
+	}
+	async playKey(index) {
+		await this.moveCard(
+			{name: 'lrigDeck', index: index},
+			{name: 'lrigZone', type: 'key'}
+		)
+	}
+	async removeKey(index) {
+		await this.moveCard(
+			{name: 'lrigZone', type: 'key', index: index},
+			{name: 'lrigTrash'}
+		)
+	}
+	async returnKey(index) {
+		await this.moveCard(
+			{name: 'lrigZone', type: 'key', index: index},
+			{name: 'lrigDeck'}
 		)
 	}
 }
