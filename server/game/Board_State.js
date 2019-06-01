@@ -26,7 +26,7 @@ class SigniZone  {
 class LrigZone extends SigniZone  {
 	constructor() {
 		super();
-		this.key: [],
+		this.key = [];
 	}
 }
 
@@ -261,6 +261,27 @@ class BoardState {
 			{name: 'lrigDeck'}
 		)
 	}
+
+	// Uncommon movements to Lrig or signi zone
+	async moveToLrigZone(name, index, type) {
+		await this.moveCard(
+			{name, index},
+			{name: 'lrigZone', type}
+		)
+	}
+	async moveToSigniZone(name, index, type, signiIndex) {
+		await this.moveCard(
+			{name, index},
+			{name: 'signiZones', type, signiIndex}
+		)
+	}
+
+	// Token creation
+	async createToken(tokenId) {
+		let card = {} // call to database, await.
+		await this.addCard(card, {name: 'checkZone'})
+	}
+
 }
 
 module.exports = BoardState;

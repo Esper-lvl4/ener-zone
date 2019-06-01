@@ -43,6 +43,13 @@ function Game (socket, io) {
 
 	// Moving between easy zones
 	socket.on('moveToZone', board.moveToZone.then(refresh));
+
+	// Uncommon actions, that move cards to signi/lrig zone;
+	socket.on('moveToLrigZone', board.moveToLrigZone.then(refresh));
+	socket.on('moveToSigniZone', board.moveToSigniZone.then(refresh));
+
+	// Create tokens.
+	socket.on('createToken', board.createToken.then(refresh));
 }
 
 module.exports = Game;
