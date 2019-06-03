@@ -1,4 +1,5 @@
-const GameState = require('../game/Game_State');
+const GameState = require('./../game/Game_State');
+const BoardState = require('./../game/Board_State');
 
 // function for cloning objects.
 function cloneObject(obj) {
@@ -30,11 +31,12 @@ function cloneArray(arr) {
 	return clone;
 }
 
-class Room {
-	constructor(socket, roomObj, id) {
-		this.users = [];
-		this.name = roomObj.name;
-		this.settings = roomObj.settings;
+function Room (socket, roomObj, id) {
+	let prototype = {
+		players: [],
+		spectators: [],
+		name: roomObj.name,
+		settings: roomObj.settings,
 		/*
 		{
 			format: 'as',
@@ -42,63 +44,79 @@ class Room {
 			password: '',
 		}
 		*/
-		this.id = id + '';
-		this.socketRoom = 'room-' + this.id;
-		this.state = false;
-		this.chat = [];
-	}
-	clear() {
-		// Clone room, then remove tokens, to not send them, and dont affect initial room object.
-		let roomClone = cloneObject(this);
-		roomClone.users.forEach((user) => {
-			delete user.token;
-		})
-		return roomClone;
-	}
-	join(socket, user) {
-		this.users.push(user);
-		socket.join(this.socketRoom);
-	}
-	leave(user) {
-		console.log(typeof user);
-		if (typeof user == 'number') {
-			console.log('number');
-			this.users.splice(user, 1);
-		} else if (typeof user == 'object') {
-			console.log('object');
-			for (let i = 0; i < this.users.length; i++) {
-				if (this.users[i].token == user.token) {
-					this.users.splice(i, 1);
+		id: id + '',
+		socketRoom: 'room-' + this.id,
+		state: false,
+		chat: [],
+
+		clear() {
+			// Clone room, then remove tokens, to not send them, and dont affect initial room object.
+			let roomClone = cloneObject(this);
+			roomClone.players.forEach((player) => {
+				delete player.token;
+			})
+			roomClone.spectators.forEach((spectator) => {
+				delete spectator.token;
+			})
+			return roomClone;
+		},
+		join(socket, user) {
+			if (user.role == 'player') {
+				this.players.push(user);
+			} else {
+				this.spectators.push(user);
+			}
+			socket.join(this.socketRoom);
+		},
+		leave(user, role) {
+			let list = role + 's';
+			if (typeof user == 'number') {
+				this[list].splice(user, 1);
+			} else if (typeof user == 'object') {
+
+				for (let i = 0; i < this[list].length; i++) {
+					if (this[list][i].token == user.token) {
+						this[list].splice(i, 1);
+					}
 				}
 			}
-		}
-	}
-	isFull() {
-		let playerCount = 0;
-		for (let j = 0; j < this.users.length; j++) {
-			if (this.users[j].role == 'player' || this.users[j].role == 'host') {
-				playerCount++;
+		},
+		isFull() {
+			let number = 2;
+			if (this.settings.numberOfPlayers) number = this.settings.NumberOfPlayers;
+			if (players.length < number) return true;
+			return false;
+		},
+		isEmpty() {
+			// Check if there are still players in the room. Dont count spectators, but search for host in their list.
+			if (this.players.length == 0) {
+				for (let i = 0; i < this.spectators.length; i++) {
+					if (this.spectators[i].isHost) {
+						return false;
+						break;
+					}
+				}
 			}
-			if (playerCount === 2) {
-				return true;
-				break;
+			return true;
+		},
+		getPlayer(socket) {
+			let token = socket.handshake.query.token;
+			for (let player of this.players) {
+				if (player.token === token) {
+					return player;
+				}
 			}
-		}
-		return false;
+		},
+		start() {
+			let game = GameState();
+			let board = BoardState();
+			Object.assign(this, game, board);
+			this.state = true;
+		},
 	}
-	isEmpty() {
-		// Check if there are still players in the room. Dont count spectators.
-		for (let k = 0; k < this.users.length; k++) {
-			if (this.users[k].role == 'player' || this.users[k].role == 'host') {
-				return false;
-				break;
-			}
-		}
-		return true;
-	}
-	start() {
-		this.state = new GameState(this.users);
-	}
+
+	let obj = Object.create(prototype);
+	return obj;
 }
 
 module.exports = Room;

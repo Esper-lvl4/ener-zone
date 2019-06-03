@@ -1,12 +1,14 @@
-var Users = require('../users/Users');
+var UserState = require('../users/Users');
 var Room = require('./Room');
+
+const Users = UserState();
 
 var gameRooms = {
 	list: [],
 	counter: 0,
 
 	async add(socket, roomObj) {
-		let room = new Room(socket, roomObj, ++this.counter);
+		let room = Room(socket, roomObj, ++this.counter);
 		this.list.push(room);
 
 		let user = await Users.getUser(socket);
@@ -44,10 +46,14 @@ var gameRooms = {
 		if (!token) {return false;}
 
 		for (let i = 0; i < this.list.length; i++) {
-			for (let j = 0; j < this.list[i].users.length; j++) {
-				if (token === this.list[i].users[j].token) {
-					return {room: this.list[i], index: i, userIndex: j};
-					break;
+			for (let j = 0; j < this.list[i].players.length; j++) {
+				if (token === this.list[i].players[j].token) {
+					return {room: this.list[i], index: i, userIndex: j, role: 'player'};
+				}
+			}
+			for (let k = 0; k < this.list[k].spectators.length; k++) {
+				if (token === this.list[i].spectators[k].token) {
+					return {room: this.list[i], index: i, userIndex: k, role: 'spectator'};
 				}
 			}
 		}

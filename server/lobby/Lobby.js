@@ -1,7 +1,9 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const Users = require('../users/Users');
+const UserState = require('../users/Users');
 const Rooms = require('../rooms/Game_Rooms');
+
+const Users = UserState();
 
 var chatHistory = [ // Array to store recent messages in chat.
 	{time: '13:00', nickname: 'Kekko', text: 'Hello there!'},
