@@ -20,6 +20,7 @@ function Users () {
 		async checkState(socket) {
 			let check = false;
 			let token = socket.handshake.query.token;
+			console.log(this.state);
 			for (let i = 0; i < this.state.length; i++) {
 				if (token == this.state[i].token) {
 					check = true;
@@ -127,11 +128,10 @@ function Users () {
 		},
 
 		changeRoom(socket, args) {
-			let [roomName, role] = args;
+			let [roomName] = args;
 			for (let i = 0; i < this.state.length; i++) {
 				if (socket.handshake.query.token == this.state[i].token) {
 					this.state[i].room = roomName;
-					this.state[i].role = role;
 				}
 			}
 		},
@@ -183,4 +183,4 @@ function Users () {
 	return Object.create(prototype);
 }
 
-module.exports = Users;
+module.exports = Users();

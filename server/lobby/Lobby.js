@@ -1,9 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const UserState = require('../users/Users');
+const Users = require('../users/Users');
 const Rooms = require('../rooms/Game_Rooms');
 
-const Users = UserState();
 
 var chatHistory = [ // Array to store recent messages in chat.
 	{time: '13:00', nickname: 'Kekko', text: 'Hello there!'},
@@ -43,13 +42,14 @@ function LobbyRoom (socket, io) {
 		}
 		let token = socket.handshake.query.token;
 		if (!token) {
-			socket.emit('successLogout', 'no token');
+			socket.emit('successLogout');
 		}
 		if (!userState) {
 			return;
 		} else if (userState.location.match('room')) {
 			let roomID = userState.location.replace('room-', '');
 			let room = Rooms.getById(roomID).room;
+			console.log(Rooms.list);
 			if (!room) {
 				socket.emit('errorMessage', 'Could not find room to refresh')
 			} else {
@@ -87,7 +87,7 @@ function LobbyRoom (socket, io) {
 		socket.emit('joiningRoom', roomClone);
 		Users.updateState(socket, 'ready', false);
 		Users.updateState(socket, 'move', room.socketRoom);
-		Users.updateState(socket, 'changeRoom', room.socketRoom, room.users[0].role);
+		Users.updateState(socket, 'changeRoom', room.socketRoom);
 		Rooms.refreshAll(io);
 	});
 
@@ -209,8 +209,8 @@ function LobbyRoom (socket, io) {
 			let index = roomObj.index;
 			let userIndex = roomObj.userIndex;
 
-			room.users[userIndex].ready = !room.users[userIndex].ready;
-			Users.updateState(socket, 'ready', room.users[userIndex].ready);
+			room.players[userIndex].ready = !room.players[userIndex].ready;
+			Users.updateState(socket, 'ready', room.players[userIndex].ready);
 			let roomClone = room.clear();
 			socket.to(room.socketRoom).emit('refreshRoom', roomClone);
 			socket.emit('refreshRoom', roomClone);

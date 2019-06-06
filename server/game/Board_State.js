@@ -155,7 +155,7 @@ function PlayerField (playerId) {
 	return Object.create(prototype);
 }
 
-function BoardState (players) {
+function BoardState () {
 	let prototype = {
 		board: [],
 		async delegateAction(originalZone, destinationZone, socket, action) {
@@ -169,10 +169,13 @@ function BoardState (players) {
 				}
 			}
 		},
+		init() {
+			for (let i = 0; i < this.players.length; i++) {
+				this.board.push(PlayerField(this.players[i].id));
+			}
+		},
 	}
-	for (let i = 0; i < players.length; i++) {
-		board.push(PlayerField(players[i].id));
-	}
+
 	return Object.create(prototype);
 }
 

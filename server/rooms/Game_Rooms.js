@@ -1,7 +1,6 @@
-var UserState = require('../users/Users');
-var Room = require('./Room');
+const Users = require('../users/Users');
+const Room = require('./Room');
 
-const Users = UserState();
 
 var gameRooms = {
 	list: [],

@@ -9,7 +9,7 @@ function verifyToken (socket) {
 	let token = socket.handshake.query.token;
 	let access = false;
 
-	if (!token) { 
+	if (!token) {
 		if (Users.checkState(socket)) {
 			Users.updateState(socket, 'remove', token);
 		};
@@ -17,7 +17,7 @@ function verifyToken (socket) {
 		return access;
 	}
 	jwt.verify(token, key.secret, function (err, decoded) {
-		if (err) {		
+		if (err) {
 			if (Users.checkState(socket)) {
 				Users.updateState(socket, 'remove', token);
 			};

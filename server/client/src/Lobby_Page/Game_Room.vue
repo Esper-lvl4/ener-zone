@@ -38,25 +38,22 @@ export default {
 			return this.currentRoom;
 		},
 		role() {
-			for (let user of this.room.users) {
+			for (let user of this.room.players) {
 				if (user.nickname == localStorage.getItem('Nickname')) {
-					return user.role;
+					return 'player';
+					break;
+				}
+			}
+			for (let user of this.room.spectators) {
+				if (user.nickname == localStorage.getItem('Nickname')) {
+					return 'spectator';
 					break;
 				}
 			}
 			return '';
 		},
 		users() {
-			let players = [];
-			let spectators = [];
-			for (let i = 0; i < this.room.users.length; i++) {
-				if (this.room.users[i].role === 'player' || this.room.users[i].role === 'host') {
-					players.push(this.room.users[i]);
-				} else if (this.room.users[i].role === 'spectator') {
-					spectators.push(this.room.users[i]);
-				}
-			}
-			return {players, spectators};
+			return {players: this.room.players, spectators: this.room.spectators};
 		},
 		userIsRoomHost: function () {
 			return this.role == 'host';
@@ -83,10 +80,10 @@ export default {
   },
 	methods: {
 		closeRoom: function () {
-			this.$socket.emit('closeRoom', 'close pls');
+			this.$socket.emit('closeRoom');
 		},
 		leaveRoom: function () {
-			this.$socket.emit('leaveRoom', 'leave pls');
+			this.$socket.emit('leaveRoom');
 		},
 		readyToPlay: function () {
 			this.$socket.emit('playerReadiness');

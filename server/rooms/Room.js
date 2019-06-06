@@ -45,7 +45,7 @@ function Room (socket, roomObj, id) {
 		}
 		*/
 		id: id + '',
-		socketRoom: 'room-' + this.id,
+		socketRoom: 'room-' + id,
 		state: false,
 		chat: [],
 
@@ -61,7 +61,7 @@ function Room (socket, roomObj, id) {
 			return roomClone;
 		},
 		join(socket, user) {
-			if (user.role == 'player') {
+			if (user.role == 'player' || user.role == 'host') {
 				this.players.push(user);
 			} else {
 				this.spectators.push(user);
@@ -84,7 +84,7 @@ function Room (socket, roomObj, id) {
 		isFull() {
 			let number = 2;
 			if (this.settings.numberOfPlayers) number = this.settings.NumberOfPlayers;
-			if (players.length < number) return true;
+			if (this.players.length == number) return true;
 			return false;
 		},
 		isEmpty() {
@@ -108,14 +108,15 @@ function Room (socket, roomObj, id) {
 			}
 		},
 		start() {
-			let game = GameState();
-			let board = BoardState();
-			Object.assign(this, game, board);
+			this.init();
 			this.state = true;
 		},
 	}
-
+	let game = GameState();
+	let board = BoardState();
+	Object.assign(prototype, game.__proto__, board.__proto__);
 	let obj = Object.create(prototype);
+	Object.assign(obj, game, board);
 	return obj;
 }
 

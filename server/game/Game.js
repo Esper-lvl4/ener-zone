@@ -4,7 +4,6 @@ const Game_State = require('./Game_State');
 function Game (socket, io) {
 	// Function for refreshing game.
 	let room = Rooms.getByToken(socket.handshake.query.token).room;
-	let board;
 
 	if (room) {
 		if (room.state) gameStarted();
@@ -17,9 +16,9 @@ function Game (socket, io) {
 	}
 
 	// common actions.
-	async function draw (number) {
+	async function drawCard (number) {
 		for (let i = 1; i <= number; i++) {
-			await board.delegateAction(
+			await room.delegateAction(
 				{name: 'mainDeck', index: 0},
 				{name: 'hand'},
 				socket,
@@ -28,8 +27,8 @@ function Game (socket, io) {
 		}
 		refresh();
 	}
-	async function discard (index) {
-		await board.delegateAction(
+	async function discardCard (index) {
+		await room.delegateAction(
 			{name: 'hand', index: index},
 			{name: 'trash'},
 			socket,
@@ -37,9 +36,9 @@ function Game (socket, io) {
 		)
 		refresh();
 	}
-	async function enerChange (number) {
+	async function enerCharge (number) {
 		for (let i = 1; i <= number; i++) {
-			await board.delegateAction(
+			await room.delegateAction(
 				{name: 'mainDeck', index: 0},
 				{name: 'enerZone'},
 				socket,
@@ -49,7 +48,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function chargeHand(index) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'hand', index: index},
 			{name: 'enerZone'},
 			socket,
@@ -60,7 +59,7 @@ function Game (socket, io) {
 
 	// Excludes, moving cards to trash, paying costs, life bursts, spell/arts usage
 	async function moveToZone(zone, index, targetZone) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: zone, index: index},
 			{name: targetZone},
 			socket,
@@ -71,7 +70,7 @@ function Game (socket, io) {
 
 	// Signi Zone actions.
 	async function callSigni(handIndex, zoneIndex) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'hand', index: handIndex},
 			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex},
 			socket,
@@ -80,7 +79,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function banishSigni(zoneIndex) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex},
 			{name: 'enerZone'},
 			socket,
@@ -89,7 +88,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function trashSigni(zoneIndex) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex},
 			{name: 'trash'},
 			socket,
@@ -98,7 +97,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function excludeSigni(zoneIndex) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex},
 			{name: 'excluded'},
 			socket,
@@ -107,7 +106,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function returnSigni(zoneIndex) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'signiZones', type: 'signi', signiIndex: zoneIndex},
 			{name: 'hand'},
 			socket,
@@ -118,13 +117,13 @@ function Game (socket, io) {
 
 	// Lrig Zone actions.
 	async function growLrig(index) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'lrigZone', type: 'lrig'},
 			{name: 'lrigZone'},
 			socket,
 			'moveCard'
 		)
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'lrigDeck', index: index},
 			{name: 'lrigZone', type: 'lrig'},
 			socket,
@@ -133,7 +132,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function returnLrig() {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'lrigZone', type: 'lrig'},
 			{name: 'lrigDeck'},
 			socket,
@@ -142,7 +141,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function removeLrig() {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'lrigZone', type: 'lrig'},
 			{name: 'lrigTrash'},
 			socket,
@@ -151,7 +150,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function payExceed(index) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'lrigZone', index: index},
 			{name: 'lrigTrash'},
 			socket,
@@ -160,7 +159,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function playKey(index) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'lrigDeck', index: index},
 			{name: 'lrigZone', type: 'key'},
 			socket,
@@ -169,7 +168,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function removeKey(index) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'lrigZone', type: 'key', index: index},
 			{name: 'lrigTrash'},
 			socket,
@@ -178,7 +177,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function returnKey(index) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: 'lrigZone', type: 'key', index: index},
 			{name: 'lrigDeck'},
 			socket,
@@ -189,7 +188,7 @@ function Game (socket, io) {
 
 	// Uncommon movements to Lrig or signi zone
 	async function moveToLrigZone(name, index, type) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: name, index: index},
 			{name: 'lrigZone', type},
 			socket,
@@ -198,7 +197,7 @@ function Game (socket, io) {
 		refresh();
 	}
 	async function moveToSigniZone(name, index, type, signiIndex) {
-		await board.delegateAction(
+		await room.delegateAction(
 			{name: name, index: index},
 			{name: 'signiZones', type: type, signiIndex: signiIndex},
 			socket,
@@ -215,17 +214,17 @@ function Game (socket, io) {
 	// }
 
 	/*
-		Create game state object, which contains full board.
+		Create game state object, which contains full boaard.
 			- Create state.
 			- Handle player rights.
-			- Create boards.
+			- Create boaards.
 			- Fill main decks.
 			- Fill lrig decks.
 			- Shuffle main decks.
 			- Fill token store.
 			- Place lvl 0 lrig into lrig zone, face-down.
 
-		Every time, board changes, emit refresh to everyone except an initiator of a refresh.
+		Every time, boaard changes, emit refresh to everyone except an initiator of a refresh.
 			- Get event from one of the players.
 			- Check, if the move is valid.
 			- If move is valid:
@@ -241,7 +240,7 @@ function Game (socket, io) {
 				- Only the owner of the cards can check hidden zone, but he can only do it if it's not restricted.
 			- Facedown cards are only visible to an owner, even if it were revealed already.
 
-		All actions that does not affect boards, are handled by Game State. Others are handled by Board object
+		All actions that does not affect boaards, are handled by Game State. Others are handled by Boaard object
 	*/
 
 	socket.on('gameStarted', gameStarted);
@@ -250,39 +249,38 @@ function Game (socket, io) {
 
 	function gameStarted () {
 		console.log('game started');
-		board = room.board;
 
 		// Field manipulation events.
-		socket.on('drawCard', board.drawCard);
-		socket.on('discardCard', board.discardCard);
-		socket.on('enerCharge', board.enerCharge);
-		socket.on('handCharge', board.chargeHand);
+		socket.on('drawCard', drawCard);
+		socket.on('discardCard', discardCard);
+		socket.on('enerCharge', enerCharge);
+		socket.on('handCharge', chargeHand);
 
 		// Signi manipulation
-		socket.on('callSigni', board.callSigni);
-		socket.on('banishSigni', board.banishSigni);
-		socket.on('trashSigni', board.trashSigni);
-		socket.on('excludeSigni', board.excludeSigni);
-		socket.on('returnSigni', board.returnSigni);
+		socket.on('callSigni', callSigni);
+		socket.on('banishSigni', banishSigni);
+		socket.on('trashSigni', trashSigni);
+		socket.on('excludeSigni', excludeSigni);
+		socket.on('returnSigni', returnSigni);
 
 		// Lrig and keys manipulation
-		socket.on('growLrig', board.growLrig);
-		socket.on('returnLrig', board.returnLrig);
-		socket.on('removeLrig', board.removeLrig);
-		socket.on('payExceed', board.payExceed);
-		socket.on('playKey', board.playKey);
-		socket.on('removeKey', board.removeKey);
-		socket.on('returnKey', board.returnKey);
+		socket.on('growLrig', growLrig);
+		socket.on('returnLrig', returnLrig);
+		socket.on('removeLrig', removeLrig);
+		socket.on('payExceed', payExceed);
+		socket.on('playKey', playKey);
+		socket.on('removeKey', removeKey);
+		socket.on('returnKey', returnKey);
 
 		// Moving between easy zones
-		socket.on('moveToZone', board.moveToZone);
+		socket.on('moveToZone', moveToZone);
 
 		// Uncommon actions, that move cards to signi/lrig zone;
-		socket.on('moveToLrigZone', board.moveToLrigZone);
-		socket.on('moveToSigniZone', board.moveToSigniZone);
+		socket.on('moveToLrigZone', moveToLrigZone);
+		socket.on('moveToSigniZone', moveToSigniZone);
 
 		// Create tokens.
-		// socket.on('createToken', board.createToken);
+		// socket.on('createToken', room.createToken);
 	}
 }
 
