@@ -168,7 +168,8 @@ export default {
 		}
 	},
 	mounted() {
-		this.$socket.emit('getGameList');
+		console.log(this.$socket);
+		this.$socket.emit('getGameList', this.$socket.id);
 	},
 }
 </script>

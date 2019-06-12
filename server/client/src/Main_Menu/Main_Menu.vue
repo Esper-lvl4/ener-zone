@@ -23,6 +23,7 @@ export default {
   methods: {
     logoutHandler() {
       localStorage.removeItem('EnerZoneToken');
+			localStorage.removeItem('Nickname');
       this.$store.commit('manageLogin', false);
     },
     toggleMenu() {

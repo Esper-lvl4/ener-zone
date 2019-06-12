@@ -40,12 +40,23 @@ mongoose.connection.on('open', function (err) {
 	console.log('Connected to database.');
 });
 
+app.use(cors());
+
 app.use(express.static(path.resolve(__dirname, 'templates/')));
+
+// app.use(bodyParser.json());
+//
+// app.all('/testing', (req, res) => {
+// 	console.log(req.body);
+// 	res.sendFile(__dirname + '/rooms/Room.js');
+// })
 
 // Authentication and Authorization.
 app.get('/auth', (req, res) => {
 	res.sendFile(__dirname + '/templates/auth/auth.html');
 })
+
+
 
 io.on('connection', function(socket) {
 	console.log('User connected');

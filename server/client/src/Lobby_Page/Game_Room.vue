@@ -14,23 +14,38 @@
 		<div class="room-ex-buttons block-style">
 			<button class="main-button" v-if="userIsRoomPlayer" :disabled="!readyToStart" @click="open()">OPEN!</button>
 			<button class="main-button" @click="readyToPlay()" v-if="userIsRoomPlayer">Ready to batoru</button>
-			<button class="main-button" v-if="userIsRoomPlayer">Choose deck</button>
+			<button class="main-button" v-if="userIsRoomPlayer" @click="openLoadModal">Choose deck</button>
 			<button class="main-button"  v-if="userIsRoomPlayer">Invite</button>
 			<button class="main-button" v-if="userIsRoomHost">Kick</button>
 			<button class="main-button" v-if="userIsRoomHost" @click="closeRoom()">Close room</button>
 			<button class="main-button" @click="leaveRoom()">Leave room</button>
 		</div>
+
+		<LoadDeck v-if="loadDeckModal" @close-modal="closeModals" />
 	</div>
 </template>
 <script>
+import LoadDeck from './../components/Load_Deck.vue';
+
 export default {
   name: "game-room",
+	components: { LoadDeck },
 	props: [
 		'currentRoom'
 	],
+	sockets: {
+		loadedDeck(deck) {
+      this.deckName = deck.name;
+
+			this.$socket.emit('playerReadiness', false);
+    },
+	},
 	data() {
 		return {
 			numberOfPlayers: 2,
+			loadDeckModal: false,
+
+			deckName: '',
 		}
 	},
   computed: {
@@ -64,6 +79,9 @@ export default {
 		userIsRoomSpectator: function () {
 			return this.role == 'spectator';
 		},
+		deckIsValid () {
+			return false;
+		},
 		readyToStart() {
 			if (this.users.players.length == this.numberOfPlayers) {
 				let result = true;
@@ -86,13 +104,22 @@ export default {
 			this.$socket.emit('leaveRoom');
 		},
 		readyToPlay: function () {
-			this.$socket.emit('playerReadiness');
+			if (this.deckName !== '' && deckIsValid) {
+				this.$socket.emit('playerReadiness');
+			}
 		},
 		open: function () {
 			if (this.readyToStart === true) {
 				this.$socket.emit('initGame', this.currentRoom.id);
 			}
 		},
+
+		openLoadModal() {
+			this.loadDeckModal = true;
+		},
+		closeModals() {
+      this.loadDeckModal = false;
+		}
 	},
 }
 </script>

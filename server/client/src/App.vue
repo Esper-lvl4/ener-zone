@@ -50,14 +50,16 @@ export default {
       this.$store.commit('manageLogin', true);
     },
 		restoreGame(room) {
-			this.$router.push('game');
+			console.log(room);
 			this.$store.commit('changeCurrentRoom', room);
+			if (!this.$route.path.match('game')) {
+				this.$router.push('game');
+			}
+			console.log(this.$store.state.currentRoom);
 		},
 		restoreRoom (room) {
-			console.log('restore room');
 			this.$router.push('lobby');
 			this.$store.commit('changeCurrentRoom', room);
-			this.$forceUpdate();
 		},
   },
   data() {

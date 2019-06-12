@@ -20,7 +20,6 @@ function Users () {
 		async checkState(socket) {
 			let check = false;
 			let token = socket.handshake.query.token;
-			console.log(this.state);
 			for (let i = 0; i < this.state.length; i++) {
 				if (token == this.state[i].token) {
 					check = true;

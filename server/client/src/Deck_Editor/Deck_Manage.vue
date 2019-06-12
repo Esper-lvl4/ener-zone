@@ -32,7 +32,7 @@ export default {
     SaveDeck, LoadDeck, DeleteDeck, DetailedFilter,
   },
   props: [
-    'main', 'lrig'
+    'main', 'lrig', 'validity'
   ],
   data: () => ({
     saveDeckModal: false,

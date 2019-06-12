@@ -3,7 +3,7 @@
     <CardInfo :cardInfo="card"/>
     <main>
     	<CardList @card-hover="cardHover" @deck-update="updateDeck" />
-    	<DeckManage @cleared-editor="clearEditor" :main="mainDeck" :lrig="lrigDeck" />
+    	<DeckManage @cleared-editor="clearEditor" :main="mainDeck" :lrig="lrigDeck"/>
       <div class="main-deck">
         <h2 class="deck-titles">Main Deck</h2>
         <div class="main-card-block block-style" @mouseover="deckCardHover($event, 'mainDeck')" @click="deckClick($event, 'mainDeck')">
@@ -75,7 +75,7 @@ export default {
     },
     filteredDatabase() {
       return this.$store.state.filteredDatabase;
-    }
+    },
   },
   methods: {
     // Called when this component is mounted. Gets and writes to store the whole card database.

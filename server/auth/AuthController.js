@@ -25,6 +25,7 @@ function socketRouter (socket) {
 			}
 		});
 		if (allowSignUp === false) {
+			console.log('disallowed');
 			return;
 		} else {
 			let hashedPass = bcrypt.hashSync(userObj.password, 8);

@@ -34,9 +34,9 @@ function LrigZone () {
 	return Object.create(prototype);
 }
 
-function PlayerField (playerId) {
+function PlayerField (player) {
 	let prototype = {
-		playerIndex: null,
+		player: null,
 		lrigTrash: [],
 		trash: [],
 		mainDeck: [],
@@ -150,7 +150,7 @@ function PlayerField (playerId) {
 		prototype.signiZones.push(SigniZone());
 	}
 	prototype.lrigZone = LrigZone();
-	prototype.playerIndex = playerId;
+	prototype.player = player;
 
 	return Object.create(prototype);
 }
@@ -171,7 +171,7 @@ function BoardState () {
 		},
 		init() {
 			for (let i = 0; i < this.players.length; i++) {
-				this.board.push(PlayerField(this.players[i].id));
+				this.board.push(PlayerField(this.players[i].nickname));
 			}
 		},
 	}

@@ -1,7 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+
 const Users = require('../users/Users');
 const Rooms = require('../rooms/Game_Rooms');
+
+const callback = require('../tools/SocketCallbackDecorator');
 
 
 var chatHistory = [ // Array to store recent messages in chat.
@@ -13,27 +16,14 @@ function LobbyRoom (socket, io) {
 
 	Users.checkState(socket);
 
-	// refresh chat for one socket.
-	function refreshChatOne () {
-		socket.emit('refreshChat', chatHistory);
-	}
+	// Decorated methods to pass current socket to it in socket callback.
+	// Otherwise I would be forced to call it withing anonimous function, since "this" is lost.
+	let getGameList = callback(Rooms.refresh, socket, Rooms);
 
-	// refresh chat for all.
-	function refreshChatAll () {
-		io.sockets.emit('refreshChat', chatHistory);
-	}
-
-	// refresh lobby and chat for every user, that just connected to lobby. This is done on page refresh too.
-	socket.on('getGameList', function () {
-		Rooms.refresh(socket);
-	});
-	socket.on('getChatHistory', function () {
-		refreshChatOne();
-	});
+	// Functions, that are used as callbacks without decorator.
 
 	// Lobby events.
-
-	socket.on('checkUserLocation', function (message) {
+	function checkUserLocation (message) {
 		let userState = Users.getUserState(socket);
 		// Emit nickname for chat. Maybe I should make separate event for this.
 		socket.emit('save-nick', userState.nick);
@@ -49,7 +39,6 @@ function LobbyRoom (socket, io) {
 		} else if (userState.location.match('room')) {
 			let roomID = userState.location.replace('room-', '');
 			let room = Rooms.getById(roomID).room;
-			console.log(Rooms.list);
 			if (!room) {
 				socket.emit('errorMessage', 'Could not find room to refresh')
 			} else {
@@ -62,9 +51,10 @@ function LobbyRoom (socket, io) {
 				}
 			}
 		}
-	})
+	}
 
-	socket.on('createRoom', async function (roomObj) {
+	// Create rooms. Dont allow people to create rooms with same names.
+	async function createRoom (roomObj) {
 		let allowCreation = true;
 		for (var i = 0; i < Rooms.list.length; i++) {
 			if (Rooms.list[i].name == roomObj.name) {
@@ -89,11 +79,10 @@ function LobbyRoom (socket, io) {
 		Users.updateState(socket, 'move', room.socketRoom);
 		Users.updateState(socket, 'changeRoom', room.socketRoom);
 		Rooms.refreshAll(io);
-	});
+	}
 
-	// Joining rooms.
-
-	socket.on('joinRoom', async function (info) {
+	// Joining rooms. Check, if it's full, but only if joining user isnt spectator.
+	async function joinRoom (info) {
 		if (!info || !info.role || !info.id) {
 			socket.emit('errorMessage', 'Info werent provided or werent complete');
 		}
@@ -127,11 +116,10 @@ function LobbyRoom (socket, io) {
 				Rooms.refreshAll(io);
 			}
 		}
-	});
+	}
 
-	// Leaving rooms.
-
-	socket.on('leaveRoom', function (data) {
+	// Leaving rooms. Close, if it's empty.
+	function leaveRoom(data) {
 		let token = socket.handshake.query.token;
 		if (!token) {
 			socket.emit('successLogout', 'no token');
@@ -143,12 +131,10 @@ function LobbyRoom (socket, io) {
 		if (!roomObj) {
 			socket.emit('errorMessage', 'Could not find room to leave from. Maybe this room does not exist already.');
 		} else {
-			let room = roomObj.room;
-			let index = roomObj.index;
-			let userIndex = roomObj.userIndex;
+			let {room, index, userIndex, role} = roomObj;
 
 			socket.emit('leftRoom');
-			room.leave(userIndex);
+			room.leave(userIndex, role);
 
 			Users.updateState(socket, 'ready', false);
 			Users.updateState(socket, 'move', '/lobby');
@@ -163,11 +149,10 @@ function LobbyRoom (socket, io) {
 			}
 			Rooms.refreshAll(io);
 		}
-	});
+	}
 
 	// Closing rooms.
-
-	socket.on('closeRoom', function (data) {
+	function closeRoom (data) {
 		let token = socket.handshake.query.token;
 		if (!token) {
 			socket.emit('successLogout');
@@ -179,8 +164,7 @@ function LobbyRoom (socket, io) {
 		if (!roomObj) {
 			socket.emit('errorMessage', 'Could not find room to close. Maybe this room does not exist.');
 		} else {
-			let room = roomObj.room;
-			let index = roomObj.index;
+			let {room, index} = roomObj;
 
 			socket.to(room.socketRoom).emit('closedRoom');
 			socket.emit('closedRoom');
@@ -191,11 +175,10 @@ function LobbyRoom (socket, io) {
 			Users.updateState(socket, 'changeRoom', null, '');
 			Rooms.refreshAll(io);
 		}
-	});
+	}
 
 	// Player is ready.
-
-	socket.on('playerReadiness', function () {
+	function playerReadiness (value) {
 		let token = socket.handshake.query.token;
 		if (!token) {
 			socket.emit('successLogout', 'no token');
@@ -209,33 +192,43 @@ function LobbyRoom (socket, io) {
 			let index = roomObj.index;
 			let userIndex = roomObj.userIndex;
 
-			room.players[userIndex].ready = !room.players[userIndex].ready;
+			if (value !== undefined) {
+				room.players[userIndex].ready = value;
+			} else {
+				room.players[userIndex].ready = !room.players[userIndex].ready;
+			}
+
 			Users.updateState(socket, 'ready', room.players[userIndex].ready);
 			let roomClone = room.clear();
 			socket.to(room.socketRoom).emit('refreshRoom', roomClone);
 			socket.emit('refreshRoom', roomClone);
 		}
-	});
+	}
 
 	// Start game, when all players are ready.
-	socket.on('initGame', function (id) {
+	function initGame (id) {
 		let room = Rooms.getById(id).room;
-		room.start();
-		socket.to(room.socketRoom).emit('restoreGame', room);
-		socket.emit('restoreGame', room);
-		Rooms.refreshAll(io);
-	});
+		if (!room.state) {
+			room.start();
+			let roomClone = room.clear();
+			socket.join(room.socketRoom);
+			socket.to(roomClone.socketRoom).emit('restoreGame', roomClone);
+			socket.emit('restoreGame', roomClone);
+			Rooms.refreshAll(io);
+		}
+	}
 
 	// Chat events.
 
-	socket.on('chatMessage', async function (message) {
+	async function chatMessage (message) {
 		if (messagesIsForbidden) {
 			return;
 		}
 		chatHistory.push(message);
 		refreshChatAll();
-	});
-	socket.on('roomMessage', async function (message) {
+	}
+
+	async function roomMessage (message) {
 		if (messagesIsForbidden) {
 			return;
 		}
@@ -248,7 +241,32 @@ function LobbyRoom (socket, io) {
 		room.chat.push(message);
 		socket.to(room.socketRoom).emit('refreshRoomChat', room.chat);
 		socket.emit('refreshRoomChat', room.chat);
-	});
+	}
+
+	// refresh chat for one socket.
+	function refreshChatOne () {
+		socket.emit('refreshChat', chatHistory);
+	}
+
+	// refresh chat for all.
+	function refreshChatAll () {
+		io.sockets.emit('refreshChat', chatHistory);
+	}
+
+	// refresh lobby and chat for every user, that just connected to lobby. This is done on page refresh too.
+	socket.on('getGameList', getGameList);
+	socket.on('getChatHistory',	refreshChatOne);
+
+	socket.on('checkUserLocation', checkUserLocation);
+	socket.on('createRoom', createRoom);
+	socket.on('joinRoom', joinRoom);
+	socket.on('leaveRoom', leaveRoom);
+	socket.on('closeRoom', closeRoom);
+	socket.on('playerReadiness', playerReadiness);
+	socket.on('initGame', initGame);
+
+	socket.on('chatMessage', chatMessage);
+	socket.on('roomMessage', roomMessage);
 };
 
 module.exports = LobbyRoom;

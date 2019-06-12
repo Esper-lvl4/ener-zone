@@ -99,7 +99,6 @@ export default {
         for (let image of matched) {
           let altText = image.getAttribute('alt');
           let src = this.getSrc(altText);
-					console.log(altText);
           image.setAttribute('src', src);
           image.setAttribute('alt', altText);
           image.setAttribute('width', '22');
