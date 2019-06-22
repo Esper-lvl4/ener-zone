@@ -1,11 +1,5 @@
 function SigniZone() {
 	let prototype = {
-		card: null,
-		under: [],
-		status: '',
-		down: false,
-		tooltip: '',
-
 		exceed(index) {
 			this.under.splice(index, 1);
 		},
@@ -22,34 +16,34 @@ function SigniZone() {
 			this.tooltip = tooltip;
 		},
 	}
-	return Object.create(prototype);
+
+	let props = {
+		card: null,
+		under: [],
+		status: '',
+		down: false,
+		tooltip: '',
+	}
+
+	let obj = Object.create(prototype);
+	obj = Object.assign(obj, props);
+
+	return obj;
 }
 
 function LrigZone () {
 	let signiZoneObj = SigniZone();
-	let prototype = {
+
+	let props = {
 		key: [],
-	}
-	prototype = Object.assign(prototype, signiZoneObj.prototype);
-	return Object.create(prototype);
+	};
+
+	let obj = Object.assign(signiZoneObj, props);
+	return obj;
 }
 
 function PlayerField (player) {
 	let prototype = {
-		player: null,
-		lrigTrash: [],
-		trash: [],
-		mainDeck: [],
-		lrigDeck: [],
-		lrigZone: null,
-		lifeCloth: [],
-		checkZone: [],
-		enerZone: [],
-		signiZones: [],
-		removedZone: [],
-		hand: [],
-		excluded: [],
-
 		async moveCard(originalZone, destinationZone) {
 			// originalZone: {name, type, index, signiIndex}
 			// destinationZone: {name, type, signiIndex}
@@ -146,18 +140,35 @@ function PlayerField (player) {
 		},
 	}
 
-	for (let i = 1; i <= 3; i++) {
-		prototype.signiZones.push(SigniZone());
+	let props = {
+		player: null,
+		lrigTrash: [],
+		trash: [],
+		mainDeck: [],
+		lrigDeck: [],
+		lrigZone: null,
+		lifeCloth: [],
+		checkZone: [],
+		enerZone: [],
+		signiZones: [],
+		removedZone: [],
+		hand: [],
+		excluded: [],
 	}
-	prototype.lrigZone = LrigZone();
-	prototype.player = player;
 
-	return Object.create(prototype);
+	for (let i = 1; i <= 3; i++) {
+		props.signiZones.push(SigniZone());
+	}
+	props.lrigZone = LrigZone();
+	props.player = player;
+
+	let obj = Object.create(prototype);
+	obj = Object.assign(obj, props);
+	return obj;
 }
 
 function BoardState () {
 	let prototype = {
-		board: [],
 		async delegateAction(originalZone, destinationZone, socket, action) {
 			let player = this.getPlayer(socket);
 			if (!player) return;
@@ -175,8 +186,14 @@ function BoardState () {
 			}
 		},
 	}
+	let props = {
+		board: [],
+	}
 
-	return Object.create(prototype);
+	let obj = Object.create(prototype);
+	obj = Object.assign(obj, props);
+
+	return obj;
 }
 
 module.exports = BoardState;

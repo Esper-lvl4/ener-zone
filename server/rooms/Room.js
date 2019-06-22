@@ -33,22 +33,6 @@ function cloneArray(arr) {
 
 function Room (socket, roomObj, id) {
 	let prototype = {
-		players: [],
-		spectators: [],
-		name: roomObj.name,
-		settings: roomObj.settings,
-		/*
-		{
-			format: 'as',
-			timeLimit: '180',
-			password: '',
-		}
-		*/
-		id: id + '',
-		socketRoom: 'room-' + id,
-		state: false,
-		chat: [],
-
 		clear() {
 			// Clone room, then remove tokens, to not send them, and dont affect initial room object.
 			let roomClone = cloneObject(this);
@@ -112,11 +96,30 @@ function Room (socket, roomObj, id) {
 			this.state = true;
 		},
 	}
+	let props = {
+		players: [],
+		spectators: [],
+		name: roomObj.name,
+		settings: roomObj.settings,
+		/*
+		{
+			format: 'as',
+			timeLimit: '180',
+			password: '',
+		}
+		*/
+		id: id + '',
+		socketRoom: 'room-' + id,
+		state: false,
+		initiated: false,
+		chat: [],
+	}
+
 	let game = GameState();
 	let board = BoardState();
 	Object.assign(prototype, game.__proto__, board.__proto__);
 	let obj = Object.create(prototype);
-	Object.assign(obj, game, board);
+	Object.assign(obj, game, board, props);
 	return obj;
 }
 

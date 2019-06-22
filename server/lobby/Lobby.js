@@ -177,6 +177,28 @@ function LobbyRoom (socket, io) {
 		}
 	}
 
+	// Loading decks.
+	function loadedDeck (name) {
+		let token = socket.handshake.query.token;
+		if (!token) {
+			socket.emit('successLogout', 'no token');
+			return;
+		}
+
+		let roomObj = Rooms.getByToken(token);
+		if (!roomObj) {
+			socket.emit('errorMessage', "You're not in the room!");
+		} else {
+			let {room, userIndex} = roomObj;
+
+			room.players[userIndex].deck = name;
+
+			let roomClone = room.clear();
+			socket.to(room.socketRoom).emit('refreshRoom', roomClone);
+			socket.emit('refreshRoom', roomClone);
+		}
+	}
+
 	// Player is ready.
 	function playerReadiness (value) {
 		let token = socket.handshake.query.token;
@@ -186,11 +208,9 @@ function LobbyRoom (socket, io) {
 		}
 		let roomObj = Rooms.getByToken(token);
 		if (!roomObj) {
-			socket.emit('errorMessage', 'Could not find room to change player readiness. Maybe your room does not exist.');
+			socket.emit('errorMessage', "You're not in the room!");
 		} else {
-			let room = roomObj.room;
-			let index = roomObj.index;
-			let userIndex = roomObj.userIndex;
+			let {room, userIndex} = roomObj;
 
 			if (value !== undefined) {
 				room.players[userIndex].ready = value;
@@ -262,6 +282,7 @@ function LobbyRoom (socket, io) {
 	socket.on('joinRoom', joinRoom);
 	socket.on('leaveRoom', leaveRoom);
 	socket.on('closeRoom', closeRoom);
+	socket.on('loadedDeck', loadedDeck);
 	socket.on('playerReadiness', playerReadiness);
 	socket.on('initGame', initGame);
 

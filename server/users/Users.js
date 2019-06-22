@@ -178,6 +178,23 @@ function Users () {
 				});
 			});
 		},
+		getUserByNick(nick) {
+			if (!nick) return false;
+			return new Promise ((resolve, reject) => {
+				User.findOne({nickname: nick}, function (err, user) {
+					if (err) {
+						socket.emit('errorMessage', 'Error, when tried to find user.')
+						reject('Error, when tried to find user.');
+					}
+					if (!user) {
+						socket.emit('successLogout', 'User without a document in DB got token.');
+						reject('User without a document in DB got token.');
+					}
+					userData = user;
+					resolve(userData);
+				});
+			})
+		}
 	}
 	return Object.create(prototype);
 }

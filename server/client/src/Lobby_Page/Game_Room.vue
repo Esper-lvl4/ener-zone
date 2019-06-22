@@ -34,10 +34,13 @@ export default {
 		'currentRoom'
 	],
 	sockets: {
+		sentDecks(decks) {
+      this.$store.commit('saveDecks', decks);
+    },
 		loadedDeck(deck) {
-      this.deckName = deck.name;
-
+      this.deck = deck;
 			this.$socket.emit('playerReadiness', false);
+			this.$socket.emit('loadedDeck', deck);
     },
 	},
 	data() {
@@ -45,7 +48,7 @@ export default {
 			numberOfPlayers: 2,
 			loadDeckModal: false,
 
-			deckName: '',
+			deck: null,
 		}
 	},
   computed: {
@@ -80,7 +83,7 @@ export default {
 			return this.role == 'spectator';
 		},
 		deckIsValid () {
-			return false;
+			return true;
 		},
 		readyToStart() {
 			if (this.users.players.length == this.numberOfPlayers) {
@@ -104,7 +107,7 @@ export default {
 			this.$socket.emit('leaveRoom');
 		},
 		readyToPlay: function () {
-			if (this.deckName !== '' && deckIsValid) {
+			if (this.deckName !== null && this.deckIsValid) {
 				this.$socket.emit('playerReadiness');
 			}
 		},
@@ -115,6 +118,9 @@ export default {
 		},
 
 		openLoadModal() {
+      if (!this.$store.state.userDecks) {
+        this.$socket.emit('showDecks');
+      }
 			this.loadDeckModal = true;
 		},
 		closeModals() {

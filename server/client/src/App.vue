@@ -55,7 +55,6 @@ export default {
 			if (!this.$route.path.match('game')) {
 				this.$router.push('game');
 			}
-			console.log(this.$store.state.currentRoom);
 		},
 		restoreRoom (room) {
 			this.$router.push('lobby');

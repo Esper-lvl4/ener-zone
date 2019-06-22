@@ -6,15 +6,15 @@ function DeckEditor (socket) {
 
 	// Return all database.
 
-	socket.on('getDatabase', function (msg) {
+	function getDatabase (msg) {
 		CardDB.find((err, data) => {
 			socket.emit('giveDatabase', data);
 		});
-	});
+	}
 
 	// Save deck.
 
-	socket.on('saveDeck', async function (deckToSave) {
+	async function saveDeck (deckToSave) {
 		let deck = deckToSave;
 		let user = await Users.getUser(socket, {returnAll: true});
 		if (!user || !user.decks) {
@@ -31,19 +31,19 @@ function DeckEditor (socket) {
 		User.updateOne({_id: user._id}, {decks: user.decks}, (err, query) => {
 			socket.emit('sentDecks', user.decks);
 		});
-	});
+	}
 
-	socket.on('showDecks', function () {
+	function showDecks () {
 		Users.getUser(socket, {returnExact: 'decks'}).then((decks) => {
 			socket.emit('sentDecks', decks);
 		}, (err) => {
 			socket.emit('errorMessage', 'Could not find decks.');
 		})
-	});
+	}
 
 	// Load deck. Delete deck.
 
-	socket.on('getDeck', function (deckToShow, action) {
+	function getDeck (deckToShow, action) {
 		let deck = deckToShow;
 		Users.getUser(socket, {returnAll: true}).then((user) => {
 			let decks = user.decks;
@@ -64,7 +64,12 @@ function DeckEditor (socket) {
 		}, (err) => {
 			socket.emit('errorMessage', 'Could not find any deck.');
 		})
-	});
+	}
+
+	socket.on('getDatabase', getDatabase);
+	socket.on('saveDeck', saveDeck);
+	socket.on('showDecks', showDecks);
+	socket.on('getDeck', getDeck);
 }
 
 module.exports = DeckEditor;

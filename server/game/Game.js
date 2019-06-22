@@ -1,5 +1,8 @@
 const Rooms = require('../rooms/Game_Rooms');
 const Game_State = require('./Game_State');
+const CardDB = require('../database/CardDB');
+const User = require('../users/User');
+const Users = require('../users/Users');
 
 function Game (socket, io) {
 	// Function for refreshing game.
@@ -243,12 +246,60 @@ function Game (socket, io) {
 		All actions that does not affect boaards, are handled by Game State. Others are handled by Boaard object
 	*/
 
+	// Functions for initiating the game.
+
+	// Get player's decks from database.
+	async function initDecks () {
+		if (room.initiated) return;
+
+		for (let player of room.players) {
+
+			await Users.getUserByNick(player.nickname).then(async (user) => {
+				let mainDeck = [], lrigDeck = [];
+				let currentDeck = null;
+				for (let deck of user.decks) {
+					console.log(player.deck);
+					console.log(deck.name);
+					if (player.deck.name === deck.name) {
+						currentDeck = deck;
+						break;
+					}
+				}
+				for (let id of currentDeck.mainDeck) {
+					await CardDB.findById(id.replace(/\(\_\d\_\)/, ''), (card) => {
+						mainDeck.push(card);
+					});
+				}
+
+				for (let id of currentDeck.lrigDeck) {
+					await CardDB.findById(id.replace(/\(\_\d\_\)/, ''), (card) => {
+						lrigDeck.push(card);
+					});
+				}
+
+				for (let field of room.board) {
+					console.log(field.player);
+					if (field.player === player.nickname) {
+						console.log(player.nickname);
+						field.mainDeck = mainDeck;
+						field.lrigDeck = lrigDeck;
+						console.log(field);
+						break;
+					}
+				}
+			});
+		}
+		room.initiated = true;
+		socket.emit('refreshGame', room);
+	}
+
 	socket.on('gameStarted', gameStarted);
 
 	// socket handlers
 
 	function gameStarted () {
 		console.log('game started');
+		initDecks();
 
 		// Field manipulation events.
 		socket.on('drawCard', drawCard);
