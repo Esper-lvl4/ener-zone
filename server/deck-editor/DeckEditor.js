@@ -1,6 +1,6 @@
 const CardDB = require('../database/CardDB');
 const User = require('../users/User');
-const Users = require('../users/Users');
+const State = require('../state/State');
 
 function DeckEditor (socket) {
 
@@ -16,7 +16,7 @@ function DeckEditor (socket) {
 
 	async function saveDeck (deckToSave) {
 		let deck = deckToSave;
-		let user = await Users.getUser(socket, {returnAll: true});
+		let user = await State.getUser(socket, {returnAll: true});
 		if (!user || !user.decks) {
 			socket.emit('errorMessage', 'Could not find a user.');
 			return;
@@ -34,7 +34,7 @@ function DeckEditor (socket) {
 	}
 
 	function showDecks () {
-		Users.getUser(socket, {returnExact: 'decks'}).then((decks) => {
+		State.getUser(socket, {returnExact: 'decks'}).then((decks) => {
 			socket.emit('sentDecks', decks);
 		}, (err) => {
 			socket.emit('errorMessage', 'Could not find decks.');
@@ -45,7 +45,7 @@ function DeckEditor (socket) {
 
 	function getDeck (deckToShow, action) {
 		let deck = deckToShow;
-		Users.getUser(socket, {returnAll: true}).then((user) => {
+		State.getUser(socket, {returnAll: true}).then((user) => {
 			let decks = user.decks;
 			for (let i = 0; i < decks.length; i++) {
 				if (decks[i].name === deck) {

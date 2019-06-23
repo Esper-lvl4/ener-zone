@@ -1,4 +1,4 @@
-const Users = require('../users/Users');
+const State = require('../state/State');
 const Room = require('./Room');
 
 
@@ -6,11 +6,20 @@ var gameRooms = {
 	list: [],
 	counter: 0,
 
+	canCreate(name) {
+		for (var i = 0; i < this.list.length; i++) {
+			if (this.list[i].name == name) {
+				return = false;
+			}
+		};
+		return true;
+	},
+
 	async add(socket, roomObj) {
 		let room = Room(socket, roomObj, ++this.counter);
 		this.list.push(room);
 
-		let user = await Users.getUser(socket);
+		let user = await State.getUser(socket);
 		user.role = 'host';
 		room.join(socket, user);
 
@@ -28,6 +37,18 @@ var gameRooms = {
 			roomClones.push(room.clear());
 		}
 		return roomClones;
+	},
+
+	// Check if room is empty, to remove it from the list.
+	checkEmptiness(room) {
+		if (room.isEmpty()) {
+			for (let i = 0; i < this.list.length; i++) {
+				if (room.id === this.list[i].id) {
+					this.list.splice(i, 1);
+					break;
+				}
+			}
+		}
 	},
 
 	// functions to search for rooms. By ID and by user jwt.

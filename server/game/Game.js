@@ -2,7 +2,7 @@ const Rooms = require('../rooms/Game_Rooms');
 const Game_State = require('./Game_State');
 const CardDB = require('../database/CardDB');
 const User = require('../users/User');
-const Users = require('../users/Users');
+const State = require('../state/State');
 
 function Game (socket, io) {
 	// Function for refreshing game.
@@ -254,7 +254,7 @@ function Game (socket, io) {
 
 		for (let player of room.players) {
 
-			await Users.getUserByNick(player.nickname).then(async (user) => {
+			await State.getUserByNick(player.nickname).then(async (user) => {
 				let mainDeck = [], lrigDeck = [];
 				let currentDeck = null;
 				for (let deck of user.decks) {

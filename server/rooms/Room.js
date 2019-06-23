@@ -1,5 +1,6 @@
 const GameState = require('./../game/Game_State');
 const BoardState = require('./../game/Board_State');
+const State = require('./../state/State');
 
 // function for cloning objects.
 function cloneObject(obj) {
@@ -32,7 +33,31 @@ function cloneArray(arr) {
 }
 
 function Room (socket, roomObj, id) {
+	let props = {
+		players: [],
+		spectators: [],
+		name: roomObj.name,
+		settings: roomObj.settings,
+		/*
+		{
+			format: 'as',
+			timeLimit: '180',
+			password: '',
+		}
+		*/
+		id: id + '',
+		socketRoom: 'room-' + id,
+		state: false,
+		initiated: false,
+		chat: [],
+	};
+
 	let prototype = {
+		refresh(socket) {
+			let roomClone = this.clear();
+			socket.to(this.socketRoom).emit('refreshRoom', roomClone);
+			socket.emit('refreshRoom', roomClone);
+		},
 		clear() {
 			// Clone room, then remove tokens, to not send them, and dont affect initial room object.
 			let roomClone = cloneObject(this);
@@ -44,24 +69,35 @@ function Room (socket, roomObj, id) {
 			})
 			return roomClone;
 		},
+
 		join(socket, user) {
-			if (user.role == 'player' || user.role == 'host') {
+			// check if there is space for more players.
+			if (this.isFull() && info.role !== 'spectator') {
+				socket.emit('errorMessage', 'The room is full. You can spectate this game, if you want, though.');
+				return false;
+			} else if (user.role == 'player' || user.role == 'host') {
 				this.players.push(user);
 			} else {
 				this.spectators.push(user);
 			}
 			socket.join(this.socketRoom);
+			return true;
 		},
-		leave(user, role) {
-			let list = role + 's';
-			if (typeof user == 'number') {
-				this[list].splice(user, 1);
-			} else if (typeof user == 'object') {
 
-				for (let i = 0; i < this[list].length; i++) {
-					if (this[list][i].token == user.token) {
-						this[list].splice(i, 1);
-					}
+		leave(socket) {
+			let user = null;
+			for (let i = 0; i < this.players.length; i++) {
+				if (this.players[i].token === socket.handshake.query.token) {
+					user = this.players[i];
+					this.players.splice(i, 1);
+					return user;
+				}
+			}
+			for (let i = 0; i < this.spectators.length; i++) {
+				if (this.spectators[i].token === socket.handshake.query.token) {
+					user = this.spectators[i];
+					this.spectators.splice(i, 1);
+					return user;
 				}
 			}
 		},
@@ -91,28 +127,17 @@ function Room (socket, roomObj, id) {
 				}
 			}
 		},
+		setPlayerReady(socket, value) {
+			for (let player of this.players) {
+				if (socket.handshake.query.token == player.token) {
+					player.ready = value;
+				}
+			}
+		},
 		start() {
 			this.init();
 			this.state = true;
 		},
-	}
-	let props = {
-		players: [],
-		spectators: [],
-		name: roomObj.name,
-		settings: roomObj.settings,
-		/*
-		{
-			format: 'as',
-			timeLimit: '180',
-			password: '',
-		}
-		*/
-		id: id + '',
-		socketRoom: 'room-' + id,
-		state: false,
-		initiated: false,
-		chat: [],
 	}
 
 	let game = GameState();
