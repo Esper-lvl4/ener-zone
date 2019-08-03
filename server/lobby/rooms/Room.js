@@ -1,6 +1,6 @@
 const GameState = require('./../game/Game_State');
 const BoardState = require('./../game/Board_State');
-const State = require('./../state/State');
+const State = require('./../../state/State');
 
 // function for cloning objects.
 function cloneObject(obj) {

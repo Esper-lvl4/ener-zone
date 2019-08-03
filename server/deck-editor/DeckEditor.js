@@ -1,5 +1,5 @@
 const CardDB = require('../database/CardDB');
-const User = require('../users/User');
+const User = require('./../state/users/User');
 const State = require('../state/State');
 
 function DeckEditor (socket) {

@@ -7,13 +7,15 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const stampit = require('stampit');
+const EventEmittable = require('@stamp/eventemittable');
 
 const request = require('request');
 const path = require('path');
 const http = require('http');
 
 const AuthController = require('./auth/AuthController');
-const UserDB = require('./users/User');
+const UserDB = require('./state/users/User');
 const VerifyToken = require('./auth/VerifyToken');
 
 const keys = require('./config/keys');
@@ -23,7 +25,8 @@ const Parser = require('./database/Parser');
 const Database = require('./database/Database');
 const LobbyRoom = require('./lobby/Lobby');
 const DeckEditor = require('./deck-editor/DeckEditor');
-const Game = require('./game/Game');
+const Game = require('./lobby/game/Game');
+const State = require('./state/State');
 
 const app = express();
 const server = http.Server(app);
@@ -35,7 +38,8 @@ const key = {
 mongoose.connect(keys.mongoURI, {useNewUrlParser: true});
 mongoose.connection.on('open', function (err) {
 	if (err) {
-		console.error( 'connection error:');
+		console.error('connection error:');
+		console.error(err);
 	}
 	console.log('Connected to database.');
 });
@@ -60,18 +64,15 @@ app.get('/auth', (req, res) => {
 
 io.on('connection', function(socket) {
 	console.log('User connected');
-	if (!VerifyToken(socket)) {
-		AuthController(socket);
-		return;
-	} else {
-		socket.emit('loginSuccess', {auth: true, token: socket.handshake.query.token});
-		DeckEditor(socket);
-		LobbyRoom(socket, io);
-		Game(socket, io);
+	socket.emit('accessVerify', VerifyToken(socket));
+	AuthController(socket);
+	socket.emit('loginSuccess', {auth: true, token: socket.handshake.query.token});
+	DeckEditor(socket);
+	LobbyRoom(socket, io);
+	Game(socket, io);
 
-		// Parser
-		Database(socket);
-	};
+	// Parser
+	Database(socket);
 })
 
 // Parser.

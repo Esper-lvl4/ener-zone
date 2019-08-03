@@ -1,8 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 
-const State = require('../state/State');
-const Rooms = require('../rooms/Game_Rooms');
+const State = require('./../state/State');
+const Rooms = require('./rooms/Game_Rooms');
 
 const callback = require('../tools/SocketCallbackDecorator');
 
@@ -13,9 +13,6 @@ var chatHistory = [ // Array to store recent messages in chat.
 ];
 
 function LobbyRoom (socket, io) {
-
-	State.check(socket);
-
 	// Decorated methods to pass current socket to it in socket callback.
 	// Otherwise I would be forced to call it within anonimous function, since "this" is lost.
 	let getGameList = callback(Rooms.refresh, socket, Rooms);
@@ -24,12 +21,11 @@ function LobbyRoom (socket, io) {
 
 	// Lobby events.
 	function checkUserLocation (message) {
-		let location = State.getUserLocation(socket);
+		let room = State.getUser(socket).room;
 		if (Rooms.list.length === 0) {
 			return;
 		}
-		if (location && location !== 'pool') {
-			let room = location.room;
+		if (room) {
 			let roomClone = room.clear();
 			socket.join(room.socketRoom);
 			if (room.state) {
@@ -44,6 +40,7 @@ function LobbyRoom (socket, io) {
 	async function createRoom (roomObj) {
 		if (Rooms.canCreate()) {
 			State.hostRoom(socket, roomObj);
+			State.emit('custom-event', 'kappa');
 		} else {
 			socket.emit('errorMessage', 'Room with that name already exists. Try changing name.');
 		}

@@ -1,83 +1,124 @@
 const jwt = require('jsonwebtoken');
-const User = require('./User');
-const Rooms = require('./../rooms/Game_Rooms');
+const User = require('./users/User');
+const Rooms = require('./../lobby/rooms/Game_Rooms');
+const stampit = require('stampit');
+const EventEmittable = require('@stamp/eventemittable');
+const {showError} = require('./../tools/tools');
 
-function UserState(nick, token, socket) {
-	let prototype = {
+// let obj = stampit({
+// 	methods: {
+// 		rip() {
+// 			this.emit('rip', 'rest pls');
+// 		}
+// 	}
+// }).compose(EventEmittable)();
+//
+// obj.on('rip', (data) => {
+// 	console.log(data);
+// })
+//
+// obj.rip();
 
+let UserState = stampit({
+	init({nickname, socket, id}) {
+		this.id = id;
+		this.socket = socket;
+		this.nickname = nickname;
+		this.token = socket.handshake.query.token;
+		this.ready = false;
+		this.gameHasStarted = false;
+		this.deck = null;
+		this.role = '';
+		this.room = null;
+	},
+	methods: {
+		leave(nick) {
+			state.emit('custom-event', nick);
+		}
 	}
-	let props = {
-		socket,
-		nickname,
-		token: socket.handshake.query.token,
-		ready: false,
-		deck: null,
-		role: '',
-	}
-	let obj = Object.create(prototype);
-	obj = Object.assign(obj, props);
-	return obj;
-}
+}).compose(EventEmittable);
 
-function State () {
-	let props = {
-		pool: [],
-		rooms: Rooms,
-	}
-
-	let prototype = {
-		// Check if state of user is tracked. If not - start tracking it.
+let UserList = stampit({
+	init() {
+		this.pool = [];
+		this.rooms = Rooms;
+		console.log('init state...');
+		this.on('custom-event', this.kappa);
+	},
+	methods: {
+		kappa (data) {
+			console.log(data);
+		},
+		// Two methods to keep track of users.
 		async check(socket) {
 			let check = false;
 
-			if (!this.getUserLocation(socket)) {
-				await this.getUser(socket).then(
-					({nickname}) => {
-						this.pool.push(UserState(nickname, socket));
+			if (!this.getUser(socket)) {
+				await this.getUserFromDB(socket).then(
+					({id, nickname}) => {
+						this.pool.push(UserState({nickname, socket, id}));
+						this.pool[0].poke(nickname);
 						check = true;
+					}, (err) => {
+						socket.emit('successLogout');
 					});
 			}
 			return check;
 		},
 
-		checkToken(socket) {
+		removeUserState(id) {
+
+		},
+
+		// Methods for getting the user by socket or id.
+
+		getUser(socketOrId) {
+			if (typeof socketOrId == 'object') {
+				getUserBySocket(socketOrId);
+			} else if (typeof socketOrId == 'string') {
+				getUserById(socketOrId);
+			}
+		},
+
+		getUserBySocket(socket) {
 			let token = socket.handshake.query.token;
 			if (!token) {
-				socket.emit('successLogout');
+				socket.emit('errorMessage', 'No token!');
 				return false;
 			}
-			return token;
-		},
-		getUserLocation(socket) {
+
 			for (let user of this.pool) {
-				if (token == user.token) {
-					return 'pool';
-				}
-			}
-			return this.getUserRoom(socket);
-		},
-		getUserRoom(socket) {
-			return this.rooms.getByToken(socket.handshake.query.token);
-		},
-
-		getUserState(socket) {
-			let token = socket.handshake.query.token;
-			if (!token) {
-				socket.emit('successLogout', 'no token');
-			}
-
-			for (let i = 0; i < this.pool.length; i++) {
-				if (this.pool[i].token === token) {
-					return {user: this.pool[i], index: i};
+				if (user.token === token) {
+					return user;
 				}
 			}
 			return false;
 		},
 
+		getUserById(id) {
+			for (let user of this.pool) {
+				if (user.id === id) {
+					return user;
+				}
+			}
+			return false;
+		},
+
+
+		checkToken(socket) {
+			let token = socket.handshake.query.token;
+			if (!token) {
+				showError('No token!', socket);
+				return false;
+			}
+			return token;
+		},
+
 		// Hosting a game in game rooms. This method is here, because we need to move users from here to the newly created roomю
 		async hostRoom(socket, roomObj) {
-			let room = await Rooms.add(socket, roomObj);
-
+			let user = this.getUser(socket);
+			user.role = 'host';
+			let room = await Rooms.add(socket, roomObj, user);
 			this.moveUser(socket, room, true);
 
 			// clone room and remove tokens from clone - then send it to client;
@@ -96,21 +137,10 @@ function State () {
 			}
 		},
 
-		// Handler for changes in user's state. Below are functions, that gets executed by this.
-		updateState(socket, action) {
-			let args;
-			if (arguments.length > 2) {
-				args = [].slice.call(arguments);
-				args = args.slice(2);
-			}
-			this[action](socket, args);
-		},
-
 		// Change location of the user.
 		moveUser(socket, room, join) {
 			if (join) {
 				let user = this.remove(socket);
-				user.role = 'host';
 				return room.join(user);
 			} else {
 				let user = room.leave(socket);
@@ -127,7 +157,7 @@ function State () {
 		remove(socket) {
 			let user = null;
 			for (let i = 0; i < this.pool.length; i++) {
-				if (socket.handshake.query.token == this.pool[i].token) {
+				if (socket.handshake.query.token === this.pool[i].token) {
 					user = this.pool[i];
 					this.pool.splice(i, 1);
 					return user;
@@ -136,26 +166,20 @@ function State () {
 		},
 		/*****/
 
-		async getUser(socket, opt = {returnAll: false, returnExact: false}) {
+		async getUserFromDB(socket, opt = {returnAll: false, returnExact: false}) {
 			let token = socket.handshake.query.token;
 			if (!token) {
-				socket.emit('errorMessage', 'No token');
-				throw new Error('no token');
+				showError('No token!', socket);
 			}
 			let decoded = jwt.decode(token, {complete: true});
 			if (!decoded) {
-				socket.emit('errorMessage', 'Failed to decode token');
-				throw new Error('failed to decode token');
+				showError('Failed to decode token.', socket);
 			}
 			let userData = null;
-			await User.findOne({_id: decoded.payload.id}).then((err, user) => {
-				if (err) {
-					socket.emit('errorMessage', 'Error, when tried to find user.')
-					throw new Error('Error, when tried to find user.');
-				}
+			await User.findOne({_id: decoded.payload.id}).then((user) => {
 				if (!user) {
-					socket.emit('successLogout', 'User without a document in DB got token.');
-					throw new Error('User without a document in DB got token.');
+					showError('User without a document in DB got token.', socket);
+					socket.emit('successLogout');
 				}
 				if (opt.returnAll) {
 					userData = user;
@@ -164,25 +188,13 @@ function State () {
 				} else {
 					userData = {id: user._id + '', nickname: user.nickname, token: token};
 				}
-			});
-			return userData;
-		},
-		async getUserByNick(nick) {
-			if (!nick) return false;
-			let userData = null;
-			await User.findOne({nickname: nick}).then((err, user) => {
-				if (err) {
-					throw new Error('Error, when tried to find user.');
-				}
-				if (!user) {
-					throw new Error('User without a document in DB got token.');
-				}
-				userData = user;
+			}, (err) => {
+				socket.emit('errorMessage', 'Error, when tried to find user.')
+				console.log(err);
 			});
 			return userData;
 		}
 	}
-	let obj = Object.create(prototype);
-	obj = Object.assign(obj, props);
-	return obj;
-}
+}).compose(EventEmittable);
+
+module.exports = UserList();

@@ -1,28 +1,22 @@
-const State = require('../state/State');
 const Room = require('./Room');
 
-
-var gameRooms = {
+const gameRooms = {
 	list: [],
 	counter: 0,
 
 	canCreate(name) {
 		for (var i = 0; i < this.list.length; i++) {
 			if (this.list[i].name == name) {
-				return = false;
+				return false;
 			}
 		};
 		return true;
 	},
 
-	async add(socket, roomObj) {
+	async add(socket, roomObj, user) {
 		let room = Room(socket, roomObj, ++this.counter);
 		this.list.push(room);
-
-		let user = await State.getUser(socket);
-		user.role = 'host';
 		room.join(socket, user);
-
 		return room;
 	},
 	remove(index) {

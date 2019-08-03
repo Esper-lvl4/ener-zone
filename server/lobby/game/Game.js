@@ -1,8 +1,8 @@
 const Rooms = require('../rooms/Game_Rooms');
 const Game_State = require('./Game_State');
-const CardDB = require('../database/CardDB');
-const User = require('../users/User');
-const State = require('../state/State');
+const CardDB = require('./../../database/CardDB');
+const User = require('./../../state/users/User');
+const State = require('./../../state/State');
 
 function Game (socket, io) {
 	// Function for refreshing game.

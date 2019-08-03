@@ -43,6 +43,12 @@ export default {
     MainMenu, LobbyPage, GamePage, DeckEditor, OptionsPage, ProfilePage, AdminPage, AuthPage, Modal
   },
   sockets: {
+		accessVerify(result) {
+			this.$store.commit('manageLogin', result);
+		},
+		successLogout() {
+			this.$store.commit('manageLogin', false);
+		},
     errorMessage(err) {
       this.$store.commit('errorMessage', err);
     },
