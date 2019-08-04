@@ -5,20 +5,6 @@ const stampit = require('stampit');
 const EventEmittable = require('@stamp/eventemittable');
 const {showError} = require('./../tools/tools');
 
-// let obj = stampit({
-// 	methods: {
-// 		rip() {
-// 			this.emit('rip', 'rest pls');
-// 		}
-// 	}
-// }).compose(EventEmittable)();
-//
-// obj.on('rip', (data) => {
-// 	console.log(data);
-// })
-//
-// obj.rip();
-
 let UserState = stampit({
 	init({nickname, socket, id}) {
 		this.id = id;
@@ -30,11 +16,6 @@ let UserState = stampit({
 		this.deck = null;
 		this.role = '';
 		this.room = null;
-	},
-	methods: {
-		leave(nick) {
-			state.emit('custom-event', nick);
-		}
 	}
 }).compose(EventEmittable);
 
@@ -43,12 +24,9 @@ let UserList = stampit({
 		this.pool = [];
 		this.rooms = Rooms;
 		console.log('init state...');
-		this.on('custom-event', this.kappa);
+		this.on('player-ready', this.playerReady);
 	},
 	methods: {
-		kappa (data) {
-			console.log(data);
-		},
 		// Two methods to keep track of users.
 		async check(socket) {
 			let check = false;
@@ -67,16 +45,46 @@ let UserList = stampit({
 		},
 
 		removeUserState(id) {
+			for (let i = 0; i < this.pool.length; i++) {
+				if (this.pool[i].id === id) {
+					this.pool.splice(i, 1);
+					break;
+				}
+			}
+		},
 
+		// Load deck of user.
+		loadDeck(socket, name) {
+			let user = this.getUser(this.handshake.query.token);
+			if (!user) {
+				this.emit('errorMessage', "State: User is not tracked!");
+			} else {
+				user.deck = name;
+				user.room.refresh(this);
+			}
+		},
+
+		// Player ready.
+
+		playerReady ({socket, value}) {
+			if (value === undefined) return;
+			let user = this.getUser(socket);
+
+			if (!user) {
+				socket.emit('errorMessage', "State: User is not tracked!");
+			} else {
+				user.ready = value;
+				user.room.refresh(this);
+			}
 		},
 
 		// Methods for getting the user by socket or id.
 
 		getUser(socketOrId) {
 			if (typeof socketOrId == 'object') {
-				getUserBySocket(socketOrId);
+				return this.getUserBySocket(socketOrId);
 			} else if (typeof socketOrId == 'string') {
-				getUserById(socketOrId);
+				return this.getUserById(socketOrId);
 			}
 		},
 
@@ -102,55 +110,6 @@ let UserList = stampit({
 				}
 			}
 			return false;
-		},
-
-
-		checkToken(socket) {
-			let token = socket.handshake.query.token;
-			if (!token) {
-				showError('No token!', socket);
-				return false;
-			}
-			return token;
-		},
-
-		// Hosting a game in game rooms. This method is here, because we need to move users from here to the newly created roomю
-		async hostRoom(socket, roomObj) {
-			let user = this.getUser(socket);
-			user.role = 'host';
-			let room = await Rooms.add(socket, roomObj, user);
-			this.moveUser(socket, room, true);
-
-			// clone room and remove tokens from clone - then send it to client;
-			let roomClone = room.clear();
-			socket.join(room.socketRoom);
-			socket.emit('joiningRoom', roomClone);
-			Rooms.refreshAll(io);
-		},
-		joinRoom(socket, room) {
-			let success = State.moveUser(socket, room, true);
-			if (success) {
-				let roomClone = room.clear();
-				socket.emit('joiningRoom', roomClone);
-				socket.to(room.socketRoom).emit('refreshRoom', roomClone);
-				Rooms.refreshAll(io);
-			}
-		},
-
-		// Change location of the user.
-		moveUser(socket, room, join) {
-			if (join) {
-				let user = this.remove(socket);
-				return room.join(user);
-			} else {
-				let user = room.leave(socket);
-				user.ready = false;
-				user.role = '';
-				user.deck = null;
-				this.pool.push(user);
-
-				Rooms.checkEmptiness();
-			}
 		},
 
 		// Remove user from state, when he leaves the client.

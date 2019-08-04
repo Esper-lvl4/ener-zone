@@ -1,43 +1,16 @@
 const GameState = require('./../game/Game_State');
 const BoardState = require('./../game/Board_State');
 const State = require('./../../state/State');
+const stampit = require('stampit');
+const EventEmittable = require('@stamp/eventemittable');
+const {cloneObject, cloneArray} = require('./../../tools/tools');
 
-// function for cloning objects.
-function cloneObject(obj) {
-	var clone = {};
-	for (var i in obj) {
-		if (obj[i] != null && typeof(obj[i]) == 'object' && obj[i].forEach) {
-			clone[i] = cloneArray(obj[i]);
-		} else if (obj[i] != null && typeof(obj[i]) == 'object') {
-			clone[i] = cloneObject(obj[i]);
-		} else {
-			clone[i] = obj[i];
-		}
-	}
-	return clone;
-}
-
-// function for cloning arrays.
-function cloneArray(arr) {
-	var clone = [];
-	for (var a in arr) {
-		if (arr[a] != null && typeof(arr[a]) == 'object' && arr[a].forEach) {
-			clone.push(cloneArray(arr[a]));
-		} else if (arr[a] != null && typeof(arr[a]) == 'object') {
-			clone.push(cloneObject(arr[a]));
-		} else {
-			clone.push(arr[a]);
-		}
-	}
-	return clone;
-}
-
-function Room (socket, roomObj, id) {
-	let props = {
-		players: [],
-		spectators: [],
-		name: roomObj.name,
-		settings: roomObj.settings,
+let Room = stampit({
+	init(socket, roomObj, id) {
+		this.players = [];
+		this.spectators = [];
+		this.name = roomObj.name;
+		this.settings = roomObj.settings;
 		/*
 		{
 			format: 'as',
@@ -45,14 +18,17 @@ function Room (socket, roomObj, id) {
 			password: '',
 		}
 		*/
-		id: id + '',
-		socketRoom: 'room-' + id,
-		state: false,
-		initiated: false,
-		chat: [],
-	};
+		this.id = id + '';
+		this.socketRoom = 'room-' + id;
+		this.state = false;
+		this.initiated = false;
+		this.chat = [];
 
-	let prototype = {
+		this.on('join', this.join);
+		this.on('leave', this.leave);
+		this.on('closing', this.clearUsers);
+	},
+	methods: {
 		refresh(socket) {
 			let roomClone = this.clear();
 			socket.to(this.socketRoom).emit('refreshRoom', roomClone);
@@ -70,7 +46,7 @@ function Room (socket, roomObj, id) {
 			return roomClone;
 		},
 
-		join(socket, user) {
+		join({socket, user}) {
 			// check if there is space for more players.
 			if (this.isFull() && info.role !== 'spectator') {
 				socket.emit('errorMessage', 'The room is full. You can spectate this game, if you want, though.');
@@ -85,19 +61,17 @@ function Room (socket, roomObj, id) {
 		},
 
 		leave(socket) {
-			let user = null;
+			let token = socket.handshake.query.token;
 			for (let i = 0; i < this.players.length; i++) {
-				if (this.players[i].token === socket.handshake.query.token) {
-					user = this.players[i];
+				if (this.players[i].token === token) {
+					this.players[i].room = null;
 					this.players.splice(i, 1);
-					return user;
 				}
 			}
 			for (let i = 0; i < this.spectators.length; i++) {
-				if (this.spectators[i].token === socket.handshake.query.token) {
-					user = this.spectators[i];
+				if (this.spectators[i].token === token) {
+					this.spectators[i].room = null;
 					this.spectators.splice(i, 1);
-					return user;
 				}
 			}
 		},
@@ -119,6 +93,14 @@ function Room (socket, roomObj, id) {
 			}
 			return true;
 		},
+		clearUsers() {
+			for (let player of this.players) {
+				player.room = null;
+			}
+			for (let spec of this.spectators) {
+				spec.room = null;
+			}
+		},
 		getPlayer(socket) {
 			let token = socket.handshake.query.token;
 			for (let player of this.players) {
@@ -139,13 +121,6 @@ function Room (socket, roomObj, id) {
 			this.state = true;
 		},
 	}
-
-	let game = GameState();
-	let board = BoardState();
-	Object.assign(prototype, game.__proto__, board.__proto__);
-	let obj = Object.create(prototype);
-	Object.assign(obj, game, board, props);
-	return obj;
-}
+}).compose(EventEmittable, GameState, BoardState);
 
 module.exports = Room;
