@@ -48,6 +48,8 @@ export default {
 		},
 		successLogout() {
 			this.$store.commit('manageLogin', false);
+			localStorage.removeItem('Nickname');
+			localStorage.removeItem('EnerZoneToken');
 		},
     errorMessage(err) {
       this.$store.commit('errorMessage', err);
@@ -60,6 +62,12 @@ export default {
 			this.$store.commit('changeCurrentRoom', room);
 			if (!this.$route.path.match('game')) {
 				this.$router.push('game');
+			}
+		},
+		leftGame() {
+			this.$store.commit('changeCurrentRoom', null);
+			if (!this.$route.path.match('lobby')) {
+				this.$router.push('lobby');
 			}
 		},
 		restoreRoom (room) {

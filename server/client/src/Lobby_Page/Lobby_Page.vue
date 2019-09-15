@@ -64,17 +64,29 @@ export default {
 			}
 			this.gameRooms = data;
 		},
+		roomAdded(room) {
+			if (room) {
+				this.gameRooms.push(room);
+			}
+		},
+		roomRemoved(id) {
+			console.log(id)
+			for (let i = 0; i < this.gameRooms.length; i++) {
+				if (this.gameRooms[i].id === id) {
+					this.gameRooms.splice(i, 1);
+				}
+			}
+		},
 		joiningRoom (room) {
 			this.initRoom(room);
 		},
 		closedRoom() {
 			this.resetLobby();
-		},
-		refreshRoom(room) {
-			this.$store.commit('changeCurrentRoom', room);
+			this.$socket.emit('getGameList');
 		},
 		leftRoom() {
 			this.resetLobby();
+			this.$socket.emit('getGameList');
 		},
 		failedRoomCreation(message) {
 			console.log(message);
@@ -153,6 +165,7 @@ export default {
 
 		// Socket emits(lobby).
 		joinRoom(role) {
+			console.log(this.selectedRoom.id);
 			this.$socket.emit('joinRoom', {id: this.selectedRoom.id, role: role});
 		},
 		spectateRoom() {
@@ -169,7 +182,7 @@ export default {
 	},
 	mounted() {
 		console.log(this.$socket);
-		this.$socket.emit('getGameList', this.$socket.id);
+		this.$socket.emit('getGameList');
 	},
 }
 </script>

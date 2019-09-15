@@ -1,5 +1,15 @@
-function SigniZone() {
-	let prototype = {
+const stampit = require('stampit');
+const {showError} = require('./../../tools/tools');
+
+let SigniZone = stampit({
+	props: {
+		card: null,
+		under: [],
+		status: '',
+		down: false,
+		tooltip: '',
+	},
+	methods: {
 		exceed(index) {
 			this.under.splice(index, 1);
 		},
@@ -16,45 +26,49 @@ function SigniZone() {
 			this.tooltip = tooltip;
 		},
 	}
+});
 
-	let props = {
-		card: null,
-		under: [],
-		status: '',
-		down: false,
-		tooltip: '',
-	}
-
-	let obj = Object.create(prototype);
-	obj = Object.assign(obj, props);
-
-	return obj;
-}
-
-function LrigZone () {
-	let signiZoneObj = SigniZone();
-
-	let props = {
+let LrigZone = stampit({
+	props: {
 		key: [],
-	};
+	}
+}).compose(SigniZone);
 
-	let obj = Object.assign(signiZoneObj, props);
-	return obj;
-}
-
-function PlayerField (player) {
-	let prototype = {
+let PlayerField = stampit({
+	init(player) {
+		for (let i = 1; i <= 3; i++) {
+			this.signiZones.push(SigniZone());
+		}
+		this.lrigZone = LrigZone();
+		this.player = player;
+	},
+	props: {
+		player: null,
+		lrigTrash: [],
+		trash: [],
+		mainDeck: [],
+		lrigDeck: [],
+		lrigZone: null,
+		lifeCloth: [],
+		checkZone: [],
+		enerZone: [],
+		signiZones: [],
+		removedZone: [],
+		hand: [],
+		excluded: [],
+	},
+	methods: {
 		async moveCard(originalZone, destinationZone) {
 			// originalZone: {name, type, index, signiIndex}
 			// destinationZone: {name, type, signiIndex}
 			// validation.
 			try {
 				if (!(originalZone && destinationZone)) {
-					throw new Error('moveCard: no zones were provided');
+					showError('moveCard: no zones were provided');
 				} else if (!(originalZone.index && originalZone.name && destinationZone.name)) {
-					throw new Error('moveCard: not enough info about zones');
+					showError('moveCard: not enough info about zones');
 				} else if (!originalCard[cardIndex]) {
-					throw new Error('moveCard: card is not in its original zone');
+					showError('moveCard: card is not in its original zone');
 				}
 
 				// removed card is saved in the variable;
@@ -139,61 +153,6 @@ function PlayerField (player) {
 
 		},
 	}
+});
 
-	let props = {
-		player: null,
-		lrigTrash: [],
-		trash: [],
-		mainDeck: [],
-		lrigDeck: [],
-		lrigZone: null,
-		lifeCloth: [],
-		checkZone: [],
-		enerZone: [],
-		signiZones: [],
-		removedZone: [],
-		hand: [],
-		excluded: [],
-	}
-
-	for (let i = 1; i <= 3; i++) {
-		props.signiZones.push(SigniZone());
-	}
-	props.lrigZone = LrigZone();
-	props.player = player;
-
-	let obj = Object.create(prototype);
-	obj = Object.assign(obj, props);
-	return obj;
-}
-
-function BoardState () {
-	let prototype = {
-		async delegateAction(originalZone, destinationZone, socket, action) {
-			let player = this.getPlayer(socket);
-			if (!player) return;
-
-			for (let field of board) {
-				if (field.playerIndex == player.id) {
-					await field[action](originalZone, destinationZone);
-					break;
-				}
-			}
-		},
-		init() {
-			for (let i = 0; i < this.players.length; i++) {
-				this.board.push(PlayerField(this.players[i].nickname));
-			}
-		},
-	}
-	let props = {
-		board: [],
-	}
-
-	let obj = Object.create(prototype);
-	obj = Object.assign(obj, props);
-
-	return obj;
-}
-
-module.exports = BoardState;
+module.exports = PlayerField;

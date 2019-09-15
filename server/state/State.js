@@ -1,30 +1,29 @@
 const jwt = require('jsonwebtoken');
 const User = require('./users/User');
-const Rooms = require('./../lobby/rooms/Game_Rooms');
 const stampit = require('stampit');
 const EventEmittable = require('@stamp/eventemittable');
 const {showError} = require('./../tools/tools');
 
 let UserState = stampit({
-	init({nickname, socket, id}) {
+	init({nickname, id}) {
 		this.id = id;
-		this.socket = socket;
 		this.nickname = nickname;
-		this.token = socket.handshake.query.token;
-		this.ready = false;
-		this.gameHasStarted = false;
-		this.deck = null;
-		this.role = '';
-		this.room = null;
-	}
+	},
+	props: {
+		id: '',
+		nickname: '',
+		ready: false,
+		gameHasStarted: false,
+		deck: null,
+		role: '',
+		room: null,
+	},
 }).compose(EventEmittable);
 
 let UserList = stampit({
 	init() {
 		this.pool = [];
-		this.rooms = Rooms;
 		console.log('init state...');
-		this.on('player-ready', this.playerReady);
 	},
 	methods: {
 		// Two methods to keep track of users.
@@ -34,10 +33,10 @@ let UserList = stampit({
 			if (!this.getUser(socket)) {
 				await this.getUserFromDB(socket).then(
 					({id, nickname}) => {
-						this.pool.push(UserState({nickname, socket, id}));
-						this.pool[0].poke(nickname);
+						this.pool.push(UserState({nickname, id}));
 						check = true;
 					}, (err) => {
+						showError('State(check): Could not get user from DB!');
 						socket.emit('successLogout');
 					});
 			}
@@ -53,31 +52,6 @@ let UserList = stampit({
 			}
 		},
 
-		// Load deck of user.
-		loadDeck(socket, name) {
-			let user = this.getUser(this.handshake.query.token);
-			if (!user) {
-				this.emit('errorMessage', "State: User is not tracked!");
-			} else {
-				user.deck = name;
-				user.room.refresh(this);
-			}
-		},
-
-		// Player ready.
-
-		playerReady ({socket, value}) {
-			if (value === undefined) return;
-			let user = this.getUser(socket);
-
-			if (!user) {
-				socket.emit('errorMessage', "State: User is not tracked!");
-			} else {
-				user.ready = value;
-				user.room.refresh(this);
-			}
-		},
-
 		// Methods for getting the user by socket or id.
 
 		getUser(socketOrId) {
@@ -90,17 +64,17 @@ let UserList = stampit({
 
 		getUserBySocket(socket) {
 			let token = socket.handshake.query.token;
-			if (!token) {
+			if (!token || token === 'null') {
 				socket.emit('errorMessage', 'No token!');
 				return false;
 			}
 
-			for (let user of this.pool) {
-				if (user.token === token) {
-					return user;
-				}
+			let decoded = jwt.decode(token, {complete: true});
+			if (!decoded) {
+				showError('Failed to decode token.', socket);
 			}
-			return false;
+
+			return this.getUserById(decoded.payload.id);
 		},
 
 		getUserById(id) {
@@ -115,8 +89,20 @@ let UserList = stampit({
 		// Remove user from state, when he leaves the client.
 		remove(socket) {
 			let user = null;
+			let token = socket.handshake.query.token;
+			if (!token || token === 'null') {
+				showError('State(remove): Cant remove user without a token!');
+				socket.emit('successLogout', 'There was no token.');
+				return false;
+			}
+
+			let decoded = jwt.decode(token, {complete: true});
+			if (!decoded) {
+				showError('Failed to decode token.', socket);
+				return false;
+			}
 			for (let i = 0; i < this.pool.length; i++) {
-				if (socket.handshake.query.token === this.pool[i].token) {
+				if (decoded.payload.id === this.pool[i].id) {
 					user = this.pool[i];
 					this.pool.splice(i, 1);
 					return user;
@@ -125,31 +111,41 @@ let UserList = stampit({
 		},
 		/*****/
 
-		async getUserFromDB(socket, opt = {returnAll: false, returnExact: false}) {
-			let token = socket.handshake.query.token;
-			if (!token) {
-				showError('No token!', socket);
+		async getUserFromDB(socketOrId, opt = {returnAll: false, returnExact: false}) {
+			let id = null;
+			if (typeof socketOrId === 'object') {
+				let token = socketOrId.handshake.query.token;
+				if (!token || token === 'null') {
+					showError('No token!', socketOrId);
+				}
+				let decoded = jwt.decode(token, {complete: true});
+				if (!decoded) {
+					showError('Failed to decode token.', socketOrId);
+				}
+				id = decoded.payload.id;
+			} else if (typeof socketOrId === 'string') {
+				id = socketOrId
 			}
-			let decoded = jwt.decode(token, {complete: true});
-			if (!decoded) {
-				showError('Failed to decode token.', socket);
-			}
+
 			let userData = null;
-			await User.findOne({_id: decoded.payload.id}).then((user) => {
-				if (!user) {
-					showError('User without a document in DB got token.', socket);
-					socket.emit('successLogout');
+			await User.findOne({_id: id}).then((user) => {
+				try {
+					if (!user) {
+						showError('User without a document in DB got token.');
+					}
+					if (opt.returnAll) {
+						userData = user;
+					} else if (opt.returnExact) {
+						userData = user[opt.returnExact];
+					} else {
+						userData = {id: user._id + '', nickname: user.nickname};
+					}
+				} catch (error) {
+					console.error(error);
 				}
-				if (opt.returnAll) {
-					userData = user;
-				} else if (opt.returnExact) {
-					userData = user[opt.returnExact];
-				} else {
-					userData = {id: user._id + '', nickname: user.nickname, token: token};
-				}
-			}, (err) => {
-				socket.emit('errorMessage', 'Error, when tried to find user.')
-				console.log(err);
+			}).catch((err) => {
+				showError('Error, when tried to find user.')
+				console.error(err);
 			});
 			return userData;
 		}

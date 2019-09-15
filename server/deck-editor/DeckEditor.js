@@ -16,8 +16,8 @@ function DeckEditor (socket) {
 
 	async function saveDeck (deckToSave) {
 		let deck = deckToSave;
-		let user = await State.getUser(socket, {returnAll: true});
-		if (!user || !user.decks) {
+		let user = await State.getUserFromDB(socket, {returnAll: true});
+		if (!user) {
 			socket.emit('errorMessage', 'Could not find a user.');
 			return;
 		}
@@ -34,9 +34,9 @@ function DeckEditor (socket) {
 	}
 
 	function showDecks () {
-		State.getUser(socket, {returnExact: 'decks'}).then((decks) => {
+		State.getUserFromDB(socket, {returnExact: 'decks'}).then((decks) => {
 			socket.emit('sentDecks', decks);
-		}, (err) => {
+		}).catch((err) => {
 			socket.emit('errorMessage', 'Could not find decks.');
 		})
 	}
@@ -45,7 +45,7 @@ function DeckEditor (socket) {
 
 	function getDeck (deckToShow, action) {
 		let deck = deckToShow;
-		State.getUser(socket, {returnAll: true}).then((user) => {
+		State.getUserFromDB(socket, {returnAll: true}).then((user) => {
 			let decks = user.decks;
 			for (let i = 0; i < decks.length; i++) {
 				if (decks[i].name === deck) {
@@ -61,9 +61,9 @@ function DeckEditor (socket) {
 					break;
 				}
 			}
-		}, (err) => {
+		}).catch((err) => {
 			socket.emit('errorMessage', 'Could not find any deck.');
-		})
+		});
 	}
 
 	socket.on('getDatabase', getDatabase);

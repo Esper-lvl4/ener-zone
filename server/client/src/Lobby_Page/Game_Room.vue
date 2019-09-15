@@ -4,7 +4,7 @@
 			<!-- Output players -->
 			<h2>List of players:</h2>
 			<div v-for="player in users.players" class="room-player">
-				<span>{{player.nickname}} </span><span>({{player.role}})</span><span>: {{player.ready ? 'ready' : 'not ready'}}</span>
+				<span>{{player.nickname}} </span><span>({{player.role}})</span><span>: {{player.ready? 'ready' : 'not ready'}}</span>
 			</div>
 			<h2>List of spectators</h2>
 			<div v-for="player in users.spectators" class="room-player">
@@ -15,8 +15,8 @@
 			<button class="main-button" v-if="userIsRoomPlayer" :disabled="!readyToStart" @click="open()">OPEN!</button>
 			<button class="main-button" @click="readyToPlay()" v-if="userIsRoomPlayer">Ready to batoru</button>
 			<button class="main-button" v-if="userIsRoomPlayer" @click="openLoadModal">Choose deck</button>
-			<button class="main-button"  v-if="userIsRoomPlayer">Invite</button>
-			<button class="main-button" v-if="userIsRoomHost">Kick</button>
+			<!-- <button class="main-button"  v-if="userIsRoomPlayer">Invite</button> -->
+			<!-- <button class="main-button" v-if="userIsRoomHost">Kick</button> -->
 			<button class="main-button" v-if="userIsRoomHost" @click="closeRoom()">Close room</button>
 			<button class="main-button" @click="leaveRoom()">Leave room</button>
 		</div>
@@ -42,12 +42,17 @@ export default {
 			this.$socket.emit('playerReadiness', false);
 			this.$socket.emit('loadedDeck', deck);
     },
+		refreshRoom(room) {
+			this.$store.commit('changeCurrentRoom', room);
+		},
+		// setReady(value) {
+		// 	this.isReady = value;
+		// }
 	},
 	data() {
 		return {
 			numberOfPlayers: 2,
 			loadDeckModal: false,
-
 			deck: null,
 		}
 	},
@@ -58,13 +63,13 @@ export default {
 		role() {
 			for (let user of this.room.players) {
 				if (user.nickname == localStorage.getItem('Nickname')) {
-					return 'player';
+					return user.role;
 					break;
 				}
 			}
 			for (let user of this.room.spectators) {
 				if (user.nickname == localStorage.getItem('Nickname')) {
-					return 'spectator';
+					return user.role;
 					break;
 				}
 			}
@@ -101,20 +106,16 @@ export default {
   },
 	methods: {
 		closeRoom: function () {
-			this.$socket.emit('closeRoom');
+			this.$socket.emit('closeRoom', this.room.id);
 		},
 		leaveRoom: function () {
-			this.$socket.emit('leaveRoom');
+			this.$socket.emit('leaveRoom', this.room.id);
 		},
 		readyToPlay: function () {
-			if (this.deckName !== null && this.deckIsValid) {
-				this.$socket.emit('playerReadiness');
-			}
+			this.$socket.emit('playerReadiness');
 		},
 		open: function () {
-			if (this.readyToStart === true) {
-				this.$socket.emit('initGame', this.currentRoom.id);
-			}
+			this.$socket.emit('initGame', this.currentRoom.id);
 		},
 
 		openLoadModal() {
