@@ -1,5 +1,5 @@
 const express = require('express');
-const User = require('../users/User');
+const User = require('../state/users/User');
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -25,6 +25,7 @@ function socketRouter (socket) {
 			}
 		});
 		if (allowSignUp === false) {
+			console.log('disallowed');
 			return;
 		} else {
 			let hashedPass = bcrypt.hashSync(userObj.password, 8);
@@ -73,7 +74,6 @@ function socketRouter (socket) {
 				const token = jwt.sign({id: user._id}, key.secret, {
 					expiresIn: 86400,
 				});
-				console.log(user);
 				socket.emit('loginSuccess', {auth: true, token: token, nick: user.nickname});
 			}
 		});

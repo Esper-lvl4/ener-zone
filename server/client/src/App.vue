@@ -43,16 +43,37 @@ export default {
     MainMenu, LobbyPage, GamePage, DeckEditor, OptionsPage, ProfilePage, AdminPage, AuthPage, Modal
   },
   sockets: {
+		accessVerify(result) {
+			this.$store.commit('manageLogin', result);
+		},
+		successLogout() {
+			this.$store.commit('manageLogin', false);
+			localStorage.removeItem('Nickname');
+			localStorage.removeItem('EnerZoneToken');
+		},
     errorMessage(err) {
       this.$store.commit('errorMessage', err);
     },
     loginSuccess() {
       this.$store.commit('manageLogin', true);
     },
-		gameInProgress(room) {
-			console.log('grape');
-			this.$router.push('game');
-		}
+		restoreGame(room) {
+			console.log(room);
+			this.$store.commit('changeCurrentRoom', room);
+			if (!this.$route.path.match('game')) {
+				this.$router.push('game');
+			}
+		},
+		leftGame() {
+			this.$store.commit('changeCurrentRoom', null);
+			if (!this.$route.path.match('lobby')) {
+				this.$router.push('lobby');
+			}
+		},
+		restoreRoom (room) {
+			this.$router.push('lobby');
+			this.$store.commit('changeCurrentRoom', room);
+		},
   },
   data() {
     return {
@@ -73,6 +94,10 @@ export default {
 		clearErrors() {
 			this.$store.commit('clearErrors');
 		}
+	},
+	mounted() {
+		console.log('check');
+		this.$socket.emit('checkUserLocation', 'check');
 	}
 }
 </script>

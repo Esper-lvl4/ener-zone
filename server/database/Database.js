@@ -2,8 +2,6 @@ const CardDB = require('./CardDB');
 const Parser = require('./Parser');
 
 function Database (socket) {
-	console.log('User connected to parser');
-	
 	/* Show db */
 	socket.on('showDB', function(val) {
 		console.log('Displaying database');

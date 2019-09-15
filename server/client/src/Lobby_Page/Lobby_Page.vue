@@ -2,7 +2,7 @@
   <div id="lobby">
 		<div class="lobby-wrap">
 			<div class="lobby-list-block">
-				<div class="lobby-filter-wrap block-style" :class="{'js-none': roomActive}">
+				<div class="lobby-filter-wrap block-style" :class="{'js-none': currentRoom}">
 					<input class="lobby-name-filter main-input"type="text" name="name-filter" id="name-filter">
 					<div class="progress-filter-wrap">
 						<input type="checkbox" name="progress-filter" id="progress-filter" placeholder="Search for rooms by name">
@@ -11,7 +11,7 @@
 					<button class="filters-modal-button main-button" @click="toggleModal('filter')">Filters</button>
 				</div>
 
-				<GameRoom v-if="roomActive" :currentRoom="currentRoom" />
+				<GameRoom v-if="currentRoom" :currentRoom="currentRoom" />
 				<div class="lobby-gamelist-wrap block-style" v-else @click.self="unselectRoom()">
 					<!-- Output list of rooms -->
 					<ul class="game-list" @click.stop="selectRoom($event.target)">
@@ -19,7 +19,7 @@
 					</ul>
 				</div>
 
-				<div class="lobby-buttons-wrap block-style" :class="{'js-none': roomActive}">
+				<div class="lobby-buttons-wrap block-style" :class="{'js-none': currentRoom}">
 					<button class="main-button" @click="toggleModal('create')">Create</button>
 					<button class="main-button" :disabled="!roomIsSelected" @click="joinButtonClick()">Join</button>
 					<button class="main-button" :disabled="!roomIsSelected" @click="spectateRoom()">Spectate</button>
@@ -59,23 +59,34 @@ export default {
 		},
 		refreshLobby (data) {
 			if (!data) {
-				console.log('No game data were sent by server!');
+				this.$store.commit('errorMessage', 'No game data were sent by server!');
 				return;
 			}
 			this.gameRooms = data;
-			console.log(this.gameRooms);
+		},
+		roomAdded(room) {
+			if (room) {
+				this.gameRooms.push(room);
+			}
+		},
+		roomRemoved(id) {
+			console.log(id)
+			for (let i = 0; i < this.gameRooms.length; i++) {
+				if (this.gameRooms[i].id === id) {
+					this.gameRooms.splice(i, 1);
+				}
+			}
 		},
 		joiningRoom (room) {
 			this.initRoom(room);
 		},
 		closedRoom() {
 			this.resetLobby();
-		},
-		refreshRoom(room) {
-			this.currentRoom = room;
+			this.$socket.emit('getGameList');
 		},
 		leftRoom() {
 			this.resetLobby();
+			this.$socket.emit('getGameList');
 		},
 		failedRoomCreation(message) {
 			console.log(message);
@@ -86,10 +97,6 @@ export default {
 			// Lobby props
 			gameRooms: [],
 			selectedRoom: null,
-
-			// Room props
-			roomActive: false,
-			currentRoom: null,
 
 			// Modals props
 			showModal: false,
@@ -125,13 +132,11 @@ export default {
 		},
 		initRoom(room) {
 			this.toggleModal();
-			this.roomActive = true;
-			this.currentRoom = room;
+			this.$store.commit('changeCurrentRoom', room);
 		},
 		resetLobby() {
 			this.toggleModal();
-			this.roomActive = false;
-			this.currentRoom = null;
+			this.$store.commit('changeCurrentRoom', null);
 		},
 		unselectRoom() {
 			this.selectedRoom = null;
@@ -160,6 +165,7 @@ export default {
 
 		// Socket emits(lobby).
 		joinRoom(role) {
+			console.log(this.selectedRoom.id);
 			this.$socket.emit('joinRoom', {id: this.selectedRoom.id, role: role});
 		},
 		spectateRoom() {
@@ -170,9 +176,12 @@ export default {
 		roomIsSelected() {
 			return this.selectedRoom ? true : false;
 		},
+		currentRoom() {
+			return this.$store.state.currentRoom;
+		}
 	},
 	mounted() {
-		this.$socket.emit('checkUserLocation', 'check');
+		console.log(this.$socket);
 		this.$socket.emit('getGameList');
 	},
 }

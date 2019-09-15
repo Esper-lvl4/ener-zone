@@ -19,29 +19,30 @@ const parser = {
 		'Key',
 		];
 
-		let colors = [
+		/*let colors = [
 		'Black',
 		'White',
 		'Blue',
 		'Red',
 		'Green',
 		'Colorless',
-		];
+	];*/
 		for (let t = 0; t < cardTypes.length; t++) {
-			for (let c = 0; c < colors.length; c++) {
-				linkList.push(this.wikiQuery(cardTypes[t], colors[c], linkList));
-			}
+			//for (let c = 0; c < colors.length; c++) {
+				linkList.push(this.wikiQuery(cardTypes[t], linkList));
+			//}
 		}
 		return linkList;
 	},
 
 	// Requests to API
 
-	wikiQuery: function (type, color, linkList, number = 1000) {
+	wikiQuery: function (type, linkList, number = 10000) {
 		return new Promise((resolve, reject) => {
-			//const loleni = 'https://selector-wixoss.wikia.com/wiki/Special:CategoryIntersection?category_1=Category%3A+ARTS&category_2=Category%3ABlack&limit=1000&wpSubmit=Find+matches'
-			const reqUrl = 'https://wixoss.wikia.com/wiki/Special:CategoryIntersection?category_1=Category%3A+' + type 
-			+ '&category_2=Category%3A+' + color + '&limit=' + number + '&wpSubmit=Find+matches';
+			/*const reqUrl = 'https://wixoss.wikia.com/wiki/Special:CategoryIntersection?category_1=Category%3A+' + type
+			+ '&category_2=Category%3A+' + color + '&limit=' + number + '&wpSubmit=Find+matches';*/
+			const reqUrl = 'https://wixoss.wikia.com/wiki/Special:CategoryIntersection?category_1=Category%3A+' + type
+			+ '&limit=' + number + '&wpSubmit=Find+matches';
 			let result = [];
 			request(reqUrl, (err, res, body) => {
 				const $ = cheerio.load(body);
@@ -158,10 +159,10 @@ const parser = {
 					}
 					else if ($(this).find('td:first-of-type a').text() == 'Key Selection') {
 						if ($(this).find('td:nth-of-type(2)').text().match('Yes')) {
-							card.ksLegal = true;				
+							card.ksLegal = true;
 						}
 					}
-				});	
+				});
 
 				card.effect = $('#info_container .effect table:first-of-type tr td').html();
 

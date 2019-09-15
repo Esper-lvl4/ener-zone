@@ -13,8 +13,10 @@
       <DeleteDeck v-if="deleteDeckModal" @close-modal="closeModals" />
 
       <SaveDeck :main="main" :lrig="lrig" v-if="saveDeckModal" @close-modal="closeModals" />
+			<keep-alive>
+				<DetailedFilter v-if="filterModal" @close-modal="closeModals" />
+			</keep-alive>
 
-      <DetailedFilter v-if="filterModal" @close-modal="closeModals" />
     </div>
   </div>
 </template>
@@ -30,7 +32,7 @@ export default {
     SaveDeck, LoadDeck, DeleteDeck, DetailedFilter,
   },
   props: [
-    'main', 'lrig'
+    'main', 'lrig', 'validity'
   ],
   data: () => ({
     saveDeckModal: false,

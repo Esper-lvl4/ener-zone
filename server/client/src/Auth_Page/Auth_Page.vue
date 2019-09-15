@@ -1,13 +1,13 @@
 <template>
   <div id="auth-page">
 
-  	<button class="main-button" @click="showLoginForm">Login</button>
-		<button class="main-button" @click="showRegForm">Sign Up</button>
+  	<button v-if="!regForm.show && !loginForm.show" class="main-button" @click="showLoginForm">Login</button>
+		<button v-if="!regForm.show && !loginForm.show" class="main-button" @click="showRegForm">Sign Up</button>
 
     <!-- Login popup -->
 
 		<div class="login-wrap" v-if="loginForm.show" @click.self="closeModals">
-			<form class="login-form">
+			<form class="login-form block-style">
 				<div class="info">{{loginForm.info}}</div>
 				<label>Username</label>
 				<input class="main-input" type="text" name="username" v-model="loginForm.name"
@@ -24,7 +24,7 @@
 		<!-- Sign Up popup -->
 
 		<div class="sign-up-wrap" v-if="regForm.show" @click.self="closeModals">
-			<form class="sign-up-form">
+			<form class="sign-up-form block-style">
 				<div class="info">{{regForm.info}}</div>
 				<label>Username</label>
 				<input class="main-input" type="text" name="username" v-model="regForm.name"

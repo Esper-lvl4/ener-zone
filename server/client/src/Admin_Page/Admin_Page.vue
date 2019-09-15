@@ -1,11 +1,26 @@
 <template>
-  <div id="main-menu">
-    Main Menu
+  <div id="admin-page">
+    <button @click="parse">Parser</button>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'main-menu',
+  name: 'admin-page',
+	data() {
+		return {
+			db: [],
+		}
+	},
+	sockets: {
+		parsed(data) {
+			this.db = data;
+		}
+	},
+	methods: {
+		parse() {
+			this.$socket.emit('parse');
+		}
+	},
 }
 </script>

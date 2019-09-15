@@ -27,15 +27,17 @@ flex($dir = row, $wrap = wrap, $just = flex-start, $align = flex-start)
 
 html
 	height: 100%
+	overflow: hidden
 
 body
 	flex(column, nowrap, flex-start, stretch)
-	min-height: 100%
+	height: 100%
 	padding: 0
 	margin: 0
 	background: $white
 	font: 16px/20px 'Raleway', sans-serif
 	color: $white
+	overflow: hidden
 
 	*
 		box-sizing: border-box
@@ -44,7 +46,8 @@ body
 	position:relative
 	flex-grow: 2
 	flex(column, nowrap, center);
-	height: 100%
+	min-height: 100%
+	overflow-y: auto
 	&::before {
 		content: ''
 		position: absolute
@@ -279,7 +282,7 @@ body
 
 
 .login-wrap, .sign-up-wrap
-	position: absolute
+	position: fixed
 	top: 0
 	left: 0
 	display: flex
@@ -300,7 +303,6 @@ body
 	align-content: center
 	width: 400px
 	padding: 100px 50px
-	background: $dark
 	color: #ffffff
 
 .info
@@ -477,9 +479,10 @@ main
 .search-result
 	display: flex
 	flex-flow: column wrap
-	justify-content: center
+	justify-content: flex-start
+	align-content: flex-start
 	overflow-x: scroll
-	height: 180px;
+	height: 180px
 
 .more-button
 	width: 20%
@@ -737,6 +740,19 @@ main
 	flex-flow: row-reverse wrap
 	justify-content: space-between
 	height: 100%
+	.deck-list-block
+		position: fixed
+		top: 0
+		left: 0
+		flex(row, nowrap, center, center)
+		width: 100%
+		height: 100%
+		background: rgba(0, 0, 0, 0.5)
+	.deck-list
+		width: 300px
+		min-height: 200px
+		background: #312955
+
 
 .room-player-list
 	flex-grow: 2
@@ -802,9 +818,10 @@ main
 /* Game styles */
 
 .game-wrap
-	display: flex
-	flex-flow: row nowrap
-	justify-content: space-between
+	position: relative
+	display: grid
+	grid-template: repeat(2, 1fr) \/ 280px 1fr
+	grid-gap: 10px
 
 	img
 		max-width: 100%
@@ -812,9 +829,16 @@ main
 		width: auto
 		height: auto
 
+.game-nav
+	position: fixed
+	bottom: 10px
+	left: 40px
+
+
 .info-block
+	grid-row: 1 \/ -1
 	display: flex
-	flex-flow: column wrap
+	flex-flow: column nowrap
 	min-width: 280px
 	width: 20%
 	padding: 5px
@@ -834,13 +858,39 @@ main
 
 .top-player-field
 	display: grid
-	grid-template: repeat(3, 128px)\/220px 220px 220px 220px 180px
+	grid-template: repeat(3, 120px)\/repeat(4, 220px) 170px
 	grid-template-areas: "lrig-trash lrig-deck life-cloth life-cloth ener-zone"\
 		"trash lrig-zone lrig-zone check-zone ener-zone"\
 		"main-deck signi-zone signi-zone signi-zone ener-zone"
 	grid-gap: 5px 5px
 	justify-content: end
-	padding: 5px 5px 0 0
+	padding: 5px 5px 0 5px
+	.block-style
+		position: relative
+	.hand-zone
+		top: 0
+
+.bottom-player-field
+	display: grid
+	grid-template: repeat(3, 120px)\/repeat(4, 220px) 170px
+	grid-template-areas: "ener-zone signi-zone signi-zone signi-zone main-deck"\
+		"ener-zone check-zone lrig-zone lrig-zone trash"\
+		"ener-zone life-cloth life-cloth lrig-deck lrig-trash"
+	grid-gap: 5px 5px
+	justify-content: end
+	padding: 5px 5px 0 5px
+	.block-style
+		position: relative
+	.hand-zone
+		bottom: 0
+
+.hand-zone
+	position: absolute
+	left: 50%
+	z-index: 5
+	transform: translateX(-50%)
+	flex(row, nowrap, center)
+	width: auto
 
 .lrig-trash-zone
 	grid-area: lrig-trash
@@ -854,10 +904,15 @@ main
 .ener-zone
 	grid-area: ener-zone
 
-.ener-zone .zone-content
-	display: flex
-	flex-flow: column nowrap
-	justify-content: flex-end
+.ener-zone
+	.zone-content
+		display: flex
+		flex-flow: column nowrap
+		justify-content: flex-end
+	.zone-content-wrap
+		width: 100%
+		height: 100%
+
 
 .trash-zone
 	grid-area: trash
@@ -874,10 +929,6 @@ main
 .signi-zones
 	grid-area: signi-zone
 
-.signi-zones .zone-content
-	display: flex
-	flex-flow: row nowrap
-	justify-content: space-evenly
 
 .game-zone
 	position: relative
@@ -898,13 +949,43 @@ main
 	background: #999999
 
 .zone-content
-	position: relative
+	position: absolute
+	top: 0
+	left: 0
 	z-index: 2
+	display: none
 	width: 100%
 	height: 100%
 	border-radius: 5px
-	background: #ffffff
+	overflow: hidden
+	&.is-opened
+		position: fixed
+		top: 0
+		left: 0
+		z-index: 10
+		flex(row, wrap, center, flex-start)
+		// background: rgba(0, 0, 0, 0.5)
+		img
+			max-width: 220px
+			max-height: 128px
+			width: auto
+			height: auto
+		.zone-content-wrap
+			margin-top: 100px
 
+.zone-content-wrap
+	flex(row, wrap)
+	padding: 10px
+
+.visible-zone-card
+	position: relative
+	z-index: 3
+	height: 100%
+	img
+		max-width: 100%
+		max-height: 100%
+		width: auto
+		height: auto
 
 .card
 	max-width: 100%

@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@stamp/eventemittable": "^1.0.2",
+    "@stamp/it": "^1.1.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.3",
@@ -20,9 +22,10 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.5.1",
     "request": "^2.88.0",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "stampit": "^4.2.0"
   },
   "devDependencies": {
-    "nodemon": "^1.18.11"
+    "nodemon": "^1.19.1"
   }
 }
