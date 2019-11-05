@@ -1,4 +1,3 @@
-const express = require('express');
 const User = require('../state/users/User');
 
 const jwt = require('jsonwebtoken');
