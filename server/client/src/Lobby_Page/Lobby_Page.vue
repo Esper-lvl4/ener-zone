@@ -3,7 +3,7 @@
 		<div class="lobby-wrap">
 			<div class="lobby-list-block">
 				<div class="lobby-filter-wrap block-style" :class="{'js-none': currentRoom}">
-					<input class="lobby-name-filter main-input"type="text" name="name-filter" id="name-filter">
+					<input class="lobby-name-filter main-input" type="text" name="name-filter" id="name-filter">
 					<div class="progress-filter-wrap">
 						<input type="checkbox" name="progress-filter" id="progress-filter" placeholder="Search for rooms by name">
 						<label for="progress-filter">Show rooms, where game has started.</label>
@@ -15,7 +15,7 @@
 				<div class="lobby-gamelist-wrap block-style" v-else @click.self="unselectRoom()">
 					<!-- Output list of rooms -->
 					<ul class="game-list" @click.stop="selectRoom($event.target)">
-						<li v-for="room in gameRooms" :id="'room-' + room.id" :class="{'js-selected-room': selectedRoom == room}">{{room.name}}</li>
+						<li v-for="room in gameRooms" :id="'room-' + room.id" :key="'room' + room.id" :class="{'js-selected-room': selectedRoom == room}">{{room.name}}</li>
 					</ul>
 				</div>
 

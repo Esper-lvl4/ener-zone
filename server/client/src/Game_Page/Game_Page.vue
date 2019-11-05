@@ -2,48 +2,59 @@
 	<!-- Game block -->
 	<div class="game-wrap wrap-size" v-on:card-hover="cardHover">
 		<nav class="game-nav">
-			<button class="main-button surrender" @click="surrenderPopup = true;">Surrender</button>
-			<button class="main-button leave-game" @click="leaveGamePopup = true;">Leave game</button>
+			<button class="main-button surrender" @click="surrenderPopup = true;">
+				Surrender
+			</button>
+			<button class="main-button leave-game" @click="leaveGamePopup = true;">
+				Leave game
+			</button>
 		</nav>
 		<CardInfo :card-info="hoveredCard"/>
 		<div class="top-player-field">
 			<CardZone
 			class="lrig-trash-zone" :zone="enemyField.lrigTrash"
-			:is-hidden="false" cardback="/src/assets/img/card-back-lrig-deck.jpg"/>
-			<CardZone class="lrig-deck-zone" :zone="enemyField.lrigDeck" :is-hidden="true" cardback="/src/assets/img/card-back-lrig-deck.jpg"/>
-			<CardZone class="life-cloth-zone" :zone="enemyField.lifeCloth" :is-hidden="true" cardback="/src/assets/img/card-back.jpg"/>
-			<CardZone class="trash-zone" :zone="enemyField.trash" :is-hidden="false" cardback="/src/assets/img/card-back.jpg"/>
-			<LrigZone class="lrig-zone" :zone="enemyField.lrigZone" :is-hidden="false" cardback="/src/assets/img/card-back-lrig-deck.jpg"/>
-			<CardZone class="check-zone" :zone="enemyField.checkZone" :is-hidden="false"/>
-			<CardZone class="main-deck-zone" :zone="enemyField.mainDeck" :is-hidden="true" cardback="/src/assets/img/card-back.jpg"/>
+			cardback="lrig"/>
+			<CardZone 
+				class="lrig-deck-zone" :zone="enemyField.lrigDeck" 
+				is-hidden cardback="lrig"/>
+			<CardZone class="life-cloth-zone" :zone="enemyField.lifeCloth" is-hidden/>
+			<CardZone class="trash-zone" :zone="enemyField.trash"/>
+			<LrigZone class="lrig-zone" :zone="enemyField.lrigZone" cardback="lrig"/>
+			<CardZone class="check-zone" :zone="enemyField.checkZone"/>
+			<CardZone class="main-deck-zone" :zone="enemyField.mainDeck" is-hidden/>
 
 			<div class="signi-zones block-style">
-				<SigniZone class="signi-zone1" :zone="enemyField.signiZones[0]" :is-hidden="false" cardback="/src/assets/img/card-back.jpg"/>
-				<SigniZone class="signi-zone2" :zone="enemyField.signiZones[1]" :is-hidden="false" cardback="/src/assets/img/card-back.jpg"/>
-				<SigniZone class="signi-zone3" :zone="enemyField.signiZones[2]" :is-hidden="false" cardback="/src/assets/img/card-back.jpg"/>
+				<SigniZone class="signi-zone1" :zone="enemyField.signiZones[0]"/>
+				<SigniZone class="signi-zone2" :zone="enemyField.signiZones[1]"/>
+				<SigniZone class="signi-zone3" :zone="enemyField.signiZones[2]"/>
 			</div>
 
-			<CardZone class="ener-zone" :zone="enemyField.enerZone" :is-hidden="false" cardback="/src/assets/img/card-back.jpg"/>
-			<CardZone class="hand-zone" :zone="userField.hand" :is-hidden="true" cardback="/src/assets/img/card-back.jpg"/>
+			<CardZone class="ener-zone" :zone="enemyField.enerZone"/>
+			<CardZone class="hand-zone" :zone="userField.hand" is-hidden/>
 		</div>
 
 		<div class="bottom-player-field">
-			<CardZone class="lrig-trash-zone" :zone="userField.lrigTrash" :is-public="true" cardback="/src/assets/img/card-back-lrig-deck.jpg" zone-name="lrigTrash"/>
-			<CardZone class="lrig-deck-zone" :zone="userField.lrigDeck" :is-public="false" cardback="/src/assets/img/card-back-lrig-deck.jpg" zone-name="lrigDeck"/>
-			<CardZone class="life-cloth-zone" :zone="userField.lifeCloth" :is-public="false" cardback="/src/assets/img/card-back.jpg" zone-name="lifeCloth"/>
-			<CardZone class="trash-zone" :zone="userField.trash" :is-public="true" cardback="/src/assets/img/card-back.jpg" zone-name="trash"/>
-			<LrigZone class="lrig-zone" :zone="userField.lrigZone" :is-public="true" cardback="/src/assets/img/card-back-lrig-deck.jpg" zone-name="lrigZone"/>
-			<CardZone class="check-zone" :zone="userField.checkZone" :is-public="true" zone-name="checkZone"/>
-			<CardZone class="main-deck-zone" :zone="userField.mainDeck" :is-public="false" cardback="/src/assets/img/card-back.jpg" zone-name="mainDeck"/>
+			<CardZone class="lrig-trash-zone" :zone="userField.lrigTrash" 
+				is-public cardback="lrig"/>
+			<CardZone class="lrig-deck-zone" :zone="userField.lrigDeck" cardback="lrig"/>
+			<CardZone class="life-cloth-zone" :zone="userField.lifeCloth"/>
+			<CardZone class="trash-zone" :zone="userField.trash" is-public/>
+			<LrigZone class="lrig-zone" :zone="userField.lrigZone" 
+				is-public cardback="lrig"/>
+			<CardZone class="check-zone" :zone="userField.checkZone" is-public/>
+			<CardZone class="main-deck-zone" :zone="userField.mainDeck" is-public/>
 
 			<div class="signi-zones block-style">
-				<SigniZone class="signi-zone1" :zone="userField.signiZones[0]" :is-public="true" cardback="/src/assets/img/card-back.jpg" zone-name="signiZones" zone-index="0"/>
-				<SigniZone class="signi-zone2" :zone="userField.signiZones[1]" :is-public="true" cardback="/src/assets/img/card-back.jpg" zone-name="signiZones" zone-index="1"/>
-				<SigniZone class="signi-zone3" :zone="userField.signiZones[2]" :is-public="true" cardback="/src/assets/img/card-back.jpg" zone-name="signiZones" zone-index="2"/>
+				<SigniZone class="signi-zone3" :zone="userField.signiZones[2]" 
+					is-public zone-index="2"/>
+				<SigniZone class="signi-zone1" :zone="userField.signiZones[0]" 
+					is-public zone-index="0"/>
+				<SigniZone class="signi-zone2" :zone="userField.signiZones[1]" 
+					is-public zone-index="1"/>
 			</div>
 
-			<CardZone class="ener-zone" :zone="userField.enerZone" :is-public="true" cardback="/src/assets/img/card-back.jpg" zone-name="enerZone"/>
-			<CardZone class="hand-zone" :zone="userField.hand" :is-public="false" cardback="/src/assets/img/card-back.jpg" zone-name="hand"/>
+			<CardZone class="ener-zone" :zone="userField.enerZone" is-public/>
+			<CardZone class="hand-zone" :zone="userField.hand"/>
 		</div>
 
 		<PopupChoice v-if="leaveGamePopup" message="Are you sure you want to leave?" v-on:yes-click="leaveGame" v-on:closed-modal="leaveGamePopup = false"></PopupChoice>
@@ -59,10 +70,11 @@ import CardZone from './Card_Zone.vue';
 import LrigZone from './Lrig_Zone.vue';
 import SigniZone from './Signi_Zone.vue';
 
-
 export default {
   name: 'game',
-	components: {CardInfo, CardZone, LrigZone, SigniZone, PopupChoice},
+	components: {
+		CardInfo, CardZone, LrigZone, SigniZone, PopupChoice
+	},
 	sockets: {
 		refreshGame(room) {
 			this.$store.commit('changeCurrentRoom', room)

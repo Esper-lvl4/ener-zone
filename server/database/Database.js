@@ -3,7 +3,7 @@ const Parser = require('./Parser');
 
 function Database (socket) {
 	/* Show db */
-	socket.on('showDB', function(val) {
+	socket.on('showDB', function() {
 		console.log('Displaying database');
 		CardDB.find((err, data) => {
 			if (err) {console.error(err)}
@@ -16,6 +16,10 @@ function Database (socket) {
 	socket.on('showFilter', function(query) {
 		console.log(`Searching for cards.`);
 		CardDB.find(query, (err, data) => {
+			if (err) {
+				console.error(err);
+				return;
+			}
 			console.log('Done');
 			socket.emit('gotUntranslatedCards', data);
 		});
@@ -23,7 +27,7 @@ function Database (socket) {
 
 	/* Parsing wiki */
 
-	socket.on('parse', function (msg) {
+	socket.on('parse', function () {
 		console.log('Parsing wixoss wiki...');
 		Promise.all(Parser.getDatabase())
 			.then((result) => {
@@ -55,9 +59,15 @@ function Database (socket) {
 			.then(() => {
 				console.log('Displaying database');
 				CardDB.find((err, data) => {
+					if (err) {
+						console.error(err);
+						return;
+					}
+					
 					socket.emit('parsed', data);
 				});
-			});
+			})
+			.catch(err => console.error(err));
 	});
 }
 

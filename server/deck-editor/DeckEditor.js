@@ -6,8 +6,9 @@ function DeckEditor (socket) {
 
 	// Return all database.
 
-	function getDatabase (msg) {
+	function getDatabase () {
 		CardDB.find((err, data) => {
+			if (err) console.error(err);
 			socket.emit('giveDatabase', data);
 		});
 	}
@@ -37,6 +38,7 @@ function DeckEditor (socket) {
 		State.getUserFromDB(socket, {returnExact: 'decks'}).then((decks) => {
 			socket.emit('sentDecks', decks);
 		}).catch((err) => {
+			console.error(err);
 			socket.emit('errorMessage', 'Could not find decks.');
 		})
 	}
@@ -55,6 +57,10 @@ function DeckEditor (socket) {
 						decks.splice(i, 1);
 						socket.emit('deletedDeck', decks);
 						User.updateOne({_id: user._id}, {decks: decks}, (err, query) => {
+							if (err) {
+								console.error(`Query resulted in error: ${query}`);
+								console.error(err);
+							}
 							socket.emit('sentDecks', decks);
 						});
 					}
@@ -62,6 +68,7 @@ function DeckEditor (socket) {
 				}
 			}
 		}).catch((err) => {
+			console.error(err);
 			socket.emit('errorMessage', 'Could not find any deck.');
 		});
 	}

@@ -3,11 +3,11 @@
 		<div class="room-player-list block-style">
 			<!-- Output players -->
 			<h2>List of players:</h2>
-			<div v-for="player in users.players" class="room-player">
+			<div v-for="(player, index) in users.players" class="room-player" :key="'player-' + index">
 				<span>{{player.nickname}} </span><span>({{player.role}})</span><span>: {{player.ready? 'ready' : 'not ready'}}</span>
 			</div>
 			<h2>List of spectators</h2>
-			<div v-for="player in users.spectators" class="room-player">
+			<div v-for="(player, index) in users.spectators" class="room-player"  :key="'spectator-' + index">
 				<span>{{player.nickname}} </span><span>({{player.role}})</span>
 			</div>
 		</div>
@@ -45,9 +45,6 @@ export default {
 		refreshRoom(room) {
 			this.$store.commit('changeCurrentRoom', room);
 		},
-		// setReady(value) {
-		// 	this.isReady = value;
-		// }
 	},
 	data() {
 		return {

@@ -1,6 +1,4 @@
-const EventEmittable = require('@stamp/eventemittable');
 const stampit = require('stampit');
-const {showError} = require('./../tools/tools');
 
 let GlobalSocket = stampit({
 	props: {

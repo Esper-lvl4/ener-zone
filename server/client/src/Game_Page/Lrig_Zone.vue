@@ -7,7 +7,7 @@
 				:src="zone.card.image"
 				:alt="zone.card.name"
 				data-number="lrig">
-			<img class="zone-card" v-if="card" v-for="(card, index) in zone.key"
+			<img class="zone-card" v-for="(card, index) in filteredKeys" :key="card.id + index"
 				width="550"
 				height="392"
 				:src="card.image"
@@ -22,7 +22,7 @@
 		</div>
 		<div class="zone-content" :class="{'is-opened': isOpened}" @click.stop.self.prevent="closeZoneList">
 			<div class="zone-content-wrap block-style">
-				<img class="zone-card" v-for="(card, index) in under"
+				<img class="zone-card" v-for="(card, index) in under" :key="card.id + index"
 					:width="card.type.toLowerCase() == 'key' ? 550 : 392"
 					:height="card.type.toLowerCase() == 'key' ? 392 : 550"
 					:src="card.image"
@@ -35,41 +35,24 @@
 
 <script>
 import draggable from 'vuedraggable';
+import cardZone from './Card_Zone.vue';
 
 export default {
 	name: 'lrig-zone',
-	props: [
-		'zone', 'cardback', 'isPublic', 'zoneName'
-	],
-	data: () => ({
-		isOpened: false,
-	}),
-	computed: {
-		topCard() {
-			if (this.zone[0]) {
-				return this.zone[0];
-			}
-			return false;
+	extends: cardZone,
+	props: {
+		zone: {
+			type: Object,
+			default: () => ({}),
 		},
+	},
+	computed: {
 		under() {
-			return this.zone.under;
+			return this.zone.under.filter(card => card !== null && card !== undefined);
+		},
+		filteredKeys() {
+			return this.zone.key.filter(card => card !== null && card !== undefined);
 		}
 	},
-	methods: {
-		cardHover(event, deck) {
-			if (event.target.tagName !== 'IMG') {
-				return;
-			}
-			this.emit('card-hover', event.target.parentElement.getAttribute('data-number'));
-		},
-		openZoneList () {
-			if (this.zone.length !== 0 && !this.isHidden) {
-				this.isOpened = true;
-			}
-		},
-		closeZoneList () {
-			this.isOpened = false;
-		},
-	}
 }
 </script>

@@ -2,7 +2,9 @@
 	<div class="block-style" @click="openZoneList" data-zone>
 		<div class="visible-zone-card">
 			<draggable :list="zoneVisible">
-				<img class="zone-card" v-if="(!isPublic || isHidden) && zone.length !== 0" :src="cardback" alt="card-back" width="250" height="349">
+				<img class="zone-card" v-if="(!isPublic || isHidden) && zone.length !== 0" 
+					:src="cardBackImage" alt="card-back" width="250" height="349"
+				>
 				<img class="zone-card" v-else-if="topCard && zone.length !== 0"
 					width="392"
 					height="550"
@@ -11,10 +13,13 @@
 					:data-number="0">
 			</draggable>
 		</div>
-		<div class="zone-content" :class="{'is-opened': isOpened}" @click.stop.self.prevent="closeZoneList">
+		<div class="zone-content" :class="{'is-opened': isOpened}" 
+			@click.stop.self.prevent="closeZoneList"
+		>
 			<div class="zone-content-wrap block-style">
 				<draggable :list="zoneContent">
-					<img class="zone-card" v-if="card" v-for="(card, index) in zone"
+					<img class="zone-card" v-for="(card, index) in filteredZone" 
+						:key="card.id + index"
 						:width="card.type.toLowerCase() == 'key' ? 550 : 392"
 						:height="card.type.toLowerCase() == 'key' ? 392 : 550"
 						:src="card.image"
@@ -31,9 +36,24 @@ import draggable from 'vuedraggable';
 
 export default {
 	name: 'card-zone',
-	props: [
-		'zone', 'cardback', 'isPublic', 'isHidden', 'zoneName'
-	],
+	props: {
+		zone: {
+			type: Array,
+			default: () => ([]),
+		},
+		cardback: {
+			type: String,
+			default: 'main',
+		},
+		isPublic: {
+			type: Boolean,
+			default: false,
+		},
+		isHidden: {
+			type: Boolean,
+			default: false,
+		},
+	},
 	data: () => ({
 		isOpened: false,
 		zoneContent: [],
@@ -45,17 +65,27 @@ export default {
 				return this.zone[0];
 			}
 			return false;
-		}
+		},
+		filteredZone() {
+			return this.zone.filter(card => card !== null && card !== undefined);
+		},
+		cardBackImage() {
+			if (this.cardback === 'main') {
+				return '/src/assets/img/card-back.jpg';
+			} else if (this.cardback === 'lrig') {
+				return '/src/assets/img/card-back-lrig-deck.jpg';
+			}
+		},
 	},
 	methods: {
 		cardHover(event, deck) {
-			if (event.target.tagName !== 'IMG') {
+			const target = event.target;
+			if (target.tagName !== 'IMG') {
 				return;
 			}
-			this.emit('card-hover', event.target.parentElement.getAttribute('data-number'));
+			this.emit('card-hover', target.parentElement.getAttribute('data-number'));
 		},
 		openZoneList () {
-			console.dir(event.target.closest('[data-zone]').dataset.zone);
 			if (this.zone.length !== 0 && !this.isHidden) {
 				this.isOpened = true;
 			}

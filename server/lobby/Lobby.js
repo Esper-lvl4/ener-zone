@@ -1,7 +1,3 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
-
-const State = require('./../state/State');
 const Rooms = require('./rooms/Game_Rooms');
 
 var chatHistory = [ // Array to store recent messages in chat.

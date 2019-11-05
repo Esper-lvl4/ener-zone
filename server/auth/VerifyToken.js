@@ -15,7 +15,7 @@ function verifyToken (socket) {
 		showError('There was no token!');
 		return access;
 	}
-	jwt.verify(token, key.secret, function (err, decoded) {
+	jwt.verify(token, key.secret, function (err) {
 		if (err) {
 			console.error(err);
 			if (State.check(socket)) {
