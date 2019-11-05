@@ -1,16 +1,9 @@
 const IO = require('socket.io');
 const express = require('express');
-const session = require('express-session');
 const mongoose = require('mongoose');
-const cheerio = require('cheerio');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const stampit = require('stampit');
-const EventEmittable = require('@stamp/eventemittable');
+// const bodyParser = require('body-parser');
 
-const request = require('request');
 const path = require('path');
 const http = require('http');
 
