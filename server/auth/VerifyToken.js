@@ -8,28 +8,25 @@ var key = {
 
 function verifyToken (socket) {
 	let token = socket.handshake.query.token;
-	let access = false;
 
 	if (!token || token === 'null') {
 		socket.emit('successLogout');
 		showError('There was no token!');
-		return access;
+		return false;
 	}
 	jwt.verify(token, key.secret, function (err) {
 		if (err) {
-			console.error(err);
 			if (State.check(socket)) {
 				State.remove(socket);
 			};
 			socket.emit('successLogout', 'Invalid token');
-			return access;
+			return false;
 		}
 
 		State.check(socket);
-		access = true;
 		socket.emit('success-auth', 'Access granted');
-	})
-	return access;
+		return true;
+	});
 };
 
 module.exports = verifyToken;

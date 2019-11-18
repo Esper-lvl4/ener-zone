@@ -23,12 +23,11 @@ function socketRouter (socket) {
 				allowSignUp = false;
 			}
 		});
-		if (allowSignUp === false) {
-			console.log('disallowed');
-			return;
-		} else {
-			let hashedPass = bcrypt.hashSync(userObj.password, 8);
-			User.create({
+
+		if (allowSignUp === false) return;
+
+		let hashedPass = bcrypt.hashSync(userObj.password, 8);
+		User.create({
 				username: userObj.name,
 				password: hashedPass,
 				nickname: userObj.name,
@@ -48,33 +47,29 @@ function socketRouter (socket) {
 					expiresIn: 86400,
 				});
 
-				socket.emit('loginSuccess', {auth: true, token: token, nick: user.nickname})
+				socket.emit('loginSuccess', {auth: true, token: token, nick: user.nickname});
 			});
-		}
 	});
 
 	socket.on('tryLogin', function (userObj) {
 		console.log('login attempt');
 		User.findOne({username: userObj.name}, function (err, user) {
-			if (err) {
-				socket.emit('loginFail', 'Error, when tried to login.');
-				return;
-			}
-			if (!user) {
+			if (err || !user) {
 				socket.emit('loginFail', 'Wrong username or password.');
 				return;
 			}
-			let passwordIsValid = bcrypt.compareSync(userObj.password, user.password);
-
-			if (!passwordIsValid) {
-				socket.emit('loginFail', 'Wrong username or password.');
-			}
-			else {
-				const token = jwt.sign({id: user._id}, key.secret, {
-					expiresIn: 86400,
-				});
-				socket.emit('loginSuccess', {auth: true, token: token, nick: user.nickname});
-			}
+			bcrypt.compare(userObj.password, user.password)
+				.then((res) => {
+					if (!res) {
+						socket.emit('loginFail', 'Wrong username or password.');
+						return;
+					}
+					const token = jwt.sign({id: user._id}, key.secret, {
+						expiresIn: 86400,
+					});
+					socket.emit('loginSuccess', {auth: true, token: token, nick: user.nickname});
+				})
+				.catch(err => console.error(err));
 		});
 	});
 };

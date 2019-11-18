@@ -35,42 +35,40 @@ function DeckEditor (socket) {
 	}
 
 	function showDecks () {
-		State.getUserFromDB(socket, {returnExact: 'decks'}).then((decks) => {
-			socket.emit('sentDecks', decks);
-		}).catch((err) => {
-			console.error(err);
-			socket.emit('errorMessage', 'Could not find decks.');
-		})
+		State.getUserFromDB(socket, {returnExact: 'decks'})
+			.then(decks => {
+				socket.emit('sentDecks', decks);
+			})
+			.catch(() => {
+				socket.emit('errorMessage', 'Could not find decks.');
+			})
 	}
 
 	// Load deck. Delete deck.
 
 	function getDeck (deckToShow, action) {
 		let deck = deckToShow;
-		State.getUserFromDB(socket, {returnAll: true}).then((user) => {
-			let decks = user.decks;
-			for (let i = 0; i < decks.length; i++) {
-				if (decks[i].name === deck) {
+		State.getUserFromDB(socket, {returnAll: true}).
+			then(user => {
+				let decks = user.decks;
+				for (let i = 0; i < decks.length; i++) {
+					if (decks[i].name !== deck) continue;
+
 					if (action ==='load') {
 						socket.emit('loadedDeck', decks[i]);
 					} else if (action === 'delete') {
 						decks.splice(i, 1);
 						socket.emit('deletedDeck', decks);
 						User.updateOne({_id: user._id}, {decks: decks}, (err, query) => {
-							if (err) {
-								console.error(`Query resulted in error: ${query}`);
-								console.error(err);
-							}
+							if (err) console.error(`Query resulted in error: ${query}`, err);
 							socket.emit('sentDecks', decks);
 						});
 					}
 					break;
 				}
-			}
-		}).catch((err) => {
-			console.error(err);
-			socket.emit('errorMessage', 'Could not find any deck.');
-		});
+			}).catch(() => {
+				socket.emit('errorMessage', 'Could not find any deck.');
+			});
 	}
 
 	socket.on('getDatabase', getDatabase);

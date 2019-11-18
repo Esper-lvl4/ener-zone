@@ -6,7 +6,10 @@ function Database (socket) {
 	socket.on('showDB', function() {
 		console.log('Displaying database');
 		CardDB.find((err, data) => {
-			if (err) {console.error(err)}
+			if (err) {
+				console.error(err);
+				return;
+			}
 			socket.emit('showingDB', data);
 		});
 	});
@@ -45,13 +48,11 @@ function Database (socket) {
 				var rdyArr = doneObj;
 				for (let start = 0, end = 1; end <= Math.ceil(rdyArr.links.length / 300); end++) {
 					await Promise.all(Parser.parseCards(rdyArr.links, start, end * 300))
-					.then((cards) => {
+					.then(cards => {
 						Parser.setDatabase(cards);
 						start = end * 300 + 1;
 					})
-					.catch((err) => {
-						console.error(err);
-					});
+					.catch(err => console.error(err));
 				}
 				console.log('Done adding cards to database');
 				return;

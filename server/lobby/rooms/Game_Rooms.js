@@ -22,7 +22,7 @@ let RoomState = stampit({
 		state: false,
 		chat: null,
 	},
-	init({socket, roomObj, id}) {
+	init({roomObj, id}) {
 		this.name = roomObj.name;
 		this.settings = roomObj.settings;
 		this.id = id + '';
