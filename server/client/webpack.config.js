@@ -9,6 +9,10 @@ module.exports = {
     publicPath: '/dist/',
     filename: 'build.js'
   },
+  alias: {
+    '@': path.resolve(__dirname),
+    '~': path.resolve(__dirname),
+  },
   module: {
     rules: [
       {

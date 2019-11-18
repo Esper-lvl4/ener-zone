@@ -4,19 +4,19 @@
       <input class="search-field main-input" type="text" v-model="filterName">
       <button class="more-button none" @click="showMoreCards(20)">More cards</button>
     </form>
-    <div class="search-result" @mouseover="cardHover($event)" @click.prevent="cardClick($event, 'visible', 'add')">
-      <img v-for="(visibleCard, index) in visibleCards"
-        :width="visibleCard.type.toLowerCase() == 'key' ? 550 : 392"
-        :height="visibleCard.type.toLowerCase() == 'key' ? 392 : 550"
-        :src="visibleCard.image"
-        :alt="visibleCard.name"
-        :data-number="index">
+    <div class="search-result" @mouseover="cardInteraction($event)" @click.prevent="cardInteraction($event, 'add')">
+        <CardListItem :card="visibleCard" v-for="(visibleCard, index) in visibleCards" :key="'list-card-' + index" />
     </div>
   </div>
 </template>
 <script>
+import CardListItem from './CardListItem';
+
 export default {
   name: "card-list",
+  components: {
+    CardListItem,
+  },
   data: () => {
     return {
       filterName: '',
@@ -31,7 +31,6 @@ export default {
       return this.$store.state.filteredDatabase;
     },
     visibleCards() {
-      let array = [];
       let origin = null;
       if (this.filteredDatabase) {
         origin = this.filteredDatabase;
@@ -39,33 +38,34 @@ export default {
         origin = this.database;
       }
       // Check for origin just in case it's still null when this computed property is being calculated.
-      // It will just return empty array, when origin is not present.
-      if (origin) {
-        // filter the cards array by name, before showing stated amout of cards to the user.
-        origin = this.filterByName(origin);
-        for (let i = 1; i <= this.visibleCount; i++) {
-          if (i-1 == origin.length) {break;}
-          array.push(origin[i-1]);
-        }
+      if (!origin) return [];
+
+      // filter the cards array by name, before showing stated amout of cards to the user.
+      const array = [];
+      
+      origin = this.filterByName(origin);
+      for (let i = 1; i <= this.visibleCount; i++) {
+        if (i-1 == origin.length) {break;}
+        array.push(origin[i-1]);
       }
       return array;
     },
   },
   methods: {
-    cardHover(event) {
-  		if (event.target.tagName !== 'IMG') {
-  			return;
-  		}
-  		let number = event.target.getAttribute('data-number');
-			this.$emit('card-hover', this.visibleCards[number]);
+    cardInteraction(event, action) {
+      if (event.target.tagName !== 'IMG') return;
+
+      const number = event.target.getAttribute('data-number');
+
+      if (number === null && number === '') return;
+
+      if (event.type === 'mouseover') {
+        this.$emit('card-hover', this.visibleCards[number]);
+      }
+      if (event.type === 'click') {
+        this.$emit('deck-update', {card: this.visibleCards[number], action: action});
+      }
   	},
-    cardClick(event, where, action) {
-      if (event.target.tagName !== 'IMG') {
-  			return;
-  		}
-  		let number = event.target.getAttribute('data-number');
-			this.$emit('deck-update', {card: this.visibleCards[number], action: action});
-    },
     showMoreCards(number = 20) {
       let from = this.visibleCount + 1;
       this.visibleCount += number;
@@ -77,22 +77,23 @@ export default {
       } else {
         origin = this.database;
       }
-  		for (var i = from; i < to; i++) {
+  		for (let i = from; i < to; i++) {
 				newCards.push(origin[i]);
 			}
       this.visibleCards.concat(newCards);
   	},
     filterByName(array) {
-      if (this.filterName === '') {return array};
-      let filteredArray = [];
-      if (array.length !== 0) {
-        for (let i = 0; i < array.length; i++) {
-          if (!array[i].name) {
-            continue;
-          }
-          if (array[i].name.match(this.filterName)) {
-            filteredArray.push(array[i]);
-          }
+      if (this.filterName === '') return array;
+
+      if (array.length !== 0) return [];
+
+      // TODO use .filter method instead.
+      const filteredArray = [];
+      for (let i = 0; i < array.length; i++) {
+        if (!array[i].name) continue;
+
+        if (array[i].name.match(this.filterName)) {
+          filteredArray.push(array[i]);
         }
       }
       return filteredArray;

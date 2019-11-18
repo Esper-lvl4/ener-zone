@@ -1,7 +1,7 @@
 <template>
-  <div class="info-block block-style" @click.prevent>
+  <div class="info-block block-style" @click.prevent v-if="cardInformation">
     <img class="info-img" :src="card.image" v-if="card.image !== ''" alt="card-image" width="392" height="550">
-    <img class="info-img" src="./../assets/img/default-card.jpg" alt="card-image" width="392" height="550" v-else>
+    <img class="info-img" src="@/assets/img/default-card.jpg" alt="card-image" width="392" height="550" v-else>
 		<span><b>{{card.name}}</b></span>
 		<span><i>{{card.props}}</i></span>
 		<span v-html="card.class"></span>
@@ -23,7 +23,6 @@ export default {
   },
   data: () => {
     return {
-
       // Default card.
       cardInformation: {
         image: '',
@@ -109,6 +108,7 @@ export default {
       return div.outerHTML;
     },
 
+    // TODO go through the database and change image srcs there.
     // Replace image's src depending on the alt of an initial image.
     getSrc(alt) {
       let src = '/src/assets/img/';
@@ -175,7 +175,7 @@ export default {
       }
       return src;
     },
-    // CHange color of the border from dark to white.
+    // Change color of the border from dark to white.
     replaceBorders(text) {
       if (!text) return '';
       return text.replace('border: 1px solid black;', 'border: 1px solid #f1f1f1;');
