@@ -1,7 +1,7 @@
 <template>
 	<div class="block-style" @click="openZoneList" data-zone>
 		<div class="visible-zone-card">
-			<draggable :list="zoneVisible">
+			<draggable v-model="zoneVisible">
 				<img class="zone-card" v-if="(!isPublic || isHidden) && zone.length !== 0" 
 					:src="cardBackImage" alt="card-back" width="250" height="349"
 				>
@@ -17,7 +17,7 @@
 			@click.stop.self.prevent="closeZoneList"
 		>
 			<div class="zone-content-wrap block-style">
-				<draggable :list="zoneContent">
+				<draggable v-model="zoneContent">
 					<img class="zone-card" v-for="(card, index) in filteredZone" 
 						:key="card.id + index"
 						:width="card.type.toLowerCase() == 'key' ? 550 : 392"
