@@ -201,13 +201,6 @@ export default {
       
       let database = this.database;
 
-      // for (let j in filter) {
-        //   if (!filter[j](card)) {
-        //     return false;
-        //   }
-        // }
-        // return true;
-
       let result = database.filter(card => {
         return !filter.find(criteria => !criteria(card));
       });
