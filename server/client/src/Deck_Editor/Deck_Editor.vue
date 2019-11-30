@@ -1,35 +1,11 @@
 <template>
   <div class="deck-editor-wrap" id="deck-editor">
-    <CardInfo :cardInfo="card"/>
+    <CardInfo :cardInfo="cardInfo"/>
     <main>
     	<CardList @card-hover="cardHover" @deck-update="updateDeck" />
     	<DeckManage @cleared-editor="clearEditor" :main="mainDeck" :lrig="lrigDeck"/>
-      <div class="main-deck">
-        <h2 class="deck-titles">Main Deck</h2>
-        <div class="main-card-block block-style" @mouseover="deckCardHover($event, 'mainDeck')" @click="deckClick($event, 'mainDeck')">
-          <div class="card" v-for="(mainCard, index) in mainDeck" :data-number="index">
-            <img
-              :src="mainCard.image"
-              :alt="mainCard.name"
-              :width="mainCard.type.toLowerCase() == 'key' ? 550 : 392"
-              :height="mainCard.type.toLowerCase() == 'key' ? 392 : 550">
-            <div class="card-count">{{mainCard.quantity}}</div>
-          </div>
-        </div>
-      </div>
-      <div class="lrig-deck">
-        <h2 class="deck-titles">LRIG Deck</h2>
-        <div class="lrig-card-block block-style" @mouseover="deckCardHover($event, 'lrigDeck')" @click="deckClick($event, 'lrigDeck')">
-          <div class="card" v-for="(lrigCard, index) in lrigDeck" :data-number="index">
-            <img
-              :src="lrigCard.image"
-              :alt="lrigCard.name"
-              :width="lrigCard.type.toLowerCase() == 'key' ? 550 : 392"
-              :height="lrigCard.type.toLowerCase() == 'key' ? 392 : 550">
-            <div class="card-count">{{lrigCard.quantity}}</div>
-          </div>
-        </div>
-      </div>
+      <DeckBlock type="main" title="Main Deck" :deck="mainDeck" @card-hover="deckHover" @card-click="deckClick" />
+      <DeckBlock type="lrig" title="LRIG Deck" :deck="lrigDeck" @card-hover="deckHover" @card-click="deckClick" />
   	</main>
 	</div>
 </template>
@@ -38,16 +14,16 @@
 import CardInfo from './Card_Info.vue';
 import CardList from './Card_List.vue';
 import DeckManage from './Deck_Manage.vue';
+import DeckBlock from './Deck_block.vue';
 
 export default {
   name: 'deck-editor',
   components: {
-    CardInfo, CardList, DeckManage
+    CardInfo, CardList, DeckManage, DeckBlock,
   },
   sockets: {
 		giveDatabase(data) {
 			this.$store.commit('saveDatabase', data);
-			console.log(data);
 		},
     sentDecks(decks) {
       this.$store.commit('saveDecks', decks);
@@ -63,8 +39,7 @@ export default {
   },
   data() {
   	return {
-      card: null,
-
+      cardInfo: null,
       mainDeck: [],
       lrigDeck: [],
   	};
@@ -81,14 +56,12 @@ export default {
     // Called when this component is mounted. Gets and writes to store the whole card database.
   	getDatabase() {
       let db = this.database;
-
-	  	if (db !== null) {
-				console.log(db)
-	  	} else {
-	  		setTimeout(function () {
+      
+      if (!db) {
+        setTimeout(() => {
 	  			this.$socket.emit('getDatabase', 'pls');
-	  		}.bind(this), 0)
-	  	}
+	  		}, 0)
+      }
   	},
 
     // Clear decks to create new one.
@@ -99,55 +72,50 @@ export default {
 
     // Pass the hovered card to CardInfo component via prop.
     cardHover(card) {
-      this.card = card;
+      this.cardInfo = card;
     },
 
     // Get card to pass to CardInfo component.
-    deckCardHover(event, deck) {
-      if (event.target.tagName !== 'IMG') {
-  			return;
-  		}
+    deckHover({event, deckType}) {
+      if (event.target.tagName !== 'IMG') return;
+
   		let number = event.target.parentElement.getAttribute('data-number');
-      this.cardHover(this[deck][number]);
+      this.cardHover(this[deckType][number]);
     },
 
     // Remove cards from deck, when clicking on them.
     deckClick(event, deck) {
-      if (event.target.tagName !== 'IMG') {
-  			return;
-  		}
+      if (!event.target || event.target.tagName !== 'IMG') return;
+
       let number = event.target.parentElement.getAttribute('data-number');
-      this.updateDeck({card: this[deck][number], action: 'remove'})
+      this.updateDeck({card: this[deckType][number], action: 'remove'})
     },
 
     // Manage decks. Can add or remove card. If ther ei smore then 1 card,
     // no new objects are added, instead quantity prop rises.
     updateDeck ({card, action}) {
       let type = card.type.toLowerCase();
-      let deck = '';
+      let deck = type === 'signi' || type === 'spell' ? 'mainDeck' : 'lrigDeck';
 
-      // Decide, which deck we are managing right now.
-      if (type == 'signi' || type == 'spell') {
-        deck = 'mainDeck';
-      } else {
-        deck = 'lrigDeck'
-      }
+      let index = this.cardInDeck(card.name, deck);
 
       // Adding card.
-      if (action == 'add') {
-        let index = this.cardInDeck(card.name, deck);
+      if (action === 'add') {
         // Dont let players add more then 1 copy of a card in lrig deck. Up to 4 for main deck.
         if (index !== false && this[deck][index].quantity < 4 && deck !== 'lrigDeck') {
           this[deck][index].quantity++;
-        } else if (index === false) {
+        }
+        
+        if (index === false) {
           card.quantity = 1;
           this[deck].push(card);
         }
+      }
+      
       // removing card.
-      } else if (action == 'remove') {
-        let index = this.cardInDeck(card.name, deck);
+      if (action === 'remove' && this[deck][index]) {
         this[deck][index].quantity--;
-        if (this[deck][index].quantity == 0) {
+        if (this[deck][index].quantity === 0) {
           delete this[deck][index].quantity;
           this[deck].splice(index, 1);
         }

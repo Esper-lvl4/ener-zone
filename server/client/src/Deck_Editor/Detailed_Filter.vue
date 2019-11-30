@@ -122,144 +122,95 @@ export default {
     	}
     	return clone;
     },
+    checkColor(card) {
+      return card.color && card.color.toLowerCase().match(this.color.toLowerCase());
+    },
+    checkType(card) {
+      return card.type && card.type.match(this.type);
+    },
+    checkSigniClass(card) {
+      return card.class && card.class.toLowerCase().match(this.class.toLowerCase());
+    },
+    checkLrigType(card) {
+      return card.lrigType && card.lrigType.toLowerCase().match(this.lrigType.toLowerCase());
+    },
+    checkLevel(card) {
+      return card.level !== null && +card.level === +this.level;
+    },
+    checkLimit(card) {
+      return card.limit !== null && +card.limit === +this.limit;
+    },
+    checkPower(card) {
+      return card.power !== null && +card.power === +this.power;
+    },
+    checkTiming(card) {
+      return card.timing && card.timing.toLowerCase().match(this.timing.toLowerCase());
+    },
+    checkLimitingCondition(card) {
+      return card.limitingCondition && 
+      card.limitingCondition.toLowerCase().match(this.limitingCondition.toLowerCase());
+    },
+    checkEffect(card) {
+      return card.effect && card.effect.toLowerCase().match(this.effect.toLowerCase());
+    },
+    checkBoosterSet(card) {
+      return card.boosterSet && card.boosterSet.toLowerCase().match(this.boosterSet.toLowerCase());
+    },
+    checkKsLegal(card) {
+      return card.ksLegal === this.ksLegal;
+    },
     applyFilter() {
-      let result = [];
-      let database = this.database;
-      let filter = {};
+      let filter = [];
+
       if (this.color) {
-        filter.checkColor = function (card) {
-          if (card.color === null) {
-						return false;
-					}
-					if (card.color.toLowerCase().match(this.color.toLowerCase()) !== null) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkColor);
       }
       if (this.type) {
-        filter.checkType = function (card) {
-          if (card.type === null) {
-						return false;
-					}
-					if (card.type.match(this.type)) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkType);
       }
       if (this.signiClass) {
-        filter.checkSigniClass = function (card) {
-          if (card.class === null) {
-						return false;
-					}
-					if (card.class.toLowerCase().match(this.class.toLowerCase()) !== null) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkSigniClass);
       }
       if (this.lrigType) {
-        filter.checkLrigType = function (card) {
-          if (card.lrigType === null) {
-						return false;
-					}
-					if (card.lrigType.toLowerCase().match(this.lrigType.toLowerCase()) !== null) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkLrigType);
       }
       if (this.level) {
-        filter.checkLevel = function (card) {
-          if (card.level === null) {
-						return false;
-					}
-					if (+card.level == +this.level) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkLevel);
       }
       if (this.limit) {
-        filter.checkLimit = function (card) {
-          if (card.limit === null) {
-						return false;
-					}
-					if (+card.limit == +this.limit) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkLimit);
       }
       if (this.power) {
-        filter.checkPower = function (card) {
-          if (card.power === null) {
-						return false;
-					}
-					if (+card.power == +this.power) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkPower);
       }
       if (this.timing) {
-        filter.checkTiming = function (card) {
-          if (card.timing === null) {
-						return false;
-					}
-					if (card.timing.toLowerCase().match(this.timing.toLowerCase()) !== null) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkTiming);
       }
       if (this.limitingCondition) {
-        filter.checkLimitingCondition = function (card) {
-          if (card.limitingCondition === null) {
-						return false;
-					}
-					if (card.limitingCondition.toLowerCase().match(this.limitingCondition.toLowerCase()) !== null) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkLimitingCondition);
       }
       if (this.effect) {
-        filter.checkEffect = function (card) {
-          if (card.effect === null) {
-						return false;
-					}
-					if (card.effect.toLowerCase().match(this.effect.toLowerCase()) !== null) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkEffect);
       }
       if (this.boosterSet) {
-        filter.checkBoosterSet = function (card) {
-          if (card.boosterSet === null) {
-						return false;
-					}
-          if (card.boosterSet.toLowerCase().match(this.boosterSet.toLowerCase()) !== null) {
-						return true;
-					}
-        }.bind(this);
+        filter.push(this.checkBoosterSet);
       }
       if (this.ksLegal) {
-        filter.checkKsLegal = function (card) {
-          if (card.ksLegal === this.ksLegal) {
-						return true;
-					} else {
-            return false;
-          }
-        }.bind(this);
+        filter.push(this.checkKsLegal);
       }
+      
+      let database = this.database;
 
-      // Use all filters, that are specified.
-      for (let i = 0; i < database.length; i++) {
-        let next = false;
-        for (let j in filter) {
-          if (!filter[j](database[i])) {
-            next = true;
-            break;
-          }
-        }
-        if (next) {
-          continue;
-        }
-        result.push(database[i]);
-      }
+      // for (let j in filter) {
+        //   if (!filter[j](card)) {
+        //     return false;
+        //   }
+        // }
+        // return true;
+
+      let result = database.filter(card => {
+        return !filter.find(criteria => !criteria(card));
+      });
 
       this.$store.commit('filterDatabase', result);
     },

@@ -5,12 +5,14 @@
       <button class="more-button none" @click="showMoreCards(20)">More cards</button>
     </form>
     <div class="search-result" @mouseover="cardInteraction($event)" @click.prevent="cardInteraction($event, 'add')">
-        <CardListItem :card="visibleCard" v-for="(visibleCard, index) in visibleCards" :key="'list-card-' + index" />
+      <CardListItem :card="visibleCard" :index="index"
+        v-for="(visibleCard, index) in visibleCards" :key="'list-card-' + index" 
+      />
     </div>
   </div>
 </template>
 <script>
-import CardListItem from './CardListItem';
+import CardListItem from './Card_List_Item';
 
 export default {
   name: "card-list",
@@ -31,13 +33,8 @@ export default {
       return this.$store.state.filteredDatabase;
     },
     visibleCards() {
-      let origin = null;
-      if (this.filteredDatabase) {
-        origin = this.filteredDatabase;
-      } else if (this.database) {
-        origin = this.database;
-      }
-      // Check for origin just in case it's still null when this computed property is being calculated.
+      let origin = this.filteredDatabase || this.database;
+
       if (!origin) return [];
 
       // filter the cards array by name, before showing stated amout of cards to the user.
@@ -45,7 +42,7 @@ export default {
       
       origin = this.filterByName(origin);
       for (let i = 1; i <= this.visibleCount; i++) {
-        if (i-1 == origin.length) {break;}
+        if (i - 1 === origin.length) break;
         array.push(origin[i-1]);
       }
       return array;
@@ -63,7 +60,7 @@ export default {
         this.$emit('card-hover', this.visibleCards[number]);
       }
       if (event.type === 'click') {
-        this.$emit('deck-update', {card: this.visibleCards[number], action: action});
+        this.$emit('deck-update', {card: this.visibleCards[number], action});
       }
   	},
     showMoreCards(number = 20) {
@@ -71,32 +68,19 @@ export default {
       this.visibleCount += number;
       let to = this.visibleCount;
       let newCards = [];
-      let origin = null;
-      if (this.filteredDatabase.length !== 0) {
-        origin = this.filteredDatabase;
-      } else {
-        origin = this.database;
-      }
+      let origin = this.filteredDatabase.length !== 0 ? this.filteredDatabase : this.database;
+
   		for (let i = from; i < to; i++) {
 				newCards.push(origin[i]);
 			}
       this.visibleCards.concat(newCards);
   	},
     filterByName(array) {
-      if (this.filterName === '') return array;
+      if (this.filterName === '' || array.length === 0) return array;
 
-      if (array.length !== 0) return [];
-
-      // TODO use .filter method instead.
-      const filteredArray = [];
-      for (let i = 0; i < array.length; i++) {
-        if (!array[i].name) continue;
-
-        if (array[i].name.match(this.filterName)) {
-          filteredArray.push(array[i]);
-        }
-      }
-      return filteredArray;
+      return array.filter(card => {
+        return card.name && card.name.match(this.filterName) !== null;
+      });
     },
   }
 }

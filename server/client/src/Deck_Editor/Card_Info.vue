@@ -93,7 +93,7 @@ export default {
       let text = this.replaceBorders(effect);
       let div = document.createElement('DIV');
       div.innerHTML = text;
-      let matched = div.getElementsByTagName('IMG');
+      let matched = div.querySelectorAll('img');
       if (matched.length !== 0) {
         for (let image of matched) {
           let altText = image.getAttribute('alt');

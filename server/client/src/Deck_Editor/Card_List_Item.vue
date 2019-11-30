@@ -14,6 +14,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    index: Number,
   },
 }
 </script>

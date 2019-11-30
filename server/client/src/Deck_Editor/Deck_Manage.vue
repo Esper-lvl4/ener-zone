@@ -8,11 +8,12 @@
       <button @click.stop="manageModals('filter')">Filter</button>
       <router-link to="/lobby" class="exit-de" tag="a">lobby</router-link>
 
-      <LoadDeck v-if="loadDeckModal" @close-modal="closeModals" />
+      <LoadDeck v-if="loadModal" @close-modal="closeModals" />
 
-      <DeleteDeck v-if="deleteDeckModal" @close-modal="closeModals" />
+      <DeleteDeck v-if="deleteModal" @close-modal="closeModals" />
 
-      <SaveDeck :main="main" :lrig="lrig" v-if="saveDeckModal" @close-modal="closeModals" />
+      <SaveDeck :main="main" :lrig="lrig" v-if="saveModal" @close-modal="closeModals" />
+
 			<keep-alive>
 				<DetailedFilter v-if="filterModal" @close-modal="closeModals" />
 			</keep-alive>
@@ -22,7 +23,7 @@
 </template>
 <script>
 import SaveDeck from './Save_Deck.vue'
-import LoadDeck from './../components/Load_Deck.vue'
+import LoadDeck from '@/components/Load_Deck.vue'
 import DeleteDeck from './Delete_Deck.vue'
 import DetailedFilter from './Detailed_Filter.vue'
 
@@ -35,9 +36,9 @@ export default {
     'main', 'lrig', 'validity'
   ],
   data: () => ({
-    saveDeckModal: false,
-    loadDeckModal: false,
-    deleteDeckModal: false,
+    saveModal: false,
+    loadModal: false,
+    deleteModal: false,
     filterModal: false,
   }),
   computed: {
@@ -55,40 +56,23 @@ export default {
     },
 	  manageModals(modal) {
       this.closeModals();
-	  	switch (modal) {
-				case 'save':
-	  			this.saveDeckModal = true;
-	  			break;
-	  		case 'load':
-	  			this.loadDeckModal = true;
-          this.showDecks();
-	  			break;
-	  		case 'delete':
-	  			this.deleteDeckModal = true;
-          this.showDecks();
-	  			break;
-	  		case 'filter':
-	  			this.filterModal = true;
-	  			break;
-	  	}
+      this[modal + 'Modal'] = true;
 	  },
     closeModals() {
-      this.saveDeckModal = false;
-      this.loadDeckModal = false;
-      this.deleteDeckModal = false;
+      this.saveModal = false;
+      this.loadModal = false;
+      this.deleteModal = false;
       this.filterModal = false;
     },
     showDecks() {
-      if (!this.$store.state.userDecks) {
-        this.$socket.emit('showDecks');
-      }
+      if (!this.$store.state.userDecks) this.$socket.emit('showDecks');
     },
   },
   mounted() {
     let deckEditor = document.getElementById('deck-editor');
-    deckEditor.addEventListener('click', function (event) {
+    deckEditor.addEventListener('click', () => {
       this.closeModals();
-    }.bind(this));
+    });
   }
 }
 </script>

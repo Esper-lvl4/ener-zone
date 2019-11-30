@@ -1,7 +1,9 @@
 <template>
   <div class="delete-list-block block-style-thick">
-    <ul class="delete-list" @click.prevent="deleteAlert">
-      <li v-for="deck in userDecks"><a :href="deck.name">{{deck.name}}</a></li>
+    <ul class="delete-list" @click.prevent="deleteAlert($event)">
+      <li v-for="(deck, index) in userDecks" :key="'delete-deck-' + index">
+        <a :href="deck.name">{{deck.name}}</a>
+      </li>
       <li @click.stop="closeModals">Cancel</li>
     </ul>
 
@@ -32,8 +34,9 @@ export default {
     closeModals() {
       this.$emit('close-modal');
     },
-    deleteAlert() {
+    deleteAlert(event) {
       if (event.target.tagName !== 'A') return;
+
       let name = event.target.getAttribute('href');
       this.deleteAlertModal.active = true;
       this.deleteAlertModal.deckName = name;
