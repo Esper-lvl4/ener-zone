@@ -12,7 +12,8 @@ function verifyToken (socket) {
 	if (!token || token === 'null') {
 		socket.emit('successLogout');
 		showError('There was no token!');
-		return false;
+		socket.emit('accessVerify', false);
+		return;
 	}
 	jwt.verify(token, key.secret, function (err) {
 		if (err) {
@@ -20,12 +21,14 @@ function verifyToken (socket) {
 				State.remove(socket);
 			};
 			socket.emit('successLogout', 'Invalid token');
-			return false;
+			socket.emit('accessVerify', false);
+			return;
 		}
 
 		State.check(socket);
 		socket.emit('success-auth', 'Access granted');
-		return true;
+		socket.emit('accessVerify', true);
+		console.log('fine');
 	});
 };
 

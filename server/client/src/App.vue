@@ -33,7 +33,8 @@ const router = new VueRouter({
     {path: '/options/', component: OptionsPage},
     {path: '/profile/', component: ProfilePage},
     {path: '/admin/', component: AdminPage},
-  ]
+  ],
+  mode: 'history',
 });
 
 export default {

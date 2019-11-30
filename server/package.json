@@ -18,12 +18,12 @@
     "cors": ">=2.8.5",
     "express": ">=4.16.4",
     "jsonwebtoken": ">=8.5.1",
-    "mongoose": ">=5.7.8",
+    "mongoose": "^5.7.13",
     "request": ">=2.88.0",
     "socket.io": ">=2.2.0",
     "stampit": ">=4.2.0"
   },
   "devDependencies": {
-    "nodemon": ">=1.19.1"
+    "nodemon": "^2.0.1"
   }
 }
