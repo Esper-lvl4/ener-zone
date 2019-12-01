@@ -39,6 +39,7 @@
         this.$emit('card-hover', {event, deckType});
       },
       deckClick(event, deckType) {
+        console.log(event, deckType);
         this.$emit('card-click', {event, deckType});
       },
     },

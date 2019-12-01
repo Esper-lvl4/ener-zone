@@ -84,7 +84,7 @@ export default {
     },
 
     // Remove cards from deck, when clicking on them.
-    deckClick(event, deck) {
+    deckClick({event, deckType}) {
       if (!event.target || event.target.tagName !== 'IMG') return;
 
       let number = event.target.parentElement.getAttribute('data-number');
@@ -107,7 +107,8 @@ export default {
         }
         
         if (index === false) {
-          card.quantity = 1;
+          this.$set(card, 'quantity', 1);
+          // card.quantity = 1;
           this[deck].push(card);
         }
       }
@@ -120,17 +121,14 @@ export default {
           this[deck].splice(index, 1);
         }
       }
-
-      // Bypassing Vue's inability to update number of cards in decks, when stored this way.
-      this.$forceUpdate();
     },
 
-    // Check if card is in a deck, by her name. Used in this.updateDeck.
+    // Check if card is in a deck, by her name.
     cardInDeck(name, deck) {
-      for (let i = 0; i < this[deck].length; i++) {
-        if (this[deck][i].name == name) return i;
-      }
-      return false;
+      const index = this[deck].findIndex(card => {
+        return card.name === name;
+      });
+      return index === -1 ? false : index;
     }
   },
   mounted() {
