@@ -9,7 +9,7 @@
         <input class="main-input" type="text" name="color" v-model="color">
 
         <label>Card Type</label>
-        <select class="main-input" v-model="type">
+        <select class="main-input" v-model="cardType">
           <option :value="''"></option>
           <option>LRIG</option>
           <option>ARTS</option>
@@ -31,38 +31,38 @@
       <div class="filter-second">
         <label>Limiting Condition</label>
         <input class="main-input" type="text" name="limcon" v-model="limitingCondition"
-          :disabled="type.toLowerCase() == 'lrig'">
+          :disabled="isLrig">
 
         <label>Signi class</label>
         <input class="main-input" type="text" name="class" v-model="signiClass"
-          :disabled="type.toLowerCase() !== 'signi' || type.toLowerCase() !== 'resona'">
+          :disabled="!isSigni && !isResona">
         <div class="filter-small-inputs">
           <div>
             <label>Level</label>
             <input class="main-input" type="number" name="level" v-model="level"
-              :disabled="type.toLowerCase() == 'arts' || type.toLowerCase() == 'spell' || type.toLowerCase() == 'key'">
+              :disabled="isArts || isSpell || isKey">
           </div>
 
           <div>
             <label>Limit</label>
             <input class="main-input" type="number" name="limit" v-model="limit"
-              :disabled="type.toLowerCase() !== 'lrig'">
+              :disabled="!isLrig">
           </div>
 
           <div>
             <label>Power</label>
             <input class="main-input" type="number" name="power" v-model="power"
-              :disabled="type.toLowerCase() !== 'signi' || type.toLowerCase() !== 'resona'">
+              :disabled="!isSigni && !isResona">
           </div>
         </div>
 
         <label>Lrig type</label>
         <input class="main-input" type="text" name="lrigtype" v-model="lrigType"
-          :disabled="type.toLowerCase() !== 'lrig'">
+          :disabled="!isLrig">
 
         <label>Use timing</label>
         <input class="main-input" type="text" name="timing" v-model="timing"
-          :disabled="type.toLowerCase() !== 'arts'">
+          :disabled="!isArts">
       </div>
 
       <div class="filter-submit">
@@ -78,7 +78,7 @@ export default {
 
     // Filter values.
     color: null,
-    type: '',
+    cardType: '',
     signiClass: null,
     lrigType: null,
     level: null,
@@ -93,6 +93,27 @@ export default {
   computed: {
     database() {
       return this.$store.state.database;
+    },
+    type() {
+      return this.cardType.toLowerCase();
+    },
+    isSigni() {
+      return this.type === 'signi';
+    },
+    isResona() {
+      return this.type === 'resona';
+    },
+    isLrig() {
+      return this.type === 'lrig';
+    },
+    isArts() {
+      return this.type === 'arts';
+    },
+    isSpell() {
+      return this.type === 'spell';
+    },
+    isKey() {
+      return this.type === 'key';
     },
   },
   methods: {
@@ -126,7 +147,7 @@ export default {
       return card.color && card.color.toLowerCase().match(this.color.toLowerCase());
     },
     checkType(card) {
-      return card.type && card.type.match(this.type);
+      return card.type && card.type.match(this.cardType);
     },
     checkSigniClass(card) {
       return card.class && card.class.toLowerCase().match(this.class.toLowerCase());
@@ -165,7 +186,7 @@ export default {
       if (this.color) {
         filter.push(this.checkColor);
       }
-      if (this.type) {
+      if (this.cardType) {
         filter.push(this.checkType);
       }
       if (this.signiClass) {
