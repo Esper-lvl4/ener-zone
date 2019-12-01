@@ -62,7 +62,7 @@ export default {
 			console.log(room);
 			this.$store.commit('changeCurrentRoom', room);
 			if (!this.$route.path.match('game')) {
-				this.$router.push('game');
+				this.$router.push({path: '/game/'});
 			}
 		},
 		leftGame() {

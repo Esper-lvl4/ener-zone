@@ -1,5 +1,5 @@
 <template>
-	<div class="block-style" @click="openZoneList" data-zone>
+	<div :class="'block-style' + ' ' + zoneName" @click="openZoneList" data-zone>
 		<div class="visible-zone-card">
 			<draggable v-model="zoneVisible">
 				<img class="zone-card" v-if="(!isPublic || isHidden) && zone.length !== 0" 
@@ -18,8 +18,8 @@
 		>
 			<div class="zone-content-wrap block-style">
 				<draggable v-model="zoneContent">
-					<img class="zone-card" v-for="(card, index) in filteredZone" 
-						:key="card.id + index"
+					<img class="zone-card" v-for="(card, index) in zoneContent" 
+						:key="zoneName + '-' + index"
 						:width="card.type.toLowerCase() == 'key' ? 550 : 392"
 						:height="card.type.toLowerCase() == 'key' ? 392 : 550"
 						:src="card.image"
@@ -36,10 +36,17 @@ import draggable from 'vuedraggable';
 
 export default {
 	name: 'card-zone',
+	components: {
+		draggable,
+	},
 	props: {
 		zone: {
 			type: Array,
 			default: () => ([]),
+		},
+		zoneName: {
+			type: String,
+			default: '',
 		},
 		cardback: {
 			type: String,
@@ -60,14 +67,17 @@ export default {
 		zoneVisible: [],
 	}),
 	computed: {
+		dragOptions() {
+			return {
+				animation: 300,
+				group: "cards",
+			}
+		},
 		topCard() {
 			if (this.zone[0]) {
 				return this.zone[0];
 			}
 			return false;
-		},
-		filteredZone() {
-			return this.zone.filter(card => card !== null && card !== undefined);
 		},
 		cardBackImage() {
 			if (this.cardback === 'main') {
@@ -76,6 +86,12 @@ export default {
 				return '/src/assets/img/card-back-lrig-deck.jpg';
 			}
 		},
+	},
+	watch: {
+		zone(value) {
+			console.log('zone: ', value);
+			this.zoneContent = this.filterZone(value);
+		}
 	},
 	methods: {
 		cardHover(event, deck) {
@@ -92,6 +108,9 @@ export default {
 		},
 		closeZoneList () {
 			this.isOpened = false;
+		},
+		filterZone(zone) {
+			return zone.filter(card => card !== null && card !== undefined);
 		},
 	}
 }

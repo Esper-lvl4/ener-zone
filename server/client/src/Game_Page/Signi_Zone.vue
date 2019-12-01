@@ -1,5 +1,5 @@
 <template>
-	<div @click="openZoneList" :data-zone="zone">
+	<div :class="zoneName" @click="openZoneList" :data-zone="zone">
 		<div class="visible-zone-card">
 			<img class="zone-card" v-if="zone.card"
 				:width="zone.card.type.toLowerCase() == 'key' ? 550 : 392"
@@ -19,7 +19,7 @@
 		>
 			<div class="zone-content-wrap block-style">
 				<img class="zone-card" v-for="(card, index) in under" 
-					:key="card.id + index"
+					:key="zoneName + '-' + index"
 					:width="card.type.toLowerCase() == 'key' ? 550 : 392"
 					:height="card.type.toLowerCase() == 'key' ? 392 : 550"
 					:src="card.image"
@@ -43,7 +43,7 @@ export default {
 			default: () => ({}),
 		},
 		zoneIndex: {
-			type: 'String',
+			type: String,
 			default: '',
 		},
 	},

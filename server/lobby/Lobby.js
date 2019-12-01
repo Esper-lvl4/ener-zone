@@ -56,9 +56,7 @@ function playerReadiness (value) {
 // Start game, when all players are ready.
 function initGame (id) {
 	let room = Rooms.getByRoomId(id);
-	if (room) {
-		room.emit('init-game', {socket: this, id});
-	}
+	if (room) room.emit('init-game', {socket: this, id});
 }
 
 // Chat events.

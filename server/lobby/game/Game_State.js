@@ -68,10 +68,8 @@ let GameState = stampit({
 
 				for (let field of this.board) {
 					if (field.player == player) {
-						console.log(player.nickname);
 						field.mainDeck = mainDeck;
 						field.lrigDeck = lrigDeck;
-						console.log(field);
 						break;
 					}
 				}

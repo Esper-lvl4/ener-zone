@@ -12,49 +12,49 @@
 		<CardInfo :card-info="hoveredCard"/>
 		<div class="top-player-field">
 			<CardZone
-			class="lrig-trash-zone" :zone="enemyField.lrigTrash"
+			zone-name="lrig-trash-zone" :zone="enemyField.lrigTrash"
 			cardback="lrig"/>
 			<CardZone 
 				class="lrig-deck-zone" :zone="enemyField.lrigDeck" 
 				is-hidden cardback="lrig"/>
-			<CardZone class="life-cloth-zone" :zone="enemyField.lifeCloth" is-hidden/>
-			<CardZone class="trash-zone" :zone="enemyField.trash"/>
-			<LrigZone class="lrig-zone" :zone="enemyField.lrigZone" cardback="lrig"/>
-			<CardZone class="check-zone" :zone="enemyField.checkZone"/>
-			<CardZone class="main-deck-zone" :zone="enemyField.mainDeck" is-hidden/>
+			<CardZone zone-name="life-cloth-zone" :zone="enemyField.lifeCloth" is-hidden/>
+			<CardZone zone-name="trash-zone" :zone="enemyField.trash"/>
+			<LrigZone zone-names="lrig-zone" :zone="enemyField.lrigZone" cardback="lrig"/>
+			<CardZone zone-name="check-zone" :zone="enemyField.checkZone"/>
+			<CardZone zone-name="main-deck-zone" :zone="enemyField.mainDeck" is-hidden/>
 
 			<div class="signi-zones block-style">
-				<SigniZone class="signi-zone1" :zone="enemyField.signiZones[0]"/>
-				<SigniZone class="signi-zone2" :zone="enemyField.signiZones[1]"/>
-				<SigniZone class="signi-zone3" :zone="enemyField.signiZones[2]"/>
+				<SigniZone zone-name="signi-zone1" :zone="enemyField.signiZones[0]" zone-index="0"/>
+				<SigniZone zone-name="signi-zone2" :zone="enemyField.signiZones[1]" zone-index="1"/>
+				<SigniZone zone-name="signi-zone3" :zone="enemyField.signiZones[2]" zone-index="2"/>
 			</div>
 
-			<CardZone class="ener-zone" :zone="enemyField.enerZone"/>
-			<CardZone class="hand-zone" :zone="userField.hand" is-hidden/>
+			<CardZone zone-name="ener-zone" :zone="enemyField.enerZone"/>
+			<CardZone zone-name="hand-zone" :zone="userField.hand" is-hidden/>
 		</div>
 
 		<div class="bottom-player-field">
-			<CardZone class="lrig-trash-zone" :zone="userField.lrigTrash" 
+			<CardZone zone-name="lrig-trash-zone" :zone="userField.lrigTrash" 
 				is-public cardback="lrig"/>
-			<CardZone class="lrig-deck-zone" :zone="userField.lrigDeck" cardback="lrig"/>
-			<CardZone class="life-cloth-zone" :zone="userField.lifeCloth"/>
-			<CardZone class="trash-zone" :zone="userField.trash" is-public/>
-			<LrigZone class="lrig-zone" :zone="userField.lrigZone" 
+			<CardZone zone-name="lrig-deck-zone" :zone="userField.lrigDeck" cardback="lrig"/>
+			<CardZone zone-name="life-cloth-zone" :zone="userField.lifeCloth"/>
+			<CardZone zone-name="trash-zone" :zone="userField.trash" is-public/>
+			<LrigZone zone-name="lrig-zone" :zone="userField.lrigZone" 
 				is-public cardback="lrig"/>
-			<CardZone class="check-zone" :zone="userField.checkZone" is-public/>
-			<CardZone class="main-deck-zone" :zone="userField.mainDeck" is-public/>
+			<CardZone zone-name="check-zone" :zone="userField.checkZone" is-public/>
+			<CardZone zone-name="main-deck-zone" :zone="userField.mainDeck" is-public/>
 
 			<div class="signi-zones block-style">
-				<SigniZone class="signi-zone3" :zone="userField.signiZones[2]" 
+				<SigniZone zone-name="signi-zone3" :zone="userField.signiZones[2]" 
 					is-public zone-index="2"/>
-				<SigniZone class="signi-zone1" :zone="userField.signiZones[0]" 
+				<SigniZone zone-name="signi-zone1" :zone="userField.signiZones[0]" 
 					is-public zone-index="0"/>
-				<SigniZone class="signi-zone2" :zone="userField.signiZones[1]" 
+				<SigniZone zone-name="signi-zone2" :zone="userField.signiZones[1]" 
 					is-public zone-index="1"/>
 			</div>
 
-			<CardZone class="ener-zone" :zone="userField.enerZone" is-public/>
-			<CardZone class="hand-zone" :zone="userField.hand"/>
+			<CardZone zone-name="ener-zone" :zone="userField.enerZone" is-public/>
+			<CardZone zone-name="hand-zone" :zone="userField.hand"/>
 		</div>
 
 		<PopupChoice v-if="leaveGamePopup" message="Are you sure you want to leave?" v-on:yes-click="leaveGame" v-on:closed-modal="leaveGamePopup = false"></PopupChoice>

@@ -152,6 +152,7 @@ let RoomState = stampit({
 		initGame({socket, id}) {
 			if (!this.state) {
 				this.start();
+				console.log('room-init');
 
 				// socket.to(this.socketRoom).emit('restoreGame', this);
 				// socket.emit('restoreGame', this);

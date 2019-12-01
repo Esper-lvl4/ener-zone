@@ -1,5 +1,5 @@
 <template>
-	<div class="block-style" @click="openZoneList" data-zone>
+	<div :class="'block-style' + ' ' + zoneName" @click="openZoneList" data-zone>
 		<div class="visible-zone-card">
 			<img class="zone-card" v-if="zone.card"
 				width="392"
@@ -22,7 +22,8 @@
 		</div>
 		<div class="zone-content" :class="{'is-opened': isOpened}" @click.stop.self.prevent="closeZoneList">
 			<div class="zone-content-wrap block-style">
-				<img class="zone-card" v-for="(card, index) in under" :key="card.id + index"
+				<img class="zone-card" v-for="(card, index) in under" 
+					:key="zoneName + '-' + index"
 					:width="card.type.toLowerCase() == 'key' ? 550 : 392"
 					:height="card.type.toLowerCase() == 'key' ? 392 : 550"
 					:src="card.image"
