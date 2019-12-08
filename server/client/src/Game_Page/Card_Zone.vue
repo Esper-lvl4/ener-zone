@@ -1,43 +1,27 @@
 <template>
 	<div :class="'block-style' + ' ' + zoneName" @click="openZoneList" data-zone>
 		<div class="visible-zone-card">
-			<draggable v-model="zoneVisible">
-				<img class="zone-card" v-if="(!isPublic || isHidden) && zone.length !== 0" 
-					:src="cardBackImage" alt="card-back" width="250" height="349"
-				>
-				<img class="zone-card" v-else-if="topCard && zone.length !== 0"
-					width="392"
-					height="550"
-					:src="topCard.image"
-					:alt="topCard.name"
-					:data-number="0">
-			</draggable>
+			<Card class="zone-card" v-if="(!isPublic || isHidden) && !isEmpty" 
+				:card="facedownCard" alt="card-back" />
+			<Card class="zone-card" v-if="topCard && !isEmpty" :card="topCard" />
 		</div>
 		<div class="zone-content" :class="{'is-opened': isOpened}" 
-			@click.stop.self.prevent="closeZoneList"
-		>
+			@click.stop.self.prevent="closeZoneList">
 			<div class="zone-content-wrap block-style">
-				<draggable v-model="zoneContent">
-					<img class="zone-card" v-for="(card, index) in zoneContent" 
-						:key="zoneName + '-' + index"
-						:width="card.type.toLowerCase() == 'key' ? 550 : 392"
-						:height="card.type.toLowerCase() == 'key' ? 392 : 550"
-						:src="card.image"
-						:alt="card.name"
-						:data-number="index">
-				</draggable>
+				<Card class="zone-card" v-for="(card, index) in zoneContent"
+					:key="zoneName + '-' + index" :card="card" />
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-import draggable from 'vuedraggable';
+import Card from './Card.vue';
 
 export default {
 	name: 'card-zone',
 	components: {
-		draggable,
+		Card,
 	},
 	props: {
 		zone: {
@@ -79,12 +63,22 @@ export default {
 			}
 			return false;
 		},
+		facedownCard() {
+			return {
+				type: 'facedown',
+				name: '',
+				image: this.cardBackImage,
+			}
+		},
 		cardBackImage() {
 			if (this.cardback === 'main') {
 				return '/src/assets/img/card-back.jpg';
 			} else if (this.cardback === 'lrig') {
 				return '/src/assets/img/card-back-lrig-deck.jpg';
 			}
+		},
+		isEmpty() {
+			return this.zone.length === 0;
 		},
 	},
 	watch: {
