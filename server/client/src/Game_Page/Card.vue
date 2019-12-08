@@ -3,9 +3,16 @@
     :width="width"
     :height="height"
     :src="card.image"
-    :alt="alt || card.name">
+    :alt="alt || card.name"
+    @mouseenter="cardHover"
+    @mousedown="startDrag($event)"
+    @dragstart.prevent
+  />
 </template>
 <script>
+  import eventBus from '@/EventBus/EventBus.js';
+  import dragger from '@/EventBus/drag_n_drop.js';
+
   export default {
     name: 'card',
     props: {
@@ -24,6 +31,14 @@
       },
       height() {
         return this.card.type.toLowerCase() === 'key' ? 392 : 550;
+      },
+    },
+    methods: {
+      cardHover() {
+        eventBus.emit('card-hover', this.card);
+      },
+      startDrag(event) {
+        dragger.emit('start-drag', {event, card: this.card});
       },
     },
   }

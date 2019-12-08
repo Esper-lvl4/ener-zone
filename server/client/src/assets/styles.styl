@@ -188,6 +188,9 @@ body
 	box-shadow: $shadow
 	color: $white
 
+.highlight
+	background: $dark-bg + #111111
+
 .block-style-thick
 	background: $dark-block-bg
 	color: $white
@@ -928,6 +931,9 @@ main
 
 .signi-zones
 	grid-area: signi-zone
+	display: grid
+	grid-template: 100% \/ repeat(3, 1fr)
+	grid-gap: 20px
 
 
 .game-zone
@@ -954,17 +960,17 @@ main
 	left: 0
 	z-index: 2
 	display: none
-	width: 100%
-	height: 100%
+	// width: 100%
+	// height: 100%
 	border-radius: 5px
 	overflow: hidden
 	&.is-opened
 		position: fixed
 		top: 0
-		left: 0
+		left: 50%
 		z-index: 10
-		flex(row, wrap, center, flex-start)
-		// background: rgba(0, 0, 0, 0.5)
+		transform: translateX(-50%)
+		display: block
 		img
 			max-width: 220px
 			max-height: 128px

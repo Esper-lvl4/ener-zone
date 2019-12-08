@@ -71,7 +71,8 @@ export default {
 				this.$router.push('lobby');
 			}
 		},
-		restoreRoom (room) {
+		restoreRoom(room) {
+      console.log(room);
 			this.$router.push('lobby');
 			this.$store.commit('changeCurrentRoom', room);
 		},

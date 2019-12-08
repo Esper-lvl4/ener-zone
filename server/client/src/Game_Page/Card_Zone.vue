@@ -1,13 +1,13 @@
 <template>
-	<div :class="'block-style' + ' ' + zoneName" @click="openZoneList" data-zone>
+	<div :class="'block-style droppable' + ' ' + zoneName" :data-zone-name="zoneName" @click="openZoneList" data-zone>
 		<div class="visible-zone-card">
 			<Card class="zone-card" v-if="(!isPublic || isHidden) && !isEmpty" 
 				:card="facedownCard" alt="card-back" />
-			<Card class="zone-card" v-if="topCard && !isEmpty" :card="topCard" />
+			<Card class="zone-card" v-else-if="topCard && !isEmpty" :card="topCard" />
 		</div>
 		<div class="zone-content" :class="{'is-opened': isOpened}" 
 			@click.stop.self.prevent="closeZoneList">
-			<div class="zone-content-wrap block-style">
+			<div class="zone-content-wrap droppable block-style">
 				<Card class="zone-card" v-for="(card, index) in zoneContent"
 					:key="zoneName + '-' + index" :card="card" />
 			</div>
@@ -106,6 +106,9 @@ export default {
 		filterZone(zone) {
 			return zone.filter(card => card !== null && card !== undefined);
 		},
+	},
+	mounted() {
+		this.zoneContent = this.filterZone(this.zone);
 	}
 }
 </script>
