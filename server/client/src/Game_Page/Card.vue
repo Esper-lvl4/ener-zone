@@ -21,6 +21,8 @@
         default: () => ({}),
       },
       alt: String,
+      zone: String,
+      index: Number,
     },
     data: () => ({
 

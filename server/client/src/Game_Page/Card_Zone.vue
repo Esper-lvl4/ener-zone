@@ -2,14 +2,20 @@
 	<div :class="'block-style droppable' + ' ' + zoneName" :data-zone-name="zoneName" @click="openZoneList" data-zone>
 		<div class="visible-zone-card">
 			<Card class="zone-card" v-if="(!isPublic || isHidden) && !isEmpty" 
-				:card="facedownCard" alt="card-back" />
-			<Card class="zone-card" v-else-if="topCard && !isEmpty" :card="topCard" />
+				:card="facedownCard" alt="card-back" 
+				:zone="zoneName" :index="0"	
+			/>
+			<Card class="zone-card" v-else-if="topCard && !isEmpty" :card="topCard" 
+				:zone="zoneName" :index="0"	
+			/>
 		</div>
 		<div class="zone-content" :class="{'is-opened': isOpened}" 
 			@click.stop.self.prevent="closeZoneList">
 			<div class="zone-content-wrap droppable block-style">
 				<Card class="zone-card" v-for="(card, index) in zoneContent"
-					:key="zoneName + '-' + index" :card="card" />
+					:key="zoneName + '-' + index" :card="card" 
+					:zone="zoneName" :index="index"	
+				/>
 			</div>
 		</div>
 	</div>
@@ -83,7 +89,6 @@ export default {
 	},
 	watch: {
 		zone(value) {
-			console.log('zone: ', value);
 			this.zoneContent = this.filterZone(value);
 		}
 	},

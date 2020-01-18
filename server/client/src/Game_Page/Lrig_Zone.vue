@@ -3,12 +3,13 @@
 		<div class="visible-zone-card">
 			<Card class="zone-card" v-if="zone.card" :card="zone.card" />
 			<Card class="zone-card" v-for="(card, index) in filteredKeys" :key="card.id + index"
-				:card="card" />
+				:card="card" :zone="`${zoneName}:key`" :index="index"	
+			/>
 		</div>
 		<div class="zone-content" :class="{'is-opened': isOpened}" @click.stop.self.prevent="closeZoneList">
 			<div class="zone-content-wrap block-style droppable" :data-zone-name="zoneName" data-under>
 				<Card class="zone-card" v-for="(card, index) in zoneContent" :key="zoneName + '-' + index"
-					:card="card" />
+					:card="card" :zone="`${zoneName}:under`" :index="index" />
 			</div>
 		</div>
 	</div>
